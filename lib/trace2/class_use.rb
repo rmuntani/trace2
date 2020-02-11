@@ -1,3 +1,4 @@
+# Registers how a class was used during run time
 class ClassUse
   FIRST_CAPTURE_GROUP = 1
 
@@ -42,6 +43,6 @@ class ClassUse
 
     return nil if caller_method.nil?
 
-    caller_method[FIRST_CAPTURE_GROUP]
+    caller_method[FIRST_CAPTURE_GROUP].to_sym
   end
 end

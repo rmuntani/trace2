@@ -73,10 +73,10 @@ describe ClassListing do
         nested_class_call.nested_call
         class_listing.disable
 
-        callers = class_listing.callers.find { |c| c[:class] == 'Simple' }
-        
-        expect(callers[:class]).to eq "Simple"
-        expect(callers[:caller]).to eq "Nested"
+        callers = class_listing.callers.find { |c| c.name == 'Simple' }
+
+        expect(callers.name).to eq "Simple"
+        expect(callers.caller_name).to eq "Nested"
       end
     end
 
@@ -91,12 +91,12 @@ describe ClassListing do
 
         callers = class_listing.callers
 
-        simple_calls = callers.select { |c| c[:class] == 'Simple' } 
-        simple_callers = simple_calls.map { |c| c[:caller] }
-        nested_calls = callers.select { |c| c[:class] == 'Nested' }
-        nested_callers = nested_calls.map { |c| c[:caller] }
-        complex_calls = callers.select { |c| c[:class] == 'ComplexNesting' }
-        complex_callers = complex_calls.map { |c| c[:caller] }
+        simple_calls = callers.select { |c| c.name == 'Simple' } 
+        simple_callers = simple_calls.map { |c| c.caller_name }
+        nested_calls = callers.select { |c| c.name == 'Nested' }
+        nested_callers = nested_calls.map { |c| c.caller_name }
+        complex_calls = callers.select { |c| c.name == 'ComplexNesting' }
+        complex_callers = complex_calls.map { |c| c.caller_name }
 
         expect(simple_calls.length).to eq 2 
         expect(simple_callers).to include('Nested', 'ComplexNesting')

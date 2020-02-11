@@ -23,10 +23,9 @@ describe ClassUse do
         defined_class: 'MyClass',
         callee_id: 'do_something',
       )
-      caller_class = double(
-        'ClassUse',   
+      caller_class = double( 'ClassUse',   
         name: 'CallerClass',
-        method: 'caller_method'
+        method: :caller_method
       )
       possible_callers = [caller_class]
       call_stack = [

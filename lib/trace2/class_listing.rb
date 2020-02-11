@@ -8,31 +8,21 @@ class ClassListing
 
   def_delegators :@trace_point, :enable, :disable
 
-  def initialize
-    @accessed_classes = []
+  def initialize(class_use = ClassUse)
+    @class_use = class_use
     @callers = []
     @trace_point = TracePoint.new(:call) do |tp|
-      @accessed_classes << tp.defined_class.to_s
-      # @callers << caller_locations
-      @callers << { class: tp.defined_class.to_s, method: tp.callee_id.to_s, caller: find_caller(caller, @callers), call_stack: caller }
+      @callers << build_class_use(tp, caller, @callers)
     end
+  end
+
+  def accessed_classes
+    @callers.map(&:name)
   end
   
   private
 
-  def find_caller(call_stack, registered_callees)
-    caller_method = parse_caller_method(call_stack)
-    caller_class = registered_callees.find do |registered_callee|
-      registered_callee[:method] == caller_method
-    end
-    
-    caller_class.nil? ? nil : caller_class[:class]
-  end
-
-  def parse_caller_method(call_stack)
-    call_stack.map do |curr_call|
-      methods = curr_call.match(/\`(\S+)'$/)
-      methods[1] if !methods.nil?
-    end[1]
+  def build_class_use(trace_point, call_stack, possible_callers)
+    @class_use.build(trace_point, call_stack, possible_callers)
   end
 end
