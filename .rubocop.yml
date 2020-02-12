@@ -1,0 +1,7 @@
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+
+AllCops:
+  Exclude:
+    - 'spec/spec_helper.rb'

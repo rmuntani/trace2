@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 require 'forwardable'
 
 # Responsable for listing all accessed classes
 class ClassListing
   extend Forwardable
 
-  attr_reader :accessed_classes, :callers
+  attr_reader :callers
 
   def_delegators :@trace_point, :enable, :disable
 
@@ -19,7 +21,7 @@ class ClassListing
   def accessed_classes
     @callers.map(&:name)
   end
-  
+
   private
 
   def build_class_use(trace_point, call_stack, possible_callers)
