@@ -2,9 +2,9 @@
 
 # Registers how a class was used during run time
 class ClassUse
-  FIRST_CAPTURE_GROUP = 1
-
   attr_reader :caller_name, :call_stack, :name, :method
+
+  CALLER_LINE = 1
 
   def initialize(name: nil, method: nil, caller_name: nil, call_stack: nil)
     @name = name
@@ -30,21 +30,15 @@ class ClassUse
   private
 
   def find_caller_name(possible_callers)
-    caller_method = parse_caller_method
     caller_class = possible_callers&.find do |possible_caller|
-      possible_caller.method == caller_method
+      possible_caller.call_stack.first == call_stack[CALLER_LINE]
     end
     return if caller_class.nil?
 
     caller_class.name
   end
 
-  def parse_caller_method
-    caller_line = @call_stack[1]
-    caller_method = caller_line.match(/\`(\S+)'$/) if caller_line
-
-    return nil if caller_method.nil?
-
-    caller_method[FIRST_CAPTURE_GROUP].to_sym
+  def source_location(str)
+    str.match(/^\.rb/)[1]
   end
 end
