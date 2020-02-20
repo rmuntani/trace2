@@ -18,7 +18,11 @@
 
 PROJECT_ROOT = File.expand_path('..', __dir__)
 
-Dir.glob(File.join(PROJECT_ROOT, 'lib', 'trace2', '*.rb')).sort.each do |file|
+Dir.glob(File.join(PROJECT_ROOT, 'lib', 'trace2', '*.rb')).each do |file|
+  require file
+end
+
+Dir.glob(File.join(PROJECT_ROOT, 'spec', 'fixtures', '*.rb')).each do |file|
   require file
 end
 
