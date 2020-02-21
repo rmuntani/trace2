@@ -6,7 +6,6 @@ require 'forwardable'
 # along with their dependencies
 class ClassLister
   extend Forwardable
-  ClassUse = Struct.new(:stack_level, :name, :caller_class, :method)
 
   attr_accessor :classes_uses
 
@@ -39,11 +38,10 @@ class ClassLister
   end
 
   def build_class_use(stack_level, trace_point)
-    ClassUse.new(
-      stack_level,
-      trace_point.defined_class.to_s,
-      caller_class(stack_level),
-      trace_point.callee_id
+    ClassUse.build(
+      trace_point: trace_point,
+      stack_level: stack_level,
+      caller_class: caller_class(stack_level)
     )
   end
 
