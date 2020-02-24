@@ -8,6 +8,6 @@ Gem::Specification.new do |s|
   s.description = 'Check the runtime dependencies of your classes'
   s.authors     = ['Raphael Montani']
   s.email       = 'raphael.muntani@gmail.com'
-  s.files       = ['lib/trace2.rb']
+  s.files       = Dir['lib/**/*']
   s.license = 'MIT'
 end
