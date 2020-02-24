@@ -20,16 +20,19 @@ class FilterUse
 
   def reject
     @action = :reject
+    self
   end
 
   def allow
     @action = :select
+    self
   end
 
   def where(filter_parameters)
     filter_parameters.each do |filter_method, parameters|
       send(filter_method, parameters) if filter_implemented?(filter_method)
     end
+    self
   end
 
   private

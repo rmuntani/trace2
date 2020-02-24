@@ -18,9 +18,9 @@ describe FilterUse do
       classes_uses = [double('ClassUse')]
       filter = FilterUse.new(classes_uses, :select)
 
-      filter.reject
+      new_filter = filter.reject
 
-      expect(filter.instance_variable_get(:@action)).to eq :reject
+      expect(new_filter.instance_variable_get(:@action)).to eq :reject
     end
   end
 
@@ -39,9 +39,9 @@ describe FilterUse do
       classes_uses = [double('ClassUse')]
       filter = FilterUse.new(classes_uses, :select)
 
-      filter.allow
+      new_filter = filter.allow
 
-      expect(filter.instance_variable_get(:@action)).to eq :select
+      expect(new_filter.instance_variable_get(:@action)).to eq :select
     end
   end
 
@@ -62,6 +62,16 @@ describe FilterUse do
       hash = { not_implemented: 'not_implemented' }
 
       expect { filter.where(hash) }.not_to raise_error
+    end
+
+    it 'returns the filter as result' do 
+      classes_uses = [double('ClassUse', path: 'my_path')]
+      filter = FilterUse.allow(classes_uses)
+      hash = { path: ['my_path'] }
+
+      filter_output = filter.where(hash)
+
+      expect(filter_output).to eq filter
     end
 
     context 'filter by path' do
