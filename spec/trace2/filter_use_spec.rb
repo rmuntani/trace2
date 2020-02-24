@@ -64,7 +64,7 @@ describe FilterUse do
       expect { filter.where(hash) }.not_to raise_error
     end
 
-    it 'returns the filter as result' do 
+    it 'returns the filter as result' do
       classes_uses = [double('ClassUse', path: 'my_path')]
       filter = FilterUse.allow(classes_uses)
       hash = { path: ['my_path'] }
@@ -160,7 +160,7 @@ describe FilterUse do
         run_method = double('ClassUse', method: 'run')
 
         classes_uses = [
-          it_method, describe_method, run_method 
+          it_method, describe_method, run_method
         ]
         filter = FilterUse.allow(classes_uses)
 
@@ -168,8 +168,46 @@ describe FilterUse do
         filter.where(hash)
 
         expect(filter.classes_uses).to eq [
-          it_method, run_method 
+          it_method, run_method
         ]
+      end
+    end
+    context 'filter by caller' do
+      it 'filters a direct caller using the where format' do
+        caller_class = double(
+          'ClassUse', method: 'it', caller_class: nil
+        )
+        callee_class = double(
+          'ClassUse', method: 'call', caller_class: caller_class
+        )
+
+        classes_uses = [caller_class, callee_class]
+        filter = FilterUse.allow(classes_uses)
+
+        hash = { caller_class: { method: ['it'] } }
+        filter.where(hash)
+
+        expect(filter.classes_uses).to eq [callee_class]
+      end
+
+      it 'filters an indirect caller using the where format' do
+        caller_class = double(
+          'ClassUse', method: 'it', caller_class: nil
+        )
+        callee_class = double(
+          'ClassUse', method: 'call', caller_class: caller_class
+        )
+        indirect_callee_class = double(
+          'ClassUse', method: 'super_call', caller_class: callee_class
+        )
+
+        classes_uses = [caller_class, callee_class, indirect_callee_class]
+        filter = FilterUse.allow(classes_uses)
+
+        hash = { caller_class: { method: ['it'] } }
+        filter.where(hash)
+
+        expect(filter.classes_uses).to eq [callee_class, indirect_callee_class]
       end
     end
   end

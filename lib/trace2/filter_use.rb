@@ -58,4 +58,16 @@ class FilterUse
       methods.any? { |method| class_use.method.match(method) }
     end
   end
+
+  def caller_class(hash)
+    @classes_uses = @classes_uses.send(@action) do |class_use|
+      class_use.caller_class &&
+        (!filter_caller(class_use).where(hash).classes_uses.empty? ||
+         !filter_caller(class_use).where(caller_class: hash).classes_uses.empty?)
+    end
+  end
+
+  def filter_caller(class_use)
+    FilterUse.new([class_use.caller_class], @action)
+  end
 end
