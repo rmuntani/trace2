@@ -139,5 +139,38 @@ describe FilterUse do
         ]
       end
     end
+
+    context 'filter by method name' do
+      it 'for a one method' do
+        it_method = double('ClassUse', method: 'it')
+        describe_method = double('ClassUse', method: 'describe')
+
+        classes_uses = [it_method, describe_method]
+        filter = FilterUse.allow(classes_uses)
+
+        hash = { method: ['it'] }
+        filter.where(hash)
+
+        expect(filter.classes_uses).to eq [it_method]
+      end
+
+      it 'for multiple classes names' do
+        it_method = double('ClassUse', method: 'it')
+        describe_method = double('ClassUse', method: 'describe')
+        run_method = double('ClassUse', method: 'run')
+
+        classes_uses = [
+          it_method, describe_method, run_method 
+        ]
+        filter = FilterUse.allow(classes_uses)
+
+        hash = { method: %w[it run] }
+        filter.where(hash)
+
+        expect(filter.classes_uses).to eq [
+          it_method, run_method 
+        ]
+      end
+    end
   end
 end

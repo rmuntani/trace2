@@ -52,4 +52,10 @@ class FilterUse
       classes_names.any? { |path| class_use.name.match(path) }
     end
   end
+
+  def method(methods)
+    @classes_uses = @classes_uses.send(@action) do |class_use|
+      methods.any? { |method| class_use.method.match(method) }
+    end
+  end
 end
