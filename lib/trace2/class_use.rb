@@ -6,12 +6,18 @@ class ClassUse
 
   def self.build(trace_point: nil, caller_class: nil, stack_level: nil)
     ClassUse.new(
-      name: trace_point.defined_class.to_s,
+      name: ClassUse.class_name(trace_point),
       method: trace_point.callee_id.to_s,
       path: trace_point.path,
       stack_level: stack_level,
       caller_class: caller_class
     )
+  end
+
+  def self.class_name(trace_point)
+    return trace_point.defined_class.to_s unless trace_point.defined_class.nil?
+
+    trace_point.self.to_s
   end
 
   def initialize(

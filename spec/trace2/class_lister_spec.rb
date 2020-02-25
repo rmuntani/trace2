@@ -73,5 +73,22 @@ describe ClassLister do
         expect(complex_calls.length).to eq 2
       end
     end
+
+    context 'for a block' do
+      it 'records the class that owns the block' do
+        class_lister = ClassLister.new
+        block_class = BlockUse.new
+
+        class_lister.enable
+        block_class.simple_block do
+          2 + 2
+        end
+        class_lister.disable
+
+        classes_uses_names = class_lister.classes_uses.map(&:name)
+
+        expect(classes_uses_names).to include 'BlockUse'
+      end
+    end
   end
 end

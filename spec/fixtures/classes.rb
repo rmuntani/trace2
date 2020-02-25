@@ -33,3 +33,9 @@ class ComplexNesting
 
   def complex_simple_call; end
 end
+
+class BlockUse
+  def simple_block(&block)
+    block.call
+  end
+end

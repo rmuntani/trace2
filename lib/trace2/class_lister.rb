@@ -16,7 +16,7 @@ class ClassLister
     @classes_stack = []
     @stack_level = caller.length
 
-    @trace_point = TracePoint.new(:call) do |tp|
+    @trace_point = TracePoint.new(:call, :b_call) do |tp|
       list_classes(tp)
     end
   end
