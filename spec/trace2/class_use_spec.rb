@@ -9,7 +9,8 @@ describe ClassUse do
         'TracePoint',
         defined_class: 'Callee',
         callee_id: 'do_something',
-        path: '/file/path'
+        path: '/file/path',
+        lineno: 10
       )
 
       caller_class = double(
@@ -28,6 +29,7 @@ describe ClassUse do
       expect(class_use.stack_level).to eq 39
       expect(class_use.caller_class.name).to eq 'Caller'
       expect(class_use.path).to eq '/file/path'
+      expect(class_use.line).to eq 10
     end
 
     it 'builds for a block' do
@@ -36,7 +38,8 @@ describe ClassUse do
         defined_class: nil,
         self: 'Callee',
         callee_id: 'do_something',
-        path: '/file/path'
+        path: '/file/path',
+        lineno: 15
       )
 
       caller_class = double(
@@ -51,10 +54,6 @@ describe ClassUse do
       )
 
       expect(class_use.name).to eq 'Callee'
-      expect(class_use.method).to eq 'do_something'
-      expect(class_use.stack_level).to eq 39
-      expect(class_use.caller_class.name).to eq 'Caller'
-      expect(class_use.path).to eq '/file/path'
     end
   end
 

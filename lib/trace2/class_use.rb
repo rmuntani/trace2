@@ -2,18 +2,19 @@
 
 # Registers how a class was used during run time
 class ClassUse
-  attr_accessor :name, :method, :stack_level, :caller_class, :path
+  attr_accessor :name, :method, :stack_level, :caller_class, :path, :line
 
   def initialize(
     name: nil, method: nil,
     caller_class: nil, stack_level: nil,
-    path: nil
+    path: nil, line: nil
   )
     @name = name
     @method = method
     @caller_class = caller_class
     @stack_level = stack_level
     @path = path
+    @line = line
   end
 
   def self.build(trace_point: nil, caller_class: nil, stack_level: nil)
@@ -22,7 +23,8 @@ class ClassUse
       method: trace_point.callee_id.to_s,
       path: trace_point.path,
       stack_level: stack_level,
-      caller_class: caller_class
+      caller_class: caller_class,
+      line: trace_point.lineno
     )
   end
 
