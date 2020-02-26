@@ -47,12 +47,13 @@ describe FilterUse do
 
   describe '#where' do
     it 'calls methods depending on input hash keys' do
-      classes_uses = [double('ClassUse')]
+      class_use = double('ClassUse')
+      classes_uses = [class_use]
       filter = FilterUse.reject(classes_uses)
       hash = { path: 'my_path', class_name: 'my_class' }
 
-      expect(filter).to receive(:path).with('my_path')
-      expect(filter).to receive(:class_name).with('my_class')
+      expect(filter).to receive(:path).with(class_use, 'my_path')
+      expect(filter).to receive(:class_name).with(class_use, 'my_class')
       filter.where(hash)
     end
 
@@ -172,13 +173,35 @@ describe FilterUse do
         ]
       end
     end
+
+    context 'for multiple filters' do
+      it 'works succesfully' do
+        right_class = double('ClassUse', method: 'it', name: 'Rspec')
+        wrong_name = double('ClassUse', method: 'it', name: 'NotMyClass')
+        wrong_method = double('ClassUse', method: 'allow', name: 'Rspec')
+
+        hash = { method: ['it'], class_name: ['Rspec'] }
+        classes_uses = [right_class, wrong_method, wrong_name]
+
+        filter = FilterUse.allow(classes_uses)
+        filter.where(hash)
+
+        expect(filter.classes_uses).to eq [right_class]
+      end
+    end
+
     context 'filter by caller' do
       it 'filters a direct caller using the where format' do
         caller_class = double(
-          'ClassUse', method: 'it', caller_class: nil
+          'ClassUse',
+          method: 'it',
+          callers_stack: []
         )
+
         callee_class = double(
-          'ClassUse', method: 'call', caller_class: caller_class
+          'ClassUse',
+          method: 'call',
+          callers_stack: [caller_class]
         )
 
         classes_uses = [caller_class, callee_class]
@@ -192,13 +215,15 @@ describe FilterUse do
 
       it 'filters an indirect caller using the where format' do
         caller_class = double(
-          'ClassUse', method: 'it', caller_class: nil
+          'ClassUse', method: 'it', callers_stack: []
         )
         callee_class = double(
-          'ClassUse', method: 'call', caller_class: caller_class
+          'ClassUse', method: 'call', callers_stack: [caller_class]
         )
         indirect_callee_class = double(
-          'ClassUse', method: 'super_call', caller_class: callee_class
+          'ClassUse',
+          method: 'super_call',
+          callers_stack: [callee_class, caller_class]
         )
 
         classes_uses = [caller_class, callee_class, indirect_callee_class]

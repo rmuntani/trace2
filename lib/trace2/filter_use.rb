@@ -29,45 +29,41 @@ class FilterUse
   end
 
   def where(filter_parameters)
-    filter_parameters.each do |filter_method, parameters|
-      send(filter_method, parameters) if filter_implemented?(filter_method)
+    @classes_uses = classes_uses.send(@action) do |class_use|
+      matches_filters?(class_use, filter_parameters)
     end
     self
   end
 
   private
 
+  def matches_filters?(class_use, filter_parameters)
+    filter_parameters.map do |filter_method, parameters|
+      return true unless filter_implemented?(filter_method)
+
+      send(filter_method, class_use, parameters)
+    end.reduce(:&)
+  end
+
   def filter_implemented?(filter)
     private_methods.include? filter
   end
 
-  def path(paths)
-    @classes_uses = @classes_uses.send(@action) do |class_use|
-      paths.any? { |path| class_use.path.match(path) }
-    end
+  def path(class_use, paths)
+    paths.any? { |path| class_use.path.match(path) }
   end
 
-  def class_name(classes_names)
-    @classes_uses = @classes_uses.send(@action) do |class_use|
-      classes_names.any? { |path| class_use.name.match(path) }
-    end
+  def class_name(class_use, classes_names)
+    classes_names.any? { |class_name| class_use.name.match(class_name) }
   end
 
-  def method(methods)
-    @classes_uses = @classes_uses.send(@action) do |class_use|
-      methods.any? { |method| class_use.method.match(method) }
-    end
+  def method(class_use, methods)
+    methods.any? { |method| class_use.method.match(method) }
   end
 
-  def caller_class(hash)
-    @classes_uses = @classes_uses.send(@action) do |class_use|
-      class_use.caller_class &&
-        (!filter_caller(class_use).where(hash).classes_uses.empty? ||
-         !filter_caller(class_use).where(caller_class: hash).classes_uses.empty?)
+  def caller_class(class_use, filter_parameters)
+    class_use.callers_stack.any? do |caller_use|
+      matches_filters?(caller_use, filter_parameters)
     end
-  end
-
-  def filter_caller(class_use)
-    FilterUse.new([class_use.caller_class], @action)
   end
 end
