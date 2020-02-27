@@ -2,46 +2,46 @@
 
 require 'spec_helper'
 
-describe FilterUse do
+describe QueryUse do
   describe '.reject' do
-    it 'returns FilterUse with classes_uses' do
+    it 'returns QueryUse with classes_uses' do
       classes_uses = [double('ClassUse')]
 
-      filter = FilterUse.reject(classes_uses)
+      query = QueryUse.reject(classes_uses)
 
-      expect(filter.classes_uses).to eq classes_uses
+      expect(query.classes_uses).to eq classes_uses
     end
   end
 
   describe '#reject' do
-    it 'changes filter action' do
+    it 'changes query action' do
       classes_uses = [double('ClassUse')]
-      filter = FilterUse.new(classes_uses, :select)
+      query = QueryUse.new(classes_uses, :select)
 
-      new_filter = filter.reject
+      new_query = query.reject
 
-      expect(new_filter.instance_variable_get(:@action)).to eq :reject
+      expect(new_query.instance_variable_get(:@action)).to eq :reject
     end
   end
 
   describe '.allow' do
-    it 'returns FilterUse with classes_uses' do
+    it 'returns QueryUse with classes_uses' do
       classes_uses = [double('ClassUse')]
 
-      filter = FilterUse.allow(classes_uses)
+      query = QueryUse.allow(classes_uses)
 
-      expect(filter.classes_uses).to eq classes_uses
+      expect(query.classes_uses).to eq classes_uses
     end
   end
 
   describe '#allow' do
-    it 'changes filter action' do
+    it 'changes query action' do
       classes_uses = [double('ClassUse')]
-      filter = FilterUse.new(classes_uses, :select)
+      query = QueryUse.new(classes_uses, :select)
 
-      new_filter = filter.allow
+      new_query = query.allow
 
-      expect(new_filter.instance_variable_get(:@action)).to eq :select
+      expect(new_query.instance_variable_get(:@action)).to eq :select
     end
   end
 
@@ -49,44 +49,44 @@ describe FilterUse do
     it 'calls methods depending on input hash keys' do
       class_use = double('ClassUse')
       classes_uses = [class_use]
-      filter = FilterUse.reject(classes_uses)
+      query = QueryUse.reject(classes_uses)
       hash = { path: 'my_path', class_name: 'my_class' }
 
-      expect(filter).to receive(:path).with(class_use, 'my_path')
-      expect(filter).to receive(:class_name).with(class_use, 'my_class')
-      filter.where(hash)
+      expect(query).to receive(:path).with(class_use, 'my_path')
+      expect(query).to receive(:class_name).with(class_use, 'my_class')
+      query.where(hash)
     end
 
     it 'ignores queries with methods that were not implemented' do
       classes_uses = [double('ClassUse')]
-      filter = FilterUse.reject(classes_uses)
+      query = QueryUse.reject(classes_uses)
       hash = { not_implemented: 'not_implemented' }
 
-      expect { filter.where(hash) }.not_to raise_error
+      expect { query.where(hash) }.not_to raise_error
     end
 
-    it 'returns the filter as result' do
+    it 'returns the query as result' do
       classes_uses = [double('ClassUse', path: 'my_path')]
-      filter = FilterUse.allow(classes_uses)
+      query = QueryUse.allow(classes_uses)
       hash = { path: ['my_path'] }
 
-      filter_output = filter.where(hash)
+      query_output = query.where(hash)
 
-      expect(filter_output).to eq filter
+      expect(query_output).to eq query
     end
 
-    context 'filter by path' do
+    context 'query by path' do
       it 'for a single path' do
         gem_class = double('ClassUse', path: 'gem/my/gem')
         not_gem_class = double('ClassUse', path: 'not/a/gem')
 
         classes_uses = [gem_class, not_gem_class]
-        filter = FilterUse.reject(classes_uses)
+        query = QueryUse.reject(classes_uses)
 
         hash = { path: ['gem/'] }
-        filter.where(hash)
+        query.where(hash)
 
-        expect(filter.classes_uses).to eq [not_gem_class]
+        expect(query.classes_uses).to eq [not_gem_class]
       end
 
       it 'for multiple paths' do
@@ -98,27 +98,27 @@ describe FilterUse do
         classes_uses = [
           gem_class, not_gem_class, controller_class, lib_class
         ]
-        filter = FilterUse.allow(classes_uses)
+        query = QueryUse.allow(classes_uses)
 
         hash = { path: ['gem/', 'app/'] }
-        filter.where(hash)
+        query.where(hash)
 
-        expect(filter.classes_uses).to eq [gem_class, controller_class]
+        expect(query.classes_uses).to eq [gem_class, controller_class]
       end
     end
 
-    context 'filter by class name' do
+    context 'query by class name' do
       it 'for a single class name' do
         rspec_class = double('ClassUse', name: 'RSpec')
         project_class = double('ClassUse', name: 'Project')
 
         classes_uses = [rspec_class, project_class]
-        filter = FilterUse.allow(classes_uses)
+        query = QueryUse.allow(classes_uses)
 
         hash = { class_name: ['Project'] }
-        filter.where(hash)
+        query.where(hash)
 
-        expect(filter.classes_uses).to eq [project_class]
+        expect(query.classes_uses).to eq [project_class]
       end
 
       it 'for multiple classes names' do
@@ -130,29 +130,29 @@ describe FilterUse do
         classes_uses = [
           rspec_class, project_class, module_class, kaminari_class
         ]
-        filter = FilterUse.allow(classes_uses)
+        query = QueryUse.allow(classes_uses)
 
         hash = { class_name: %w[Project RSpec] }
-        filter.where(hash)
+        query.where(hash)
 
-        expect(filter.classes_uses).to eq [
+        expect(query.classes_uses).to eq [
           rspec_class, project_class, module_class
         ]
       end
     end
 
-    context 'filter by method name' do
+    context 'query by method name' do
       it 'for a one method' do
         it_method = double('ClassUse', method: 'it')
         describe_method = double('ClassUse', method: 'describe')
 
         classes_uses = [it_method, describe_method]
-        filter = FilterUse.allow(classes_uses)
+        query = QueryUse.allow(classes_uses)
 
         hash = { method: ['it'] }
-        filter.where(hash)
+        query.where(hash)
 
-        expect(filter.classes_uses).to eq [it_method]
+        expect(query.classes_uses).to eq [it_method]
       end
 
       it 'for multiple classes names' do
@@ -163,18 +163,18 @@ describe FilterUse do
         classes_uses = [
           it_method, describe_method, run_method
         ]
-        filter = FilterUse.allow(classes_uses)
+        query = QueryUse.allow(classes_uses)
 
         hash = { method: %w[it run] }
-        filter.where(hash)
+        query.where(hash)
 
-        expect(filter.classes_uses).to eq [
+        expect(query.classes_uses).to eq [
           it_method, run_method
         ]
       end
     end
 
-    context 'for multiple filters' do
+    context 'for multiple queries' do
       it 'works succesfully' do
         right_class = double('ClassUse', method: 'it', name: 'Rspec')
         wrong_name = double('ClassUse', method: 'it', name: 'NotMyClass')
@@ -183,15 +183,15 @@ describe FilterUse do
         hash = { method: ['it'], class_name: ['Rspec'] }
         classes_uses = [right_class, wrong_method, wrong_name]
 
-        filter = FilterUse.allow(classes_uses)
-        filter.where(hash)
+        query = QueryUse.allow(classes_uses)
+        query.where(hash)
 
-        expect(filter.classes_uses).to eq [right_class]
+        expect(query.classes_uses).to eq [right_class]
       end
     end
 
-    context 'filter by caller' do
-      it 'filters a direct caller using the where format' do
+    context 'query by caller' do
+      it 'queries a direct caller using the where format' do
         caller_class = double(
           'ClassUse',
           method: 'it',
@@ -205,15 +205,15 @@ describe FilterUse do
         )
 
         classes_uses = [caller_class, callee_class]
-        filter = FilterUse.allow(classes_uses)
+        query = QueryUse.allow(classes_uses)
 
         hash = { caller_class: { method: ['it'] } }
-        filter.where(hash)
+        query.where(hash)
 
-        expect(filter.classes_uses).to eq [callee_class]
+        expect(query.classes_uses).to eq [callee_class]
       end
 
-      it 'filters an indirect caller using the where format' do
+      it 'queries an indirect caller using the where format' do
         caller_class = double(
           'ClassUse', method: 'it', callers_stack: []
         )
@@ -227,12 +227,12 @@ describe FilterUse do
         )
 
         classes_uses = [caller_class, callee_class, indirect_callee_class]
-        filter = FilterUse.allow(classes_uses)
+        query = QueryUse.allow(classes_uses)
 
         hash = { caller_class: { method: ['it'] } }
-        filter.where(hash)
+        query.where(hash)
 
-        expect(filter.classes_uses).to eq [callee_class, indirect_callee_class]
+        expect(query.classes_uses).to eq [callee_class, indirect_callee_class]
       end
     end
   end

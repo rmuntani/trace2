@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# Class that filters ClassUse by parameters
+# Class that queries ClassUse by parameters
 # passed as a hash
-class FilterUse
+class QueryUse
   attr_reader :classes_uses
 
   def initialize(classes_uses, action)
@@ -11,11 +11,11 @@ class FilterUse
   end
 
   def self.reject(classes_uses)
-    FilterUse.new(classes_uses, :reject)
+    QueryUse.new(classes_uses, :reject)
   end
 
   def self.allow(classes_uses)
-    FilterUse.new(classes_uses, :select)
+    QueryUse.new(classes_uses, :select)
   end
 
   def reject
@@ -28,25 +28,25 @@ class FilterUse
     self
   end
 
-  def where(filter_parameters)
+  def where(query_parameters)
     @classes_uses = classes_uses.send(@action) do |class_use|
-      matches_filters?(class_use, filter_parameters)
+      matches_queries?(class_use, query_parameters)
     end
     self
   end
 
   private
 
-  def matches_filters?(class_use, filter_parameters)
-    filter_parameters.map do |filter_method, parameters|
-      return true unless filter_implemented?(filter_method)
+  def matches_queries?(class_use, query_parameters)
+    query_parameters.map do |query_method, parameters|
+      return true unless query_implemented?(query_method)
 
-      send(filter_method, class_use, parameters)
+      send(query_method, class_use, parameters)
     end.reduce(:&)
   end
 
-  def filter_implemented?(filter)
-    private_methods.include? filter
+  def query_implemented?(query)
+    private_methods.include? query
   end
 
   def path(class_use, paths)
@@ -61,9 +61,9 @@ class FilterUse
     methods.any? { |method| class_use.method.match(method) }
   end
 
-  def caller_class(class_use, filter_parameters)
+  def caller_class(class_use, query_parameters)
     class_use.callers_stack.any? do |caller_use|
-      matches_filters?(caller_use, filter_parameters)
+      matches_queries?(caller_use, query_parameters)
     end
   end
 end
