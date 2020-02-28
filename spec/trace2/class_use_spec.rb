@@ -30,6 +30,7 @@ describe ClassUse do
       expect(class_use.caller_class.name).to eq 'Caller'
       expect(class_use.path).to eq '/file/path'
       expect(class_use.line).to eq 10
+      expect(class_use.top_of_stack).to eq true
     end
 
     it 'builds for a block' do
