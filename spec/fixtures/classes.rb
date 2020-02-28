@@ -39,3 +39,24 @@ class BlockUse
     block.call
   end
 end
+
+class NestedFunctions
+  def initialize
+    @simple = Simple.new
+  end
+
+  def call
+    shallow_call
+    @simple.simple_call
+  end
+
+  def shallow_call
+    normal_call
+  end
+
+  def normal_call
+    deep_call
+  end
+
+  def deep_call; end
+end

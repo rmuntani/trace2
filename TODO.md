@@ -1,8 +1,8 @@
 # TODO
 
+- query for top of stack
 - maybe turn it all into a DSL for call stack? 
-- process ClassUses to a tree of classes uses; -> ok (array view)
-- use a filter to remove unwanted classes of a call stack
+- use a filter to remove unwanted classes of a call stack -> or do it on creation?
 - generate view of classes dependencies;
 - make runners for the principal ruby tools
    - Rails

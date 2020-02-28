@@ -91,6 +91,23 @@ describe ClassLister do
 
         expect(complex_calls.length).to eq 2
       end
+
+      it 'conects the callee to the correct caller' do
+        class_lister = ClassLister.new
+        nested_functions = NestedFunctions.new
+
+        class_lister.enable
+        nested_functions.call
+        class_lister.disable
+
+        classes_uses = class_lister.classes_uses
+
+        simple_class = classes_uses.find { |c| c.name == 'Simple' }
+        simple_caller = simple_class.caller_class
+
+        expect(simple_caller.name).to eq 'NestedFunctions'
+        expect(simple_caller.method).to eq 'call'
+      end
     end
 
     context 'for a block' do

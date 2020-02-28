@@ -38,24 +38,37 @@ class ClassLister
   end
 
   def process_event(trace_point)
-    @classes_uses << @callers_stack.pop if @stack_level > caller.length
+    @classes_uses << @callers_stack.shift if @stack_level > caller.length
     @stack_level = caller.length
-    update_current_caller
-    @callers_stack.push(build_class_use(trace_point))
-    @current_caller.top_of_stack = false unless @current_caller.nil?
+    update_callers_stack(trace_point)
   end
 
-  def build_class_use(trace_point)
+  def build_class_use(trace_point, caller_class)
     ClassUse.build(
       trace_point: trace_point,
       stack_level: @stack_level,
-      caller_class: @current_caller
+      caller_class: caller_class
     )
   end
 
-  def update_current_caller
-    @current_caller = @callers_stack.reverse.find do |current_class|
-      current_class.stack_level < @stack_level
+  def update_callers_stack(trace_point)
+    remove_exited_callers_from_stack
+    mark_as_not_top_of_stack(@callers_stack.first)
+    current_class_use = build_class_use(trace_point, @callers_stack.first)
+    @callers_stack.unshift(current_class_use)
+  end
+
+  def remove_exited_callers_from_stack
+    while class_exited(@callers_stack.first)
+      @classes_uses << @callers_stack.shift
     end
+  end
+
+  def class_exited(current_class)
+    current_class && current_class.stack_level >= @stack_level
+  end
+
+  def mark_as_not_top_of_stack(current_caller)
+    current_caller.top_of_stack = false unless current_caller.nil?
   end
 end
