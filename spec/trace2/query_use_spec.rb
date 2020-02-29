@@ -235,5 +235,24 @@ describe QueryUse do
         expect(query.classes_uses).to eq [callee_class, indirect_callee_class]
       end
     end
+
+    context 'query by top of stack' do
+      it 'successfully' do
+        top_of_stack = double(
+          'ClassUse', top_of_stack: true
+        )
+        not_top_of_stack = double(
+          'ClassUse', top_of_stack: false
+        )
+        classes_uses = [top_of_stack, not_top_of_stack]
+
+        query = QueryUse.allow(classes_uses)
+
+        parameters = { top_of_stack: true }
+        query.where(parameters)
+
+        expect(query.classes_uses).to eq [top_of_stack]
+      end
+    end
   end
 end

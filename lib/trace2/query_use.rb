@@ -61,6 +61,10 @@ class QueryUse
     methods.any? { |method| class_use.method.match(method) }
   end
 
+  def top_of_stack(class_use, is_top_of_stack)
+    class_use.top_of_stack == is_top_of_stack
+  end
+
   def caller_class(class_use, query_parameters)
     class_use.callers_stack.any? do |caller_use|
       matches_queries?(caller_use, query_parameters)

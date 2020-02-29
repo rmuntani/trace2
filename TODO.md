@@ -1,7 +1,6 @@
 # TODO
 
-- query for top of stack
-- maybe turn it all into a DSL for call stack? 
+- maybe turn it all into a DSL for call stack?
 - use a filter to remove unwanted classes of a call stack -> or do it on creation?
 - generate view of classes dependencies;
 - make runners for the principal ruby tools
