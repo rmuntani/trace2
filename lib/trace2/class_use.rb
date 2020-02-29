@@ -5,37 +5,15 @@ class ClassUse
   attr_reader :name, :method, :stack_level, :caller_class, :path, :line
   attr_accessor :top_of_stack
 
-  def initialize(
-    name: nil, method: nil,
-    caller_class: nil, stack_level: nil,
-    path: nil, line: nil
-  )
-    @name = name
-    @method = method
-    @caller_class = caller_class
-    @stack_level = stack_level
-    @path = path
-    @line = line
-    @top_of_stack = true
+  def initialize(params)
+    @name = params[:name]
+    @method = params[:method]
+    @caller_class = params[:caller_class]
+    @stack_level = params[:stack_level]
+    @path = params[:path]
+    @line = params[:line]
+    @top_of_stack = params[:top_of_stack]
   end
-
-  def self.build(trace_point: nil, caller_class: nil, stack_level: nil)
-    ClassUse.new(
-      name: class_name(trace_point),
-      method: trace_point.callee_id.to_s,
-      path: trace_point.path,
-      stack_level: stack_level,
-      caller_class: caller_class,
-      line: trace_point.lineno
-    )
-  end
-
-  def self.class_name(trace_point)
-    return trace_point.defined_class.to_s unless trace_point.defined_class.nil?
-
-    trace_point.self.to_s
-  end
-  private_class_method :class_name
 
   def callers_stack
     curr_class = caller_class

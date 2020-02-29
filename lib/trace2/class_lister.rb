@@ -44,7 +44,7 @@ class ClassLister
   end
 
   def build_class_use(trace_point, caller_class)
-    ClassUse.build(
+    ClassUseFactory.build(
       trace_point: trace_point,
       stack_level: @stack_level,
       caller_class: caller_class
