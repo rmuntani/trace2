@@ -38,4 +38,67 @@ describe ClassUse do
       ]
     end
   end
+
+  describe '#matches_method?' do
+    it 'successfully' do
+      class_use = ClassUse.new(method: 'it')
+      methods = [/hit/, 'it']
+      expect(class_use.matches_method?(methods)).to be_truthy
+    end
+  end
+
+  describe '#matches_name?' do
+    it 'successfully' do
+      class_use = ClassUse.new(name: 'MyTestClass')
+      methods = [/MyTest/]
+      expect(class_use.matches_name?(methods)).to be_truthy
+    end
+  end
+
+  describe '#matches_path?' do
+    it 'successfully' do
+      class_use = ClassUse.new(path: 'path/to/my/great_file.rb')
+      methods = [/gre.t/]
+      expect(class_use.matches_path?(methods)).to be_truthy
+    end
+  end
+
+  describe '#matches_top_of_stack?' do
+    it 'successfully' do
+      class_use = ClassUse.new(top_of_stack: true)
+      is_top = true
+      expect(class_use.matches_top_of_stack?(is_top)).to be_truthy
+    end
+  end
+
+  describe '#matches_caller_class?' do
+    it 'successfully' do
+      caller_use = ClassUse.new(name: 'Caller')
+      class_use = ClassUse.new(caller_class: caller_use)
+      caller_attributes = { name: ['Caller'] }
+
+      expect(class_use.matches_caller_class?(caller_attributes)).to be_truthy
+    end
+    it 'queries an indirect caller using the where format' do
+      caller_class = ClassUse.new(method: 'it')
+      callee_class = ClassUse.new(method: 'call', caller_class: caller_class)
+      indirect_callee_class = ClassUse.new(
+        method: 'super_call', caller_class: callee_class
+      )
+
+      caller_attributes = { caller_class: { method: ['it'] } }
+      expect(
+        indirect_callee_class.matches_caller_class?(caller_attributes)
+      ).to be_truthy
+    end
+  end
+
+  context 'when #matches_something? is not implemented' do
+    it 'returns true' do
+      class_use = ClassUse.new(name: 'Filler')
+      caller_attributes = 'anything'
+
+      expect(class_use.matches_something?(caller_attributes)).to be_truthy
+    end
+  end
 end

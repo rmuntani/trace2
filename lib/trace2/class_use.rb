@@ -24,4 +24,45 @@ class ClassUse
     end
     callers_stack
   end
+
+  def matches_method?(methods_names)
+    methods_names.any? { |method_name| method.match(method_name) }
+  end
+
+  def matches_name?(classes_names)
+    classes_names.any? { |class_name| name.match(class_name) }
+  end
+
+  def matches_path?(paths_patterns)
+    paths_patterns.any? { |path_pattern| path.match(path_pattern) }
+  end
+
+  def matches_top_of_stack?(is_top)
+    top_of_stack == is_top
+  end
+
+  def matches_caller_class?(caller_attributes)
+    callers_stack.any? do |current_caller|
+      valid_caller?(current_caller, caller_attributes)
+    end
+  end
+
+  private
+
+  def valid_caller?(current_caller, caller_attributes)
+    caller_attributes.all? do |attribute, values|
+      validation = "matches_#{attribute}?"
+      current_caller.send(validation, values)
+    end
+  end
+
+  def respond_to_missing?(method, _)
+    method.match?(/^matches_\S+?\?$/)
+  end
+
+  def method_missing(method, *args, &block)
+    return true if respond_to_missing?(method, args)
+
+    super
+  end
 end

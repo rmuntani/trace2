@@ -38,36 +38,9 @@ class QueryUse
   private
 
   def matches_queries?(class_use, query_parameters)
-    query_parameters.map do |query_method, parameters|
-      return true unless query_implemented?(query_method)
-
-      send(query_method, class_use, parameters)
-    end.reduce(:&)
-  end
-
-  def query_implemented?(query)
-    private_methods.include? query
-  end
-
-  def path(class_use, paths)
-    paths.any? { |path| class_use.path.match(path) }
-  end
-
-  def class_name(class_use, classes_names)
-    classes_names.any? { |class_name| class_use.name.match(class_name) }
-  end
-
-  def method(class_use, methods)
-    methods.any? { |method| class_use.method.match(method) }
-  end
-
-  def top_of_stack(class_use, is_top_of_stack)
-    class_use.top_of_stack == is_top_of_stack
-  end
-
-  def caller_class(class_use, query_parameters)
-    class_use.callers_stack.any? do |caller_use|
-      matches_queries?(caller_use, query_parameters)
+    query_parameters.all? do |attribute, values|
+      validation = "matches_#{attribute}?"
+      class_use.send(validation, values)
     end
   end
 end
