@@ -3,69 +3,57 @@
 require 'spec_helper'
 
 describe QueryUse do
-  describe '.reject' do
-    it 'returns QueryUse with classes_uses' do
-      classes_uses = [double('ClassUse')]
-
-      query = QueryUse.reject(classes_uses)
-
-      expect(query.classes_uses).to eq classes_uses
-    end
-  end
-
-  describe '#reject' do
-    it 'changes query action' do
-      classes_uses = [double('ClassUse')]
-      query = QueryUse.new(classes_uses, :select)
-
-      new_query = query.reject
-
-      expect(new_query.instance_variable_get(:@action)).to eq :reject
-    end
-  end
-
-  describe '.allow' do
-    it 'returns QueryUse with classes_uses' do
-      classes_uses = [double('ClassUse')]
-
-      query = QueryUse.allow(classes_uses)
-
-      expect(query.classes_uses).to eq classes_uses
-    end
-  end
-
-  describe '#allow' do
-    it 'changes query action' do
-      classes_uses = [double('ClassUse')]
-      query = QueryUse.new(classes_uses, :select)
-
-      new_query = query.allow
-
-      expect(new_query.instance_variable_get(:@action)).to eq :select
-    end
-  end
-
-  describe '#where' do
-    it 'calls methods depending on input hash keys' do
+  describe '#select' do
+    it 'successfully for empty query' do
       class_use = double('ClassUse')
       classes_uses = [class_use]
-      query = QueryUse.reject(classes_uses)
-      hash = { name: 'my_class' }
+      query = QueryUse.where([])
 
-      expect(class_use).to receive(:matches_name?).with('my_class')
-      query.where(hash)
+      selected_classes = query.select(classes_uses)
+
+      expect(selected_classes).to eq classes_uses
     end
 
-    it 'returns the query as result' do
-      class_use = double('ClassUse', path: 'my_path')
+    it 'applies query successfully' do
+      class_use = double('ClassUse')
       classes_uses = [class_use]
-      query = QueryUse.allow(classes_uses)
-      hash = { path: ['my_path'] }
+      query = QueryUse.where([
+                               allow: { name: ['RSpec'], path: ['/my/path/to'] }
+                             ])
 
-      allow(class_use).to receive(:matches_path?).and_return true
-      query_output = query.where(hash)
+      allow(class_use).to receive(:matches_name?)
+        .and_return(true)
+      allow(class_use).to receive(:matches_path?)
+        .and_return(true)
 
-      expect(query_output).to eq query
+      selected_classes = query.select(classes_uses)
+
+      expect(selected_classes).to eq classes_uses
+    end
+
+    it 'applies multiple queries successfully' do
+      remove_use = double('ClassUse')
+      allow(remove_use).to receive(:matches_name?).and_return(false)
+
+      accept_use = double('ClassUse')
+      allow(accept_use).to receive(:matches_name?).and_return(true)
+      allow(accept_use).to receive(:matches_path?).and_return(false)
+
+      pass_first_filter = double('ClassUse')
+      allow(pass_first_filter).to receive(:matches_name?).and_return(true)
+      allow(pass_first_filter).to receive(:matches_path?).and_return(true)
+
+      classes_uses = [remove_use, accept_use, pass_first_filter]
+
+      query_parameters = [
+        allow: { name: ['RSpec'] },
+        reject: { path: ['/my/path/to'] }
+      ]
+
+      query = QueryUse.where(query_parameters)
+      selected_classes = query.select(classes_uses)
+
+      expect(selected_classes).to eq [accept_use]
     end
   end
 end

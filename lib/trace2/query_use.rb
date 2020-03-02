@@ -5,37 +5,39 @@
 class QueryUse
   attr_reader :classes_uses
 
-  def initialize(classes_uses, action)
-    @classes_uses = classes_uses
-    @action = action
+  def initialize(query_parameters)
+    @queries = query_parameters
   end
 
-  def self.reject(classes_uses)
-    QueryUse.new(classes_uses, :reject)
+  def self.where(query_parameters)
+    QueryUse.new(query_parameters)
   end
 
-  def self.allow(classes_uses)
-    QueryUse.new(classes_uses, :select)
-  end
-
-  def reject
-    @action = :reject
-    self
-  end
-
-  def allow
-    @action = :select
-    self
-  end
-
-  def where(query_parameters)
-    @classes_uses = classes_uses.send(@action) do |class_use|
-      matches_queries?(class_use, query_parameters)
+  def select(classes_uses)
+    selected_classes = classes_uses
+    @queries.each do |query|
+      query.each do |action, validations|
+        selected_classes = apply_validation(
+          selected_classes, action, validations
+        )
+      end
     end
-    self
+    selected_classes
   end
 
   private
+
+  def filter_action(action)
+    return :select if action == :allow
+
+    :reject
+  end
+
+  def apply_validation(classes_uses, action, validations)
+    classes_uses.send(filter_action(action)) do |class_use|
+      matches_queries?(class_use, validations)
+    end
+  end
 
   def matches_queries?(class_use, query_parameters)
     query_parameters.all? do |attribute, values|
