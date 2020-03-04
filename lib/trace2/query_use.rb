@@ -42,9 +42,11 @@ class QueryUse
   end
 
   def matches_validations?(class_use, validations)
-    validations.all? do |attribute, values|
-      validation = "matches_#{attribute}?"
-      class_use.send(validation, values)
+    validations.any? do |validation|
+      validation.all? do |attribute, values|
+        attribute_match = "matches_#{attribute}?"
+        class_use.send(attribute_match, values)
+      end
     end
   end
 end

@@ -1,7 +1,9 @@
 # TODO
 
-- maybe turn it all into a DSL for call stack?
-- use a filter to remove unwanted classes of a call stack -> or do it on creation?
+- test OR query better -> debugging do rspec dá errado
+- benchmarking for functions execution
+- save class use (logging, databases)
+- improve removal of classes from a class use stack; -> maybe not
 - generate view of classes dependencies;
 - make runners for the principal ruby tools
    - Rails

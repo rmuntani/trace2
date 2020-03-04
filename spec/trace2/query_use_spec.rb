@@ -18,7 +18,7 @@ describe QueryUse do
       class_use = double('ClassUse')
       classes_uses = [class_use]
       query = QueryUse.where(
-        [allow: { name: ['RSpec'], path: ['/my/path/to'] }]
+        [allow: [{ name: ['RSpec'], path: ['/my/path/to'] }]]
       )
 
       allow(class_use).to receive(:matches_name?)
@@ -31,7 +31,7 @@ describe QueryUse do
       expect(selected_classes).to eq classes_uses
     end
 
-    it 'applies multiple queries successfully' do
+    it 'applies AND query successfully' do
       remove_use = double('ClassUse')
       allow(remove_use).to receive(:matches_name?).and_return(false)
 
@@ -46,14 +46,39 @@ describe QueryUse do
       classes_uses = [remove_use, accept_use, pass_first_filter]
 
       query_parameters = [
-        allow: { name: ['RSpec'] },
-        reject: { path: ['/my/path/to'] }
+        allow: [{ name: ['RSpec'] }],
+        reject: [{ path: ['/my/path/to'] }]
       ]
 
       query = QueryUse.where(query_parameters)
       selected_classes = query.select(classes_uses)
 
       expect(selected_classes).to eq [accept_use]
+    end
+
+    it 'applies OR query successfully' do
+      fail_query = double('ClassUse')
+      allow(fail_query).to receive(:matches_name?).and_return(false)
+      allow(fail_query).to receive(:matches_path?).and_return(false)
+
+      pass_name = double('ClassUse')
+      allow(pass_name).to receive(:matches_name?).and_return(true)
+      allow(pass_name).to receive(:matches_path?).and_return(false)
+
+      pass_both = double('ClassUse')
+      allow(pass_both).to receive(:matches_name?).and_return(true)
+      allow(pass_both).to receive(:matches_path?).and_return(true)
+
+      classes_uses = [fail_query, pass_name, pass_both]
+
+      query_parameters = [
+        allow: [{ name: ['RSpec'] }, { path: ['/my/path/to'] }]
+      ]
+
+      query = QueryUse.where(query_parameters)
+      selected_classes = query.select(classes_uses)
+
+      expect(selected_classes).to eq [pass_name, pass_both]
     end
   end
 
@@ -70,7 +95,9 @@ describe QueryUse do
     it 'applies query successfully' do
       class_use = double('ClassUse')
       query = QueryUse.where([
-                               allow: { name: ['RSpec'], path: ['/my/path/to'] }
+                               allow: [
+                                 { name: ['RSpec'], path: ['/my/path/to'] }
+                               ]
                              ])
 
       allow(class_use).to receive(:matches_name?)
