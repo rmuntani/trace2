@@ -11,7 +11,8 @@ class ClassLister
 
   def_delegators :@trace_point, :enable
 
-  def initialize
+  def initialize(filter_by = [])
+    @selector = QueryUse.where(filter_by)
     @classes_uses = []
     @callers_stack = []
     @stack_level = caller.length
@@ -38,7 +39,7 @@ class ClassLister
   end
 
   def process_event(trace_point)
-    @classes_uses << @callers_stack.shift if @stack_level > caller.length
+    @classes_uses << caller_to_classes_uses if @stack_level > caller.length
     @stack_level = caller.length
     update_callers_stack(trace_point)
   end
@@ -60,8 +61,12 @@ class ClassLister
 
   def remove_exited_callers_from_stack
     while class_exited(@callers_stack.first)
-      @classes_uses << @callers_stack.shift
+      @classes_uses << caller_to_classes_uses
     end
+  end
+
+  def caller_to_classes_uses
+    @selector.filter(@callers_stack.shift)
   end
 
   def class_exited(current_class)
