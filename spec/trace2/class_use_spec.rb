@@ -10,7 +10,7 @@ describe ClassUse do
       expect(class_use.callers_stack).to eq []
     end
 
-    it 'for a single caller' do
+    it 'returns callers for a single caller' do
       caller_class = ClassUse.new(
         caller_class: nil, name: 'Simple', method: 'simple_call'
       )
@@ -19,7 +19,7 @@ describe ClassUse do
       expect(callee_class.callers_stack).to eq [caller_class]
     end
 
-    it 'for a long stack of callers' do
+    it 'returns callers for a long stack of callers' do
       first_caller = ClassUse.new(
         caller_class: nil, name: 'First', method: 'first_call'
       )
@@ -36,6 +36,28 @@ describe ClassUse do
       expect(callee.callers_stack).to eq [
         third_caller, second_caller, first_caller
       ]
+    end
+
+    it 'returns callers stack without their callers' do
+      first_caller = ClassUse.new(
+        caller_class: nil, name: 'First', method: 'first_call'
+      )
+      second_caller = ClassUse.new(
+        caller_class: first_caller, name: 'Second', method: 'second_call'
+      )
+      third_caller = ClassUse.new(
+        caller_class: second_caller, name: 'Third', method: 'third_call'
+      )
+      callee = ClassUse.new(
+        caller_class: third_caller, name: 'Callee', method: 'call'
+      )
+
+      compact_callers = callee.callers_stack(true)
+      callers_names = compact_callers.map(&:name)
+      callers_callers = compact_callers.map(&:caller_class)
+
+      expect(callers_names).to eq %w[Third Second First]
+      expect(callers_callers).to eq [nil, nil, nil]
     end
   end
 
