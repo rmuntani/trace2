@@ -34,7 +34,10 @@ class ClassLister
   private
 
   def aggregate_uses
-    @classes_uses = @classes_uses.concat(@callers_stack).reject(&:nil?)
+    @classes_uses = @callers_stack
+      .map { |caller_class| @selector.filter(caller_class) }
+      .concat(@classes_uses)
+      .reject(&:nil?)
     @callers_stack = []
   end
 

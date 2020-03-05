@@ -1,9 +1,8 @@
 # TODO
 
-- test OR query better -> debugging do rspec dá errado
+- improve removal of classes from a class use stack; -> maybe not
 - benchmarking for functions execution
 - save class use (logging, databases)
-- improve removal of classes from a class use stack; -> maybe not
 - generate view of classes dependencies;
 - make runners for the principal ruby tools
    - Rails
