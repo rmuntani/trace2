@@ -52,12 +52,66 @@ describe ClassUse do
         caller_class: third_caller, name: 'Callee', method: 'call'
       )
 
-      compact_callers = callee.callers_stack(true)
+      compact_callers = callee.callers_stack(compact: true)
       callers_names = compact_callers.map(&:name)
       callers_callers = compact_callers.map(&:caller_class)
 
       expect(callers_names).to eq %w[Third Second First]
       expect(callers_callers).to eq [nil, nil, nil]
+    end
+
+    it 'removes caller using a filter' do
+      first_caller = ClassUse.new(
+        caller_class: nil, name: 'First', method: 'first_call'
+      )
+      second_caller = ClassUse.new(
+        caller_class: first_caller, name: 'Second', method: 'second_call'
+      )
+      third_caller = ClassUse.new(
+        caller_class: second_caller, name: 'Third', method: 'third_call'
+      )
+      callee = ClassUse.new(
+        caller_class: third_caller, name: 'Callee', method: 'call'
+      )
+
+      selector = Class.new do
+        def filter(class_use)
+          class_use unless class_use.name == 'Second'
+        end
+      end.new
+
+      filtered_callers = callee.callers_stack(selector: selector)
+      callers_names = filtered_callers.map(&:name)
+
+      expect(callers_names).to eq %w[Third First]
+    end
+
+    it 'applies multiple options' do
+      first_caller = ClassUse.new(
+        caller_class: nil, name: 'First', method: 'first_call'
+      )
+      second_caller = ClassUse.new(
+        caller_class: first_caller, name: 'Second', method: 'second_call'
+      )
+      third_caller = ClassUse.new(
+        caller_class: second_caller, name: 'Third', method: 'third_call'
+      )
+      callee = ClassUse.new(
+        caller_class: third_caller, name: 'Callee', method: 'call'
+      )
+
+      selector = Class.new do
+        def filter(class_use)
+          class_use unless class_use.name == 'Second'
+        end
+      end.new
+
+      callers = callee.callers_stack(selector: selector, compact: true)
+      callers_names = callers.map(&:name)
+      callers_callers = callers.map(&:caller_class)
+
+      expect(callers_names).to eq %w[Third First]
+      expect(callers_callers).to eq [nil, nil]
     end
   end
 

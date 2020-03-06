@@ -15,12 +15,12 @@ class ClassUse
     @top_of_stack = params[:top_of_stack]
   end
 
-  def callers_stack(compact = false)
+  def callers_stack(options = {})
     curr_class = caller_class
     callers_stack = []
     until curr_class.nil?
-      curr_caller = compact ? compact_callers(curr_class) : curr_class
-      callers_stack.push(curr_caller)
+      curr_caller = run_options(curr_class, options)
+      callers_stack.push(curr_caller) unless curr_caller.nil?
       curr_class = curr_class.caller_class
     end
     callers_stack
@@ -49,6 +49,23 @@ class ClassUse
   end
 
   private
+
+  def run_options(class_use, options)
+    options.reduce(class_use) do |acc_use, option|
+      option_method = "run_#{option.first}"
+      send(option_method, acc_use, option.last) unless acc_use.nil?
+    end
+  end
+
+  def run_selector(class_use, selector)
+    return class_use if selector.nil?
+
+    selector.filter(class_use)
+  end
+
+  def run_compact(class_use, compact)
+    compact ? compact_callers(class_use) : class_use
+  end
 
   def compact_callers(class_use)
     class_use.dup.tap do |compacted_use|
