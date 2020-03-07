@@ -80,6 +80,40 @@ describe QueryUse do
 
       expect(selected_classes).to eq [pass_name, pass_both]
     end
+
+    it 'applies both types of query' do
+      fail_both = double('ClassUse')
+      allow(fail_both).to receive(:matches_name?).and_return(false)
+      allow(fail_both).to receive(:matches_path?).and_return(false)
+      allow(fail_both).to receive(:matches_top_of_stack?).and_return(false)
+
+      fail_stack = double('ClassUse')
+      allow(fail_stack).to receive(:matches_name?).and_return(true)
+      allow(fail_stack).to receive(:matches_path?).and_return(true)
+      allow(fail_stack).to receive(:matches_top_of_stack?).and_return(false)
+
+      pass_name = double('ClassUse')
+      allow(pass_name).to receive(:matches_name?).and_return(true)
+      allow(pass_name).to receive(:matches_path?).and_return(false)
+      allow(pass_name).to receive(:matches_top_of_stack?).and_return(true)
+
+      pass_path = double('ClassUse')
+      allow(pass_path).to receive(:matches_name?).and_return(false)
+      allow(pass_path).to receive(:matches_path?).and_return(true)
+      allow(pass_path).to receive(:matches_top_of_stack?).and_return(true)
+
+      classes_uses = [fail_both, fail_stack, pass_name, pass_path]
+
+      query_parameters = [
+        { allow: [{ name: ['RSpec'] }, { path: ['/my/path/to'] }] },
+        { allow: [{ top_of_stack: true }] }
+      ]
+
+      query = QueryUse.where(query_parameters)
+      selected_classes = query.select(classes_uses)
+
+      expect(selected_classes).to eq [pass_name, pass_path]
+    end
   end
 
   describe '#filter' do
@@ -108,6 +142,27 @@ describe QueryUse do
       selected_classes = query.filter(class_use)
 
       expect(selected_classes).to be_nil
+    end
+
+    it 'applies a complex filter successfully' do
+      filters = [
+        { allow: [
+          { caller_class: { name: [/ForASimpleClass/] } },
+          { name: [/ForASimpleClass/] }
+        ] },
+        {
+          allow: [{ top_of_stack: true }]
+        }
+      ]
+
+      query = QueryUse.where(filters)
+
+      pass_path = double('ClassUse')
+      allow(pass_path).to receive(:matches_caller_class?).and_return(true)
+      allow(pass_path).to receive(:matches_name?).and_return(false)
+      allow(pass_path).to receive(:matches_top_of_stack?).and_return(false)
+
+      expect(query.filter(pass_path)).to be_nil
     end
   end
 end

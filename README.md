@@ -22,19 +22,19 @@ To make an AND query, the following
 are equivalent:
 ```
 [
-  allow: [ something: [] ], 
-  allow: [ anything: [] ]
+  { allow: [ something: [] ] },
+  { allow: [ anything: [] ] }
 ]
 
 [ 
-  allow: [{ something: [], anything: [] }]
+  { allow: [{ something: [], anything: [] }] }
 ]
 ```
 
 An OR can be written as:
 ```
 [ 
-  allow: [ something: [], anything: [] ]
+  { allow: [ something: [], anything: [] ] }
 ]
 ```
 
