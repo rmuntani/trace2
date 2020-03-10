@@ -1,6 +1,6 @@
 # TODO
 
-- improve removal of classes from a class use stack; -> maybe not
+- break a callees tree depending on filter
 - benchmarking for functions execution
 - save class use (logging, databases)
 - generate view of classes dependencies;

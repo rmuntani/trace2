@@ -57,9 +57,16 @@ class ClassLister
 
   def update_callers_stack(trace_point)
     remove_exited_callers_from_stack
-    mark_as_not_top_of_stack(@callers_stack.first)
     current_class_use = build_class_use(trace_point, @callers_stack.first)
+    update_top_of_callers(current_class_use)
     @callers_stack.unshift(current_class_use)
+  end
+
+  def update_top_of_callers(callee)
+    return if @callers_stack.first.nil?
+
+    @callers_stack.first.top_of_stack = false
+    @callers_stack.first.add_callee(callee)
   end
 
   def remove_exited_callers_from_stack
@@ -74,9 +81,5 @@ class ClassLister
 
   def class_exited(current_class)
     current_class && current_class.stack_level >= @stack_level
-  end
-
-  def mark_as_not_top_of_stack(current_caller)
-    current_caller.top_of_stack = false unless current_caller.nil?
   end
 end

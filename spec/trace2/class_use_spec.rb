@@ -155,6 +155,7 @@ describe ClassUse do
 
       expect(class_use.matches_caller_class?(caller_attributes)).to be_truthy
     end
+
     it 'queries an indirect caller using the where format' do
       caller_class = ClassUse.new(method: 'it')
       callee_class = ClassUse.new(method: 'call', caller_class: caller_class)
@@ -175,6 +176,17 @@ describe ClassUse do
       caller_attributes = 'anything'
 
       expect(class_use.matches_something?(caller_attributes)).to be_truthy
+    end
+  end
+
+  context '#add_callee' do
+    it 'successfully' do
+      caller_class = ClassUse.new(name: 'Caller')
+      callee = ClassUse.new(name: 'Callee')
+
+      caller_class.add_callee(callee)
+
+      expect(caller_class.callees).to eq [callee]
     end
   end
 end

@@ -2,7 +2,7 @@
 
 # Registers how a class was used during run time
 class ClassUse
-  attr_reader :name, :method, :stack_level, :path, :line
+  attr_reader :name, :method, :stack_level, :path, :line, :callees
   attr_accessor :caller_class, :top_of_stack
 
   def initialize(params)
@@ -13,6 +13,7 @@ class ClassUse
     @path = params[:path]
     @line = params[:line]
     @top_of_stack = params[:top_of_stack]
+    @callees = params[:callees] || []
   end
 
   def callers_stack(options = {})
@@ -46,6 +47,10 @@ class ClassUse
     callers_stack.any? do |current_caller|
       valid_caller?(current_caller, caller_attributes)
     end
+  end
+
+  def add_callee(callee)
+    callees << callee
   end
 
   private
