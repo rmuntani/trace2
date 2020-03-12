@@ -14,7 +14,7 @@ class QueryUse
   end
 
   def filter(class_use)
-    class_use if valid_use?(class_use)
+    class_use if class_use && valid_use?(class_use)
   end
 
   def select(classes_uses)

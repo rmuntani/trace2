@@ -197,4 +197,65 @@ describe ClassLister do
       expect(classes_uses_names).to include 'BlockUse'
     end
   end
+
+  describe 'integration with QueryUse' do
+    it 'lists acessed classes that pass the filter' do
+      class_lister = ClassLister.new([{ allow: [{ name: ['Zaratustra'] }] }])
+      simple_class = Simple.new
+
+      class_lister.enable
+      simple_class.simple_call
+      class_lister.disable
+
+      classes_uses = class_lister.classes_uses
+
+      expect(classes_uses).to be_empty
+    end
+
+    it 'does not list callers that dont pass the filter' do
+      class_lister = ClassLister.new([{ reject: [{ name: [/Nested/] }] }])
+      complex_class = ComplexNesting.new
+
+      class_lister.enable
+      complex_class.complex_call
+      class_lister.disable
+
+      classes_uses = class_lister.classes_uses
+
+      simple_callers = classes_uses
+                       .select { |class_use| class_use.name == 'Simple' }
+                       .map(&:caller_class)
+                       .map(&:name)
+      nested_classes = classes_uses
+                       .select { |class_use| class_use.name == 'Nested' }
+
+      expect(simple_callers).to eq %w[ComplexNesting ComplexNesting]
+      expect(nested_classes).to be_empty
+    end
+
+    it 'does not list callees that dont pass the filter' do
+      class_lister = ClassLister.new([{ reject: [{ name: [/Nested/] }] }])
+      complex_class = ComplexNesting.new
+
+      class_lister.enable
+      complex_class.complex_call
+      class_lister.disable
+
+      classes_uses = class_lister.classes_uses
+
+      complex_callees = classes_uses
+                        .select do |class_use|
+        class_use.name == 'ComplexNesting'
+      end
+                        .map(&:callees)
+
+      used_complex_callees = complex_callees.find { |cn| !cn.empty? }
+
+      expect(complex_callees.length).to eq 2
+      expect(complex_callees).to include []
+      expect(
+        used_complex_callees.map(&:name)
+      ).to eq %w[Simple Simple ComplexNesting]
+    end
+  end
 end
