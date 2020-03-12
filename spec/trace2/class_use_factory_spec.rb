@@ -10,7 +10,8 @@ describe ClassUseFactory do
         defined_class: 'Callee',
         callee_id: 'do_something',
         path: '/file/path',
-        lineno: 10
+        lineno: 10,
+        event: :call
       )
 
       caller_class = double(
@@ -37,10 +38,11 @@ describe ClassUseFactory do
       trace_point = double(
         'TracePoint',
         defined_class: nil,
-        self: 'Callee',
+        self: '<Callee:0x00005608b25a0080>',
         callee_id: 'do_something',
         path: '/file/path',
-        lineno: 15
+        lineno: 15,
+        event: :b_call
       )
 
       caller_class = double(
@@ -55,6 +57,41 @@ describe ClassUseFactory do
       )
 
       expect(class_use.name).to eq 'Callee'
+    end
+  end
+
+  describe '.class_name' do
+    it 'changes nothing for a method call' do
+      trace_point = instance_double(
+        'TracePoint', event: :call, defined_class: 'MyClass'
+      )
+
+      class_name = ClassUseFactory.class_name(trace_point)
+
+      expect(class_name).to eq 'MyClass'
+    end
+
+    it 'parses the class name for a block' do
+      trace_point = instance_double(
+        'TracePoint',
+        event: :b_call,
+        defined_class: nil,
+        self: '<MyClass:0x00005608b25a0080>'
+      )
+
+      class_name = ClassUseFactory.class_name(trace_point)
+
+      expect(class_name).to eq 'MyClass'
+    end
+
+    it 'returns self if name is not parseable' do
+      trace_point = instance_double(
+        'TracePoint', event: :b_call, defined_class: nil, self: 'main'
+      )
+
+      class_name = ClassUseFactory.class_name(trace_point)
+
+      expect(class_name).to eq 'main'
     end
   end
 end
