@@ -16,7 +16,8 @@ class ClassUseFactory
       name: class_name(trace_point),
       method: trace_point.callee_id.to_s,
       path: trace_point.path,
-      line: trace_point.lineno
+      line: trace_point.lineno,
+      event: trace_point.event
     }
   end
   private_class_method :trace_point_params

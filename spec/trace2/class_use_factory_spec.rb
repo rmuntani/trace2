@@ -32,6 +32,7 @@ describe ClassUseFactory do
       expect(class_use.path).to eq '/file/path'
       expect(class_use.line).to eq 10
       expect(class_use.top_of_stack).to eq true
+      expect(class_use.event).to eq :call
     end
 
     it 'builds for a block' do
@@ -57,6 +58,7 @@ describe ClassUseFactory do
       )
 
       expect(class_use.name).to eq 'Callee'
+      expect(class_use.event).to eq :b_call
     end
   end
 
