@@ -140,10 +140,52 @@ describe ClassUse do
   end
 
   describe '#matches_top_of_stack?' do
-    it 'successfully' do
-      class_use = ClassUse.new(top_of_stack: true)
+    it 'for a class use without callees' do
+      class_use = ClassUse.new(callees: [])
       is_top = true
       expect(class_use.matches_top_of_stack?(is_top)).to be_truthy
+    end
+
+    it 'for a class use without callees' do
+      class_use = ClassUse.new(
+        callees: [
+          ClassUse.new(callees: [])
+        ]
+      )
+      is_top = true
+      expect(class_use.matches_top_of_stack?(is_top)).to be_falsy
+    end
+
+    it 'matches a case without callee if is_top is false' do
+      class_use = ClassUse.new(
+        callees: [ClassUse.new(caller_class: nil)]
+      )
+      is_top = false
+      expect(class_use.matches_top_of_stack?(is_top)).to be_truthy
+    end
+  end
+
+  describe '#matches_stack_bottom?' do
+    it 'for a class use without callees' do
+      class_use = ClassUse.new(caller_class: nil)
+      is_bottom = true
+      expect(class_use.matches_bottom_of_stack?(is_bottom)).to be_truthy
+    end
+
+    it 'for a class use without callees' do
+      class_use = ClassUse.new(
+        caller_class: ClassUse.new(caller_class: nil)
+      )
+      is_bottom = true
+      expect(class_use.matches_bottom_of_stack?(is_bottom)).to be_falsy
+    end
+
+    it 'matches a case with caller if is_bottom is false' do
+      class_use = ClassUse.new(
+        caller_class: ClassUse.new(caller_class: nil)
+      )
+      is_bottom = false
+      expect(class_use.matches_bottom_of_stack?(is_bottom)).to be_truthy
     end
   end
 

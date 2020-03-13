@@ -3,7 +3,7 @@
 # Registers how a class was used during run time
 class ClassUse
   attr_reader :name, :method, :stack_level, :path, :line, :callees, :event
-  attr_accessor :caller_class, :top_of_stack
+  attr_accessor :caller_class
 
   def initialize(params)
     @name = params[:name]
@@ -12,7 +12,6 @@ class ClassUse
     @stack_level = params[:stack_level]
     @path = params[:path]
     @line = params[:line]
-    @top_of_stack = params[:top_of_stack]
     @callees = params[:callees] || []
     @event = params[:event]
   end
@@ -40,8 +39,12 @@ class ClassUse
     paths_patterns.any? { |path_pattern| path.match(path_pattern) }
   end
 
+  def matches_bottom_of_stack?(is_bottom)
+    caller_class.nil? == is_bottom
+  end
+
   def matches_top_of_stack?(is_top)
-    top_of_stack == is_top
+    callees.empty? == is_top
   end
 
   def matches_caller_class?(caller_attributes)

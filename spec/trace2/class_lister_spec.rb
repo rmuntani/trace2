@@ -62,25 +62,6 @@ describe ClassLister do
       expect(simple_class.caller_class.name).to eq 'Nested'
     end
 
-    it 'marks the top of a stack' do
-      class_lister = ClassLister.new
-      nested_class_call = Nested.new
-
-      class_lister.enable
-      nested_class_call.nested_call
-      class_lister.disable
-
-      simple_class = class_lister
-                     .classes_uses
-                     .find { |class_use| class_use.name == 'Simple' }
-      nested_class = class_lister
-                     .classes_uses
-                     .find { |class_use| class_use.name == 'Nested' }
-
-      expect(simple_class.top_of_stack).to be_truthy
-      expect(nested_class.top_of_stack).to be_falsy
-    end
-
     it 'relates caller to its callees' do
       class_lister = ClassLister.new
       nested_class_call = Nested.new

@@ -66,7 +66,6 @@ class ClassLister
     caller_class = callee.caller_class
     return if caller_class.nil?
 
-    caller_class.top_of_stack = false
     caller_class.add_callee(callee) unless @selector.filter(callee).nil?
   end
 

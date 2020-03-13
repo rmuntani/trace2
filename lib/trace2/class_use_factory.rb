@@ -7,7 +7,6 @@ class ClassUseFactory
       trace_point_params(trace_point)
         .merge(caller_class: caller_class)
         .merge(stack_level: stack_level)
-        .merge(top_of_stack: true)
     )
   end
 
