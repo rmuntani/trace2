@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe QueryUse do
+describe Trace2::QueryUse do
   describe '#select' do
     it 'successfully for empty query' do
-      class_use = double('ClassUse')
+      class_use = double('Trace2::ClassUse')
       classes_uses = [class_use]
-      query = QueryUse.where([])
+      query = Trace2::QueryUse.where([])
 
       selected_classes = query.select(classes_uses)
 
@@ -15,9 +15,9 @@ describe QueryUse do
     end
 
     it 'applies query successfully' do
-      class_use = double('ClassUse')
+      class_use = double('Trace2::ClassUse')
       classes_uses = [class_use]
-      query = QueryUse.where(
+      query = Trace2::QueryUse.where(
         [allow: [{ name: ['RSpec'], path: ['/my/path/to'] }]]
       )
 
@@ -32,14 +32,14 @@ describe QueryUse do
     end
 
     it 'applies AND query successfully' do
-      remove_use = double('ClassUse')
+      remove_use = double('Trace2::ClassUse')
       allow(remove_use).to receive(:matches_name?).and_return(false)
 
-      accept_use = double('ClassUse')
+      accept_use = double('Trace2::ClassUse')
       allow(accept_use).to receive(:matches_name?).and_return(true)
       allow(accept_use).to receive(:matches_path?).and_return(false)
 
-      pass_first_filter = double('ClassUse')
+      pass_first_filter = double('Trace2::ClassUse')
       allow(pass_first_filter).to receive(:matches_name?).and_return(true)
       allow(pass_first_filter).to receive(:matches_path?).and_return(true)
 
@@ -50,22 +50,22 @@ describe QueryUse do
         reject: [{ path: ['/my/path/to'] }]
       ]
 
-      query = QueryUse.where(query_parameters)
+      query = Trace2::QueryUse.where(query_parameters)
       selected_classes = query.select(classes_uses)
 
       expect(selected_classes).to eq [accept_use]
     end
 
     it 'applies OR query successfully' do
-      fail_query = double('ClassUse')
+      fail_query = double('Trace2::ClassUse')
       allow(fail_query).to receive(:matches_name?).and_return(false)
       allow(fail_query).to receive(:matches_path?).and_return(false)
 
-      pass_name = double('ClassUse')
+      pass_name = double('Trace2::ClassUse')
       allow(pass_name).to receive(:matches_name?).and_return(true)
       allow(pass_name).to receive(:matches_path?).and_return(false)
 
-      pass_both = double('ClassUse')
+      pass_both = double('Trace2::ClassUse')
       allow(pass_both).to receive(:matches_name?).and_return(true)
       allow(pass_both).to receive(:matches_path?).and_return(true)
 
@@ -75,29 +75,29 @@ describe QueryUse do
         allow: [{ name: ['RSpec'] }, { path: ['/my/path/to'] }]
       ]
 
-      query = QueryUse.where(query_parameters)
+      query = Trace2::QueryUse.where(query_parameters)
       selected_classes = query.select(classes_uses)
 
       expect(selected_classes).to eq [pass_name, pass_both]
     end
 
     it 'applies both types of query' do
-      fail_both = double('ClassUse')
+      fail_both = double('Trace2::ClassUse')
       allow(fail_both).to receive(:matches_name?).and_return(false)
       allow(fail_both).to receive(:matches_path?).and_return(false)
       allow(fail_both).to receive(:matches_top_of_stack?).and_return(false)
 
-      fail_stack = double('ClassUse')
+      fail_stack = double('Trace2::ClassUse')
       allow(fail_stack).to receive(:matches_name?).and_return(true)
       allow(fail_stack).to receive(:matches_path?).and_return(true)
       allow(fail_stack).to receive(:matches_top_of_stack?).and_return(false)
 
-      pass_name = double('ClassUse')
+      pass_name = double('Trace2::ClassUse')
       allow(pass_name).to receive(:matches_name?).and_return(true)
       allow(pass_name).to receive(:matches_path?).and_return(false)
       allow(pass_name).to receive(:matches_top_of_stack?).and_return(true)
 
-      pass_path = double('ClassUse')
+      pass_path = double('Trace2::ClassUse')
       allow(pass_path).to receive(:matches_name?).and_return(false)
       allow(pass_path).to receive(:matches_path?).and_return(true)
       allow(pass_path).to receive(:matches_top_of_stack?).and_return(true)
@@ -109,7 +109,7 @@ describe QueryUse do
         { allow: [{ top_of_stack: true }] }
       ]
 
-      query = QueryUse.where(query_parameters)
+      query = Trace2::QueryUse.where(query_parameters)
       selected_classes = query.select(classes_uses)
 
       expect(selected_classes).to eq [pass_name, pass_path]
@@ -118,8 +118,8 @@ describe QueryUse do
 
   describe '#filter' do
     it 'successfully for empty query' do
-      class_use = double('ClassUse')
-      query = QueryUse.where([])
+      class_use = double('Trace2::ClassUse')
+      query = Trace2::QueryUse.where([])
 
       selected_classes = query.filter(class_use)
 
@@ -127,12 +127,14 @@ describe QueryUse do
     end
 
     it 'applies query successfully' do
-      class_use = double('ClassUse')
-      query = QueryUse.where([
-                               allow: [
-                                 { name: ['RSpec'], path: ['/my/path/to'] }
-                               ]
-                             ])
+      class_use = double('Trace2::ClassUse')
+      query = Trace2::QueryUse.where(
+        [
+          allow: [
+            { name: ['RSpec'], path: ['/my/path/to'] }
+          ]
+        ]
+      )
 
       allow(class_use).to receive(:matches_name?)
         .and_return(false)
@@ -155,9 +157,9 @@ describe QueryUse do
         }
       ]
 
-      query = QueryUse.where(filters)
+      query = Trace2::QueryUse.where(filters)
 
-      pass_path = double('ClassUse')
+      pass_path = double('Trace2::ClassUse')
       allow(pass_path).to receive(:matches_caller_class?).and_return(true)
       allow(pass_path).to receive(:matches_name?).and_return(false)
       allow(pass_path).to receive(:matches_top_of_stack?).and_return(false)

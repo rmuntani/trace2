@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ClassUseFactory do
+describe Trace2::ClassUseFactory do
   describe '.build' do
     it 'successfully' do
       trace_point = double(
@@ -15,11 +15,11 @@ describe ClassUseFactory do
       )
 
       caller_class = double(
-        'ClassUse',
+        'Trace2::ClassUse',
         name: 'Caller'
       )
 
-      class_use = ClassUseFactory.build(
+      class_use = Trace2::ClassUseFactory.build(
         trace_point: trace_point,
         caller_class: caller_class,
         stack_level: 39
@@ -38,7 +38,7 @@ describe ClassUseFactory do
       trace_point = double(
         'TracePoint',
         defined_class: nil,
-        self: '<Callee:0x00005608b25a0080>',
+        self: '#<Callee:0x00005608b25a0080>',
         callee_id: 'do_something',
         path: '/file/path',
         lineno: 15,
@@ -46,11 +46,11 @@ describe ClassUseFactory do
       )
 
       caller_class = double(
-        'ClassUse',
+        'Trace2::ClassUse',
         name: 'Caller'
       )
 
-      class_use = ClassUseFactory.build(
+      class_use = Trace2::ClassUseFactory.build(
         trace_point: trace_point,
         caller_class: caller_class,
         stack_level: 39
@@ -67,7 +67,7 @@ describe ClassUseFactory do
         'TracePoint', event: :call, defined_class: 'MyClass'
       )
 
-      class_name = ClassUseFactory.class_name(trace_point)
+      class_name = Trace2::ClassUseFactory.class_name(trace_point)
 
       expect(class_name).to eq 'MyClass'
     end
@@ -77,10 +77,10 @@ describe ClassUseFactory do
         'TracePoint',
         event: :b_call,
         defined_class: nil,
-        self: '<MyClass:0x00005608b25a0080>'
+        self: '#<MyClass:0x00005608b25a0080>'
       )
 
-      class_name = ClassUseFactory.class_name(trace_point)
+      class_name = Trace2::ClassUseFactory.class_name(trace_point)
 
       expect(class_name).to eq 'MyClass'
     end
@@ -90,7 +90,7 @@ describe ClassUseFactory do
         'TracePoint', event: :b_call, defined_class: nil, self: 'main'
       )
 
-      class_name = ClassUseFactory.class_name(trace_point)
+      class_name = Trace2::ClassUseFactory.class_name(trace_point)
 
       expect(class_name).to eq 'main'
     end

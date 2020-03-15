@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ReportGenerator do
+describe Trace2::ReportGenerator do
   describe '#generate' do
     let(:output_file) { 'spec/fixtures/test_report.html' }
     after(:each) do
@@ -10,14 +10,14 @@ describe ReportGenerator do
     end
 
     it 'calls the relationship parser' do
-      classes_uses = [instance_double('ClassUse')]
+      classes_uses = [instance_double('Trace2::ClassUse')]
       parsed_relationship = [{ caller: 'Caller', callee: 'Callee' }]
       relationship_parser = class_double(
-        'ClassesRelationshipParser',
+        'Trace2::ClassesRelationshipParser',
         parse: parsed_relationship
       )
 
-      report_generator = ReportGenerator.new(
+      report_generator = Trace2::ReportGenerator.new(
         classes_uses: classes_uses,
         relationship_parser: relationship_parser,
         output_path: output_file

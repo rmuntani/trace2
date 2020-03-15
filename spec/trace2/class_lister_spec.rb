@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe ClassLister do
+describe Trace2::ClassLister do
   context 'for a simple class' do
     it 'lists all acessed classes' do
-      class_lister = ClassLister.new
+      class_lister = Trace2::ClassLister.new
       simple_class = Simple.new
 
       class_lister.enable
@@ -18,7 +18,7 @@ describe ClassLister do
     end
 
     it 'lists callees of accessed classes' do
-      class_lister = ClassLister.new
+      class_lister = Trace2::ClassLister.new
       simple_class = Simple.new
 
       class_lister.enable
@@ -35,7 +35,7 @@ describe ClassLister do
 
   context 'for a class called inside another class' do
     it 'lists all accessed classes' do
-      class_lister = ClassLister.new
+      class_lister = Trace2::ClassLister.new
       nested_class_call = Nested.new
 
       class_lister.enable
@@ -48,7 +48,7 @@ describe ClassLister do
     end
 
     it 'callee should point to its caller' do
-      class_lister = ClassLister.new
+      class_lister = Trace2::ClassLister.new
       nested_class_call = Nested.new
 
       class_lister.enable
@@ -63,7 +63,7 @@ describe ClassLister do
     end
 
     it 'relates caller to its callees' do
-      class_lister = ClassLister.new
+      class_lister = Trace2::ClassLister.new
       nested_class_call = Nested.new
 
       class_lister.enable
@@ -84,7 +84,7 @@ describe ClassLister do
 
   context 'for multiple calls inside a class' do
     it 'is able to record multiple calls to different classes' do
-      class_lister = ClassLister.new
+      class_lister = Trace2::ClassLister.new
       complex_nesting = ComplexNesting.new
 
       class_lister.enable
@@ -109,7 +109,7 @@ describe ClassLister do
     end
 
     it 'connects callers to its callees' do
-      class_lister = ClassLister.new
+      class_lister = Trace2::ClassLister.new
       complex_nesting = ComplexNesting.new
 
       class_lister.enable
@@ -145,7 +145,7 @@ describe ClassLister do
 
   context 'for nested functions' do
     it 'connects the callee to the correct caller' do
-      class_lister = ClassLister.new
+      class_lister = Trace2::ClassLister.new
       nested_functions = NestedFunctions.new
 
       class_lister.enable
@@ -164,7 +164,7 @@ describe ClassLister do
 
   context 'for a block' do
     it 'records the class that owns the block' do
-      class_lister = ClassLister.new
+      class_lister = Trace2::ClassLister.new
       block_class = BlockUse.new
 
       class_lister.enable
@@ -179,9 +179,11 @@ describe ClassLister do
     end
   end
 
-  describe 'integration with QueryUse' do
+  describe 'integration with Trace2::QueryUse' do
     it 'lists acessed classes that pass the filter' do
-      class_lister = ClassLister.new([{ allow: [{ name: ['Zaratustra'] }] }])
+      class_lister = Trace2::ClassLister.new(
+        [{ allow: [{ name: ['Zaratustra'] }] }]
+      )
       simple_class = Simple.new
 
       class_lister.enable
@@ -194,7 +196,9 @@ describe ClassLister do
     end
 
     it 'does not list callers that dont pass the filter' do
-      class_lister = ClassLister.new([{ reject: [{ name: [/Nested/] }] }])
+      class_lister = Trace2::ClassLister.new(
+        [{ reject: [{ name: [/Nested/] }] }]
+      )
       complex_class = ComplexNesting.new
 
       class_lister.enable
@@ -215,7 +219,9 @@ describe ClassLister do
     end
 
     it 'does not list callees that dont pass the filter' do
-      class_lister = ClassLister.new([{ reject: [{ name: [/Nested/] }] }])
+      class_lister = Trace2::ClassLister.new(
+        [{ reject: [{ name: [/Nested/] }] }]
+      )
       complex_class = ComplexNesting.new
 
       class_lister.enable

@@ -2,34 +2,34 @@
 
 require 'spec_helper'
 
-describe ClassUse do
+describe Trace2::ClassUse do
   describe '#callers_stack' do
     it 'successfully' do
-      class_use = ClassUse.new(caller_class: nil)
+      class_use = Trace2::ClassUse.new(caller_class: nil)
 
       expect(class_use.callers_stack).to eq []
     end
 
     it 'returns callers for a single caller' do
-      caller_class = ClassUse.new(
+      caller_class = Trace2::ClassUse.new(
         caller_class: nil, name: 'Simple', method: 'simple_call'
       )
-      callee_class = ClassUse.new(caller_class: caller_class)
+      callee_class = Trace2::ClassUse.new(caller_class: caller_class)
 
       expect(callee_class.callers_stack).to eq [caller_class]
     end
 
     it 'returns callers for a long stack of callers' do
-      first_caller = ClassUse.new(
+      first_caller = Trace2::ClassUse.new(
         caller_class: nil, name: 'First', method: 'first_call'
       )
-      second_caller = ClassUse.new(
+      second_caller = Trace2::ClassUse.new(
         caller_class: first_caller, name: 'Second', method: 'second_call'
       )
-      third_caller = ClassUse.new(
+      third_caller = Trace2::ClassUse.new(
         caller_class: second_caller, name: 'Third', method: 'third_call'
       )
-      callee = ClassUse.new(
+      callee = Trace2::ClassUse.new(
         caller_class: third_caller, name: 'Callee', method: 'call'
       )
 
@@ -39,16 +39,16 @@ describe ClassUse do
     end
 
     it 'returns callers stack without their callers' do
-      first_caller = ClassUse.new(
+      first_caller = Trace2::ClassUse.new(
         caller_class: nil, name: 'First', method: 'first_call'
       )
-      second_caller = ClassUse.new(
+      second_caller = Trace2::ClassUse.new(
         caller_class: first_caller, name: 'Second', method: 'second_call'
       )
-      third_caller = ClassUse.new(
+      third_caller = Trace2::ClassUse.new(
         caller_class: second_caller, name: 'Third', method: 'third_call'
       )
-      callee = ClassUse.new(
+      callee = Trace2::ClassUse.new(
         caller_class: third_caller, name: 'Callee', method: 'call'
       )
 
@@ -61,16 +61,16 @@ describe ClassUse do
     end
 
     it 'removes caller using a filter' do
-      first_caller = ClassUse.new(
+      first_caller = Trace2::ClassUse.new(
         caller_class: nil, name: 'First', method: 'first_call'
       )
-      second_caller = ClassUse.new(
+      second_caller = Trace2::ClassUse.new(
         caller_class: first_caller, name: 'Second', method: 'second_call'
       )
-      third_caller = ClassUse.new(
+      third_caller = Trace2::ClassUse.new(
         caller_class: second_caller, name: 'Third', method: 'third_call'
       )
-      callee = ClassUse.new(
+      callee = Trace2::ClassUse.new(
         caller_class: third_caller, name: 'Callee', method: 'call'
       )
 
@@ -87,16 +87,16 @@ describe ClassUse do
     end
 
     it 'applies multiple options' do
-      first_caller = ClassUse.new(
+      first_caller = Trace2::ClassUse.new(
         caller_class: nil, name: 'First', method: 'first_call'
       )
-      second_caller = ClassUse.new(
+      second_caller = Trace2::ClassUse.new(
         caller_class: first_caller, name: 'Second', method: 'second_call'
       )
-      third_caller = ClassUse.new(
+      third_caller = Trace2::ClassUse.new(
         caller_class: second_caller, name: 'Third', method: 'third_call'
       )
-      callee = ClassUse.new(
+      callee = Trace2::ClassUse.new(
         caller_class: third_caller, name: 'Callee', method: 'call'
       )
 
@@ -117,7 +117,7 @@ describe ClassUse do
 
   describe '#matches_method?' do
     it 'successfully' do
-      class_use = ClassUse.new(method: 'it')
+      class_use = Trace2::ClassUse.new(method: 'it')
       methods = [/hit/, 'it']
       expect(class_use.matches_method?(methods)).to be_truthy
     end
@@ -125,7 +125,7 @@ describe ClassUse do
 
   describe '#matches_name?' do
     it 'successfully' do
-      class_use = ClassUse.new(name: 'MyTestClass')
+      class_use = Trace2::ClassUse.new(name: 'MyTestClass')
       methods = [/MyTest/]
       expect(class_use.matches_name?(methods)).to be_truthy
     end
@@ -133,7 +133,7 @@ describe ClassUse do
 
   describe '#matches_path?' do
     it 'successfully' do
-      class_use = ClassUse.new(path: 'path/to/my/great_file.rb')
+      class_use = Trace2::ClassUse.new(path: 'path/to/my/great_file.rb')
       methods = [/gre.t/]
       expect(class_use.matches_path?(methods)).to be_truthy
     end
@@ -141,15 +141,15 @@ describe ClassUse do
 
   describe '#matches_top_of_stack?' do
     it 'for a class use without callees' do
-      class_use = ClassUse.new(callees: [])
+      class_use = Trace2::ClassUse.new(callees: [])
       is_top = true
       expect(class_use.matches_top_of_stack?(is_top)).to be_truthy
     end
 
     it 'for a class use without callees' do
-      class_use = ClassUse.new(
+      class_use = Trace2::ClassUse.new(
         callees: [
-          ClassUse.new(callees: [])
+          Trace2::ClassUse.new(callees: [])
         ]
       )
       is_top = true
@@ -157,8 +157,8 @@ describe ClassUse do
     end
 
     it 'matches a case without callee if is_top is false' do
-      class_use = ClassUse.new(
-        callees: [ClassUse.new(caller_class: nil)]
+      class_use = Trace2::ClassUse.new(
+        callees: [Trace2::ClassUse.new(caller_class: nil)]
       )
       is_top = false
       expect(class_use.matches_top_of_stack?(is_top)).to be_truthy
@@ -167,22 +167,22 @@ describe ClassUse do
 
   describe '#matches_stack_bottom?' do
     it 'for a class use without callees' do
-      class_use = ClassUse.new(caller_class: nil)
+      class_use = Trace2::ClassUse.new(caller_class: nil)
       is_bottom = true
       expect(class_use.matches_bottom_of_stack?(is_bottom)).to be_truthy
     end
 
     it 'for a class use without callees' do
-      class_use = ClassUse.new(
-        caller_class: ClassUse.new(caller_class: nil)
+      class_use = Trace2::ClassUse.new(
+        caller_class: Trace2::ClassUse.new(caller_class: nil)
       )
       is_bottom = true
       expect(class_use.matches_bottom_of_stack?(is_bottom)).to be_falsy
     end
 
     it 'matches a case with caller if is_bottom is false' do
-      class_use = ClassUse.new(
-        caller_class: ClassUse.new(caller_class: nil)
+      class_use = Trace2::ClassUse.new(
+        caller_class: Trace2::ClassUse.new(caller_class: nil)
       )
       is_bottom = false
       expect(class_use.matches_bottom_of_stack?(is_bottom)).to be_truthy
@@ -191,17 +191,19 @@ describe ClassUse do
 
   describe '#matches_caller_class?' do
     it 'successfully' do
-      caller_use = ClassUse.new(name: 'Caller')
-      class_use = ClassUse.new(caller_class: caller_use)
+      caller_use = Trace2::ClassUse.new(name: 'Caller')
+      class_use = Trace2::ClassUse.new(caller_class: caller_use)
       caller_attributes = { name: ['Caller'] }
 
       expect(class_use.matches_caller_class?(caller_attributes)).to be_truthy
     end
 
     it 'queries an indirect caller using the where format' do
-      caller_class = ClassUse.new(method: 'it')
-      callee_class = ClassUse.new(method: 'call', caller_class: caller_class)
-      indirect_callee_class = ClassUse.new(
+      caller_class = Trace2::ClassUse.new(method: 'it')
+      callee_class = Trace2::ClassUse.new(
+        method: 'call', caller_class: caller_class
+      )
+      indirect_callee_class = Trace2::ClassUse.new(
         method: 'super_call', caller_class: callee_class
       )
 
@@ -214,7 +216,7 @@ describe ClassUse do
 
   context 'when #matches_something? is not implemented' do
     it 'returns true' do
-      class_use = ClassUse.new(name: 'Filler')
+      class_use = Trace2::ClassUse.new(name: 'Filler')
       caller_attributes = 'anything'
 
       expect(class_use.matches_something?(caller_attributes)).to be_truthy
@@ -223,8 +225,8 @@ describe ClassUse do
 
   context '#add_callee' do
     it 'successfully' do
-      caller_class = ClassUse.new(name: 'Caller')
-      callee = ClassUse.new(name: 'Callee')
+      caller_class = Trace2::ClassUse.new(name: 'Caller')
+      callee = Trace2::ClassUse.new(name: 'Callee')
 
       caller_class.add_callee(callee)
 
