@@ -22,7 +22,7 @@ class ClassesRelationshipParser
 
   def self.relationship_hash(class_use)
     class_use.callees.map do |callee|
-      { caller: class_use.name, callee: callee.name }
+      { source: class_use.name, target: callee.name }
     end
   end
   private_class_method :relationship_hash

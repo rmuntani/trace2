@@ -27,8 +27,8 @@ describe ClassesRelationshipParser do
         parsed = ClassesRelationshipParser.parse([caller_class])
 
         expect(parsed).to eq [
-          { caller: 'Caller', callee: 'First' },
-          { caller: 'Caller', callee: 'Second' }
+          { source: 'Caller', target: 'First' },
+          { source: 'Caller', target: 'Second' }
         ]
       end
     end
@@ -58,8 +58,8 @@ describe ClassesRelationshipParser do
         )
 
         expect(parsed).to eq [
-          { caller: 'FirstCaller', callee: 'FirstCallee' },
-          { caller: 'SecondCaller', callee: 'SecondCallee' }
+          { source: 'FirstCaller', target: 'FirstCallee' },
+          { source: 'SecondCaller', target: 'SecondCallee' }
         ]
       end
     end
@@ -84,9 +84,9 @@ describe ClassesRelationshipParser do
         parsed = ClassesRelationshipParser.parse([caller_class])
 
         expect(parsed).to eq [
-          { caller: 'Caller', callee: 'FirstCallee' },
-          { caller: 'FirstCallee', callee: 'SecondCallee' },
-          { caller: 'SecondCallee', callee: 'ThirdCallee' }
+          { source: 'Caller', target: 'FirstCallee' },
+          { source: 'FirstCallee', target: 'SecondCallee' },
+          { source: 'SecondCallee', target: 'ThirdCallee' }
         ]
       end
     end
@@ -130,11 +130,11 @@ describe ClassesRelationshipParser do
                                                  ])
 
         expect(parsed).to eq [
-          { caller: '1_Caller', callee: '1_1_Callee' },
-          { caller: '2_Caller', callee: '2_1_Callee' },
-          { caller: '2_Caller', callee: '3_1_Callee' },
-          { caller: '1_1_Callee', callee: '1_2_Callee' },
-          { caller: '1_1_Callee', callee: '2_2_Callee' }
+          { source: '1_Caller', target: '1_1_Callee' },
+          { source: '2_Caller', target: '2_1_Callee' },
+          { source: '2_Caller', target: '3_1_Callee' },
+          { source: '1_1_Callee', target: '1_2_Callee' },
+          { source: '1_1_Callee', target: '2_2_Callee' }
         ]
       end
     end
