@@ -3,6 +3,8 @@
 module Trace2
   # Builds a ClassUse from TracePoint
   class ClassUseFactory
+    CLASS_POINTER_FORMAT = '0x[0-9abcdef]+'
+
     def self.build(trace_point:, caller_class:, stack_level:)
       ClassUse.new(
         trace_point_params(trace_point)
@@ -23,18 +25,27 @@ module Trace2
     private_class_method :trace_point_params
 
     def self.class_name(trace_point)
-      event = trace_point.event
-      return parsed_self_name(trace_point) if event == :b_call
+      current_class = trace_point.self
+      if trace_point.defined_class == Kernel
+        return trace_point.defined_class.to_s
+      end
+      if (current_class.is_a? Class) || (current_class.is_a? Module)
+        return parse_class_name(current_class)
+      end
 
-      trace_point.defined_class.to_s
+      parse_instance_name(current_class)
     end
 
-    def self.parsed_self_name(trace_point)
-      self_name = trace_point.self.to_s
-      parsed_name = self_name.match(/^#<(\S+)?:{1}/)
-      return self_name if parsed_name.nil?
+    def self.parse_class_name(current_class)
+      return current_class.name unless current_class.name.nil?
 
-      parsed_name[1]
-    private_class_method :parsed_self_name
+      current_class.to_s.match(/^#<Class:(\S+)>$/)[1]
+    end
+    private_class_method :parse_class_name
+
+    def self.parse_instance_name(current_class)
+      current_class.class.name
+    end
+    private_class_method :parse_instance_name
   end
 end

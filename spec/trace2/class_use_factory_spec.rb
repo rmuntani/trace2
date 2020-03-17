@@ -7,11 +7,12 @@ describe Trace2::ClassUseFactory do
     it 'successfully' do
       trace_point = double(
         'TracePoint',
-        defined_class: 'Callee',
         callee_id: 'do_something',
         path: '/file/path',
         lineno: 10,
-        event: :call
+        event: :call,
+        defined_class: 'Simple',
+        self: Simple
       )
 
       caller_class = double(
@@ -25,7 +26,7 @@ describe Trace2::ClassUseFactory do
         stack_level: 39
       )
 
-      expect(class_use.name).to eq 'Callee'
+      expect(class_use.name).to eq 'Simple'
       expect(class_use.method).to eq 'do_something'
       expect(class_use.stack_level).to eq 39
       expect(class_use.caller_class.name).to eq 'Caller'
@@ -37,11 +38,11 @@ describe Trace2::ClassUseFactory do
     it 'builds for a block' do
       trace_point = double(
         'TracePoint',
-        defined_class: nil,
-        self: '#<Callee:0x00005608b25a0080>',
+        defined_class: 'Simple',
         callee_id: 'do_something',
         path: '/file/path',
         lineno: 15,
+        self: Simple,
         event: :b_call
       )
 
@@ -56,28 +57,35 @@ describe Trace2::ClassUseFactory do
         stack_level: 39
       )
 
-      expect(class_use.name).to eq 'Callee'
+      expect(class_use.name).to eq 'Simple'
       expect(class_use.event).to eq :b_call
     end
   end
 
   describe '.class_name' do
-    it 'changes nothing for a method call' do
-      trace_point = instance_double(
-        'TracePoint', event: :call, defined_class: 'MyClass'
-      )
+    it 'parses a module name correctly' do
+      module MyModule; end
 
-      class_name = Trace2::ClassUseFactory.class_name(trace_point)
-
-      expect(class_name).to eq 'MyClass'
-    end
-
-    it 'parses the class name for a block' do
       trace_point = instance_double(
         'TracePoint',
         event: :b_call,
-        defined_class: nil,
-        self: '#<MyClass:0x00005608b25a0080>'
+        defined_class: 'MyModule',
+        self: MyModule
+      )
+
+      class_name = Trace2::ClassUseFactory.class_name(trace_point)
+
+      expect(class_name).to eq 'MyModule'
+    end
+
+    it 'parses a class name correctly' do
+      class MyClass; end
+
+      trace_point = instance_double(
+        'TracePoint',
+        event: :b_call,
+        defined_class: 'MyClass',
+        self: MyClass
       )
 
       class_name = Trace2::ClassUseFactory.class_name(trace_point)
@@ -85,14 +93,71 @@ describe Trace2::ClassUseFactory do
       expect(class_name).to eq 'MyClass'
     end
 
-    it 'returns self if name is not parseable' do
+    it 'parses a class name correctly even when it overrides .to_s' do
+      class MyClass
+        def self.to_s
+          raise 'Name will be parsed anyway'
+        end
+      end
+
       trace_point = instance_double(
-        'TracePoint', event: :b_call, defined_class: nil, self: 'main'
+        'TracePoint',
+        event: :b_call,
+        defined_class: 'MyClass',
+        self: MyClass
       )
 
       class_name = Trace2::ClassUseFactory.class_name(trace_point)
 
-      expect(class_name).to eq 'main'
+      expect(class_name).to eq 'MyClass'
+    end
+
+    it 'parses name correctly even if .to_s returns nil' do
+      class MyClass
+        def self.to_s
+          nil
+        end
+      end
+
+      trace_point = instance_double(
+        'TracePoint',
+        event: :b_call,
+        defined_class: 'MyClass',
+        self: MyClass
+      )
+
+      class_name = Trace2::ClassUseFactory.class_name(trace_point)
+
+      expect(class_name).to eq 'MyClass'
+    end
+
+    it 'returns name correctly for a class instance' do
+      class MyClass; end
+      class_instance = MyClass.new
+
+      trace_point = instance_double(
+        'TracePoint',
+        event: :b_call,
+        defined_class: 'MyClass',
+        self: class_instance
+      )
+
+      class_name = Trace2::ClassUseFactory.class_name(trace_point)
+
+      expect(class_name).to eq 'MyClass'
+    end
+
+    it 'parses <main> class' do
+      trace_point = instance_double(
+        'TracePoint',
+        event: :b_call,
+        defined_class: Kernel,
+        self: 'main'
+      )
+
+      class_name = Trace2::ClassUseFactory.class_name(trace_point)
+
+      expect(class_name).to eq 'Kernel'
     end
   end
 end
