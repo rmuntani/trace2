@@ -13,17 +13,6 @@ module Trace2
       )
     end
 
-    def self.trace_point_params(trace_point)
-      {
-        name: class_name(trace_point),
-        method: trace_point.callee_id.to_s,
-        path: trace_point.path,
-        line: trace_point.lineno,
-        event: trace_point.event
-      }
-    end
-    private_class_method :trace_point_params
-
     def self.class_name(trace_point)
       current_class = trace_point.self
       if trace_point.defined_class == Kernel
@@ -36,16 +25,37 @@ module Trace2
       parse_instance_name(current_class)
     end
 
-    def self.parse_class_name(current_class)
-      return current_class.name unless current_class.name.nil?
+    class << self
+      def trace_point_params(trace_point)
+        {
+          name: class_name(trace_point),
+          method: trace_point.callee_id.to_s,
+          path: trace_point.path,
+          line: trace_point.lineno,
+          event: trace_point.event
+        }
+      end
 
-      current_class.to_s.match(/^#<Class:(\S+)>$/)[1]
-    end
-    private_class_method :parse_class_name
+      def parse_class_name(current_class)
+        return current_class.name unless current_class.name.nil?
+        return "Anonymous#{current_class.class}" if anonymous? current_class
 
-    def self.parse_instance_name(current_class)
-      current_class.class.name
+        current_class.to_s.match(/^#<Class:(\S+)>$/)[1]
+      end
+
+      def anonymous?(current_class)
+        %w[Class Module].any? do |type|
+          current_class.to_s.match(anonymous_format(type))
+        end
+      end
+
+      def anonymous_format(type)
+        "#<#{type}:#{CLASS_POINTER_FORMAT}>"
+      end
+
+      def parse_instance_name(current_class)
+        current_class.class.name
+      end
     end
-    private_class_method :parse_instance_name
   end
 end

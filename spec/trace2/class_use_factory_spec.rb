@@ -159,5 +159,33 @@ describe Trace2::ClassUseFactory do
 
       expect(class_name).to eq 'Kernel'
     end
+
+    it 'parses anonymous classes' do
+      anonymous_class = Class.new
+      trace_point = instance_double(
+        'TracePoint',
+        event: :b_call,
+        defined_class: Class,
+        self: anonymous_class
+      )
+
+      class_name = Trace2::ClassUseFactory.class_name(trace_point)
+
+      expect(class_name).to eq 'AnonymousClass'
+    end
+
+    it 'parses anonymous modules' do
+      anonymous_module = Module.new
+      trace_point = instance_double(
+        'TracePoint',
+        event: :b_call,
+        defined_class: Module,
+        self: anonymous_module
+      )
+
+      class_name = Trace2::ClassUseFactory.class_name(trace_point)
+
+      expect(class_name).to eq 'AnonymousModule'
+    end
   end
 end
