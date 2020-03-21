@@ -21,7 +21,7 @@ module Trace2
     private
 
     def parse_classes_uses
-      @relationship_parser.parse(@classes_uses).to_json
+      @relationship_parser.parse(@classes_uses)
     end
 
     def make_report_text(parsed_relationships)

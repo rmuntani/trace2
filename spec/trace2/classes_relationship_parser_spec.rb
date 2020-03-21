@@ -12,7 +12,7 @@ describe Trace2::ClassesRelationshipParser do
 
         parsed = Trace2::ClassesRelationshipParser.parse([class_use])
 
-        expect(parsed).to eq []
+        expect(parsed).to eq '[]'
       end
     end
 
@@ -35,7 +35,7 @@ describe Trace2::ClassesRelationshipParser do
         expect(parsed).to eq [
           { source: 'Caller', target: 'First' },
           { source: 'Caller', target: 'Second' }
-        ]
+        ].to_json
       end
     end
 
@@ -66,7 +66,7 @@ describe Trace2::ClassesRelationshipParser do
         expect(parsed).to eq [
           { source: 'FirstCaller', target: 'FirstCallee' },
           { source: 'SecondCaller', target: 'SecondCallee' }
-        ]
+        ].to_json
       end
     end
 
@@ -93,7 +93,7 @@ describe Trace2::ClassesRelationshipParser do
           { source: 'Caller', target: 'FirstCallee' },
           { source: 'FirstCallee', target: 'SecondCallee' },
           { source: 'SecondCallee', target: 'ThirdCallee' }
-        ]
+        ].to_json
       end
     end
 
@@ -143,7 +143,7 @@ describe Trace2::ClassesRelationshipParser do
           { source: '2_Caller', target: '3_1_Callee' },
           { source: '1_1_Callee', target: '1_2_Callee' },
           { source: '1_1_Callee', target: '2_2_Callee' }
-        ]
+        ].to_json
       end
     end
   end

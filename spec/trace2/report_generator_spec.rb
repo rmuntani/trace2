@@ -14,7 +14,7 @@ describe Trace2::ReportGenerator do
       parsed_relationship = [{ caller: 'Caller', callee: 'Callee' }]
       relationship_parser = class_double(
         'Trace2::ClassesRelationshipParser',
-        parse: parsed_relationship
+        parse: parsed_relationship.to_json
       )
 
       report_generator = Trace2::ReportGenerator.new(
