@@ -11,6 +11,10 @@ Dir.glob(File.join(PROJECT_ROOT, 'lib', 'trace2', '*.rb')).each do |file|
   require file
 end
 
+Dir.glob(File.join(PROJECT_ROOT, 'lib', 'trace2', 'relationship_parser', '*.rb')).each do |file|
+  require file
+end
+
 Dir.glob(File.join(PROJECT_ROOT, 'spec', 'fixtures', '*.rb')).each do |file|
   require file
 end

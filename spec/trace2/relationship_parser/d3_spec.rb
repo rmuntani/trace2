@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Trace2::MermaidRelationshipParser do
+describe Trace2::RelationshipParser::D3 do
   describe '#parse' do
     context 'when there is no callees' do
       it 'generates an empty array' do
@@ -10,9 +10,9 @@ describe Trace2::MermaidRelationshipParser do
           'Trace2::ClassUse', callees: [], name: 'NoCallee'
         )
 
-        parsed = Trace2::MermaidRelationshipParser.parse([class_use])
+        parsed = Trace2::RelationshipParser::D3.parse([class_use])
 
-        expect(parsed).to eq ''
+        expect(parsed).to eq '[]'
       end
     end
 
@@ -30,10 +30,12 @@ describe Trace2::MermaidRelationshipParser do
           name: 'Caller'
         )
 
-        parsed = Trace2::MermaidRelationshipParser.parse([caller_class])
+        parsed = Trace2::RelationshipParser::D3.parse([caller_class])
 
-        expect(parsed).to eq "Caller-->First;\n"\
-          "Caller-->Second;\n"
+        expect(parsed).to eq [
+          { source: 'Caller', target: 'First' },
+          { source: 'Caller', target: 'Second' }
+        ].to_json
       end
     end
 
@@ -57,12 +59,14 @@ describe Trace2::MermaidRelationshipParser do
           name: 'SecondCaller'
         )
 
-        parsed = Trace2::MermaidRelationshipParser.parse(
+        parsed = Trace2::RelationshipParser::D3.parse(
           [first_caller, second_caller]
         )
 
-        expect(parsed).to eq "FirstCaller-->FirstCallee;\n"\
-          "SecondCaller-->SecondCallee;\n"
+        expect(parsed).to eq [
+          { source: 'FirstCaller', target: 'FirstCallee' },
+          { source: 'SecondCaller', target: 'SecondCallee' }
+        ].to_json
       end
     end
 
@@ -83,11 +87,13 @@ describe Trace2::MermaidRelationshipParser do
           name: 'Caller'
         )
 
-        parsed = Trace2::MermaidRelationshipParser.parse([caller_class])
+        parsed = Trace2::RelationshipParser::D3.parse([caller_class])
 
-        expect(parsed).to eq "Caller-->FirstCallee;\n"\
-          "FirstCallee-->SecondCallee;\n"\
-          "SecondCallee-->ThirdCallee;\n"
+        expect(parsed).to eq [
+          { source: 'Caller', target: 'FirstCallee' },
+          { source: 'FirstCallee', target: 'SecondCallee' },
+          { source: 'SecondCallee', target: 'ThirdCallee' }
+        ].to_json
       end
     end
 
@@ -125,17 +131,19 @@ describe Trace2::MermaidRelationshipParser do
           name: '2_Caller'
         )
 
-        parsed = Trace2::MermaidRelationshipParser.parse(
+        parsed = Trace2::RelationshipParser::D3.parse(
           [
             first_caller, second_caller
           ]
         )
 
-        expect(parsed).to eq "1_Caller-->1_1_Callee;\n"\
-          "2_Caller-->2_1_Callee;\n"\
-          "2_Caller-->3_1_Callee;\n"\
-          "1_1_Callee-->1_2_Callee;\n"\
-          "1_1_Callee-->2_2_Callee;\n"
+        expect(parsed).to eq [
+          { source: '1_Caller', target: '1_1_Callee' },
+          { source: '2_Caller', target: '2_1_Callee' },
+          { source: '2_Caller', target: '3_1_Callee' },
+          { source: '1_1_Callee', target: '1_2_Callee' },
+          { source: '1_1_Callee', target: '2_2_Callee' }
+        ].to_json
       end
     end
   end
