@@ -1,0 +1,4 @@
+clean
+clobber
+compile
+compile:trace2_c
