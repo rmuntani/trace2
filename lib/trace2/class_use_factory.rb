@@ -14,15 +14,7 @@ module Trace2
     end
 
     def self.class_name(trace_point)
-      current_class = trace_point.self
-      if trace_point.defined_class == Kernel
-        return trace_point.defined_class.to_s
-      end
-      if (current_class.is_a? Class) || (current_class.is_a? Module)
-        return parse_class_name(current_class)
-      end
-
-      parse_instance_name(current_class)
+      Trace2::NameFinder.class_name(trace_point.self)
     end
 
     class << self
@@ -34,27 +26,6 @@ module Trace2
           line: trace_point.lineno,
           event: trace_point.event
         }
-      end
-
-      def parse_class_name(current_class)
-        return current_class.name unless current_class.name.nil?
-        return "Anonymous#{current_class.class}" if anonymous? current_class
-
-        current_class.to_s.match(/^#<Class:(\S+)>$/)[1]
-      end
-
-      def anonymous?(current_class)
-        %w[Class Module].any? do |type|
-          current_class.to_s.match(anonymous_format(type))
-        end
-      end
-
-      def anonymous_format(type)
-        "#<#{type}:#{CLASS_POINTER_FORMAT}>"
-      end
-
-      def parse_instance_name(current_class)
-        current_class.class.name
       end
     end
   end

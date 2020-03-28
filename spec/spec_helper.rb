@@ -7,7 +7,7 @@ end
 
 PROJECT_ROOT = File.expand_path('..', __dir__)
 
-Dir.glob(File.join(PROJECT_ROOT, 'lib', 'trace2', '*.rb')).each do |file|
+Dir.glob(File.join(PROJECT_ROOT, 'lib', 'trace2', '*.*')).each do |file|
   require file
 end
 
