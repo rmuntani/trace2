@@ -7,3 +7,10 @@ trace2 is a gem to improve tracing of an application.
 ```
 rake compile && rspec
 ```
+
+## Running extension tests
+
+```
+scripts/test_extension.sh
+```
+

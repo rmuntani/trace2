@@ -3,6 +3,7 @@
 #include "ruby/ruby.h"
 #include "ruby/debug.h"
 #include "name_finder.h"
+#include "munit/munit.h"
 
 struct classes_list {
   struct classes_list *next;
@@ -24,8 +25,9 @@ struct classes_list *list_tail;
 
 VALUE event_processor;
 
-void pop_stack() {
+void pop_stack_to_list() {
   struct classes_list *new_node = malloc(sizeof(struct classes_list));
+
   if (list_head == NULL) {
     new_node->curr = top;
     new_node->next = NULL;
@@ -75,7 +77,7 @@ void update_classes_stack(VALUE trace_point) {
   if (event == RUBY_EVENT_CALL || event == RUBY_EVENT_B_CALL) {
     push_to_stack(tracearg);
   } else if (event == RUBY_EVENT_RETURN || event == RUBY_EVENT_B_RETURN) {
-    pop_stack();
+    pop_stack_to_list();
   }
 }
 
@@ -91,7 +93,7 @@ void process_event(VALUE self, VALUE trace_point) {
 }
 
 void aggregate_uses(VALUE self) {
-  while (top != NULL) pop_stack();
+  while (top != NULL) pop_stack_to_list();
 }
 
 /* VALUE *has_name(VALUE self, VALUE name_str) {
