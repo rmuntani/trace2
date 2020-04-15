@@ -1,5 +1,6 @@
 #include "../munit/munit.h"
 #include "event_processor.h"
+#include "test_helpers.h"
 
 extern struct classes_stack *top;
 extern struct classes_list *list_head;
@@ -14,16 +15,6 @@ void clear_list() {
     free(free_node);
   }
   free(list_tail);
-}
-
-void clear_stack() {
-  struct classes_stack *free_top;
-
-  while (top) {
-    free_top = top;
-    top = top->prev;
-    free(free_top);
-  }
 }
 
 static void* 
@@ -75,6 +66,8 @@ pop_stack_to_list_empty_head(const MunitParameter params[], void* user_data_or_f
   munit_assert_ptr_equal(original_top, list_head->curr);
   munit_assert_ptr_equal(list_head->next, NULL);
   munit_assert_ptr_equal(list_tail, NULL);
+
+  return MUNIT_OK;
 }
 
 MunitResult 
@@ -87,6 +80,8 @@ pop_stack_to_list_empty_tail(const MunitParameter params[], void* user_data_or_f
   munit_assert_ptr_equal(list_head->next, list_tail);
   munit_assert_ptr_equal(list_tail->curr, original_top);
   munit_assert_ptr_equal(list_tail->next, NULL);
+
+  return MUNIT_OK;
 }
 
 MunitResult 
@@ -101,11 +96,13 @@ pop_stack_to_list_full(const MunitParameter params[], void* user_data_or_fixture
   munit_assert_ptr_not_equal(original_tail, list_tail);
   munit_assert_ptr_equal(list_tail->curr, original_top);
   munit_assert_ptr_equal(list_tail->next, NULL);
+
+  return MUNIT_OK;
 }
 
 MunitTest pop_stack_to_list_tests[] = {
   {
-    " when classes list head is empty",
+    "when classes list head is empty",
     pop_stack_to_list_empty_head,
     pop_stack_to_list_setup_empty_head,
     pop_stack_to_list_tear_down,
@@ -113,7 +110,7 @@ MunitTest pop_stack_to_list_tests[] = {
     NULL
   },
   {
-    " when classes list tail is not empty",
+    "when classes list tail is not empty",
     pop_stack_to_list_empty_tail,
     pop_stack_to_list_setup_empty_tail,
     pop_stack_to_list_tear_down,
@@ -121,7 +118,7 @@ MunitTest pop_stack_to_list_tests[] = {
     NULL
   },
   {
-    " when classes list head and tail exists",
+    "when classes list head and tail exists",
     pop_stack_to_list_full,
     pop_stack_to_list_setup,
     pop_stack_to_list_tear_down,
@@ -132,7 +129,7 @@ MunitTest pop_stack_to_list_tests[] = {
 };
 
 const MunitSuite pop_stack_to_list_suite = {
-  "pop_stack_to_list",
+  "pop_stack_to_list ",
   pop_stack_to_list_tests,
   NULL, 
   1,

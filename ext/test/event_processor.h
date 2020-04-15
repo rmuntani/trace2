@@ -5,7 +5,7 @@ struct classes_list {
   struct classes_stack *curr;
 } classes_list;
 
-struct classes_stack {
+typedef struct classes_stack {
   const char* name;
   const char* method;
   int lineno;
@@ -20,6 +20,7 @@ struct classes_list *list_tail;
 
 VALUE event_processor;
 
+classes_stack *pop(classes_stack**);
 void pop_stack_to_list();
 void insert_callee(struct classes_stack*, struct classes_stack*);
 void push_to_stack(rb_trace_arg_t*);

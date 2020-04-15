@@ -4,3 +4,4 @@ trace2-*.gem
 tmp
 lib/trace2/trace2_c.so
 learnings.c
+test.o

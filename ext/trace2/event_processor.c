@@ -10,7 +10,7 @@ struct classes_list {
   struct classes_stack *curr;
 } classes_list;
 
-struct classes_stack {
+typedef struct classes_stack {
   const char* name;
   const char* method;
   int lineno;
@@ -24,6 +24,19 @@ struct classes_list *list_head;
 struct classes_list *list_tail;
 
 VALUE event_processor;
+
+classes_stack *pop(classes_stack **top) {
+  if (*top == NULL) {
+    return NULL;
+  } 
+  else {
+    classes_stack *popped_value = *top;
+
+    *top = (*top)->prev;
+
+    return popped_value;
+  }
+}
 
 void pop_stack_to_list() {
   struct classes_list *new_node = malloc(sizeof(struct classes_list));
