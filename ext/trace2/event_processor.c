@@ -5,7 +5,7 @@
 #include "name_finder.h"
 #include "munit/munit.h"
 
-struct classes_list {
+typedef struct classes_list {
   struct classes_list *next;
   struct classes_stack *curr;
 } classes_list;
@@ -28,13 +28,28 @@ VALUE event_processor;
 classes_stack *pop(classes_stack **top) {
   if (*top == NULL) {
     return NULL;
-  } 
+  }
   else {
     classes_stack *popped_value = *top;
 
     *top = (*top)->prev;
 
     return popped_value;
+  }
+}
+
+void *insert(classes_list **head, classes_list **tail, classes_stack *top) {
+  classes_list *new_node = malloc(sizeof(classes_list));
+  new_node->curr = pop(&top);
+  new_node->next = NULL;
+  if (*head == NULL) {
+    *head = new_node;
+  } else if (*tail == NULL) {
+    (*head)->next = new_node;
+    *tail = new_node;
+  } else {
+    (*tail)->next = new_node;
+    *tail = (*tail)->next;
   }
 }
 

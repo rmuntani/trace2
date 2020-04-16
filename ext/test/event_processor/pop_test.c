@@ -26,7 +26,7 @@ pop_test(const MunitParameter params[], void* user_data_or_fixture) {
 
   popped = pop(&top);
 
-  munit_assert_ptr(popped, ==, original_top);
+  munit_assert_ptr_equal(popped, original_top);
   munit_assert_ptr_equal(top, NULL);
 
   return MUNIT_OK;

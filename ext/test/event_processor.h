@@ -1,6 +1,6 @@
 #include "ruby.h"
 
-struct classes_list {
+typedef struct classes_list {
   struct classes_list *next;
   struct classes_stack *curr;
 } classes_list;
@@ -21,6 +21,7 @@ struct classes_list *list_tail;
 VALUE event_processor;
 
 classes_stack *pop(classes_stack**);
+void *insert(classes_list **head, classes_list **tail, classes_stack *top);
 void pop_stack_to_list();
 void insert_callee(struct classes_stack*, struct classes_stack*);
 void push_to_stack(rb_trace_arg_t*);

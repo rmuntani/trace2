@@ -8,6 +8,7 @@ gcc -g -I ext/test \
        ext/test/ruby.c \
        ext/test/event_processor/pop_stack_to_list_test.c \
        ext/test/event_processor/pop_test.c \
+       ext/test/event_processor/insert_test.c \
        ext/test/event_processor/test_helpers.c \
        ext/test/test.c -o test.o
 
@@ -16,4 +17,3 @@ echo 'Running tests...'
 
 echo 'Removing compiled file...'
 rm test.o
-

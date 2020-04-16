@@ -2,21 +2,6 @@
 #include "event_processor.h"
 #include "test_helpers.h"
 
-extern struct classes_stack *top;
-extern struct classes_list *list_head;
-extern struct classes_list *list_tail;
-
-void clear_list() {
-  struct classes_list *free_node;
-
-  while(list_head) {
-    free_node = list_head;     
-    list_head = list_head->next;
-    free(free_node);
-  }
-  free(list_tail);
-}
-
 static void* 
 pop_stack_to_list_setup_empty_head(const MunitParameter params[], void* user_data) {
   list_head = NULL;
