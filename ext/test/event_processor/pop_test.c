@@ -2,7 +2,7 @@
 #include "event_processor.h"
 #include "test_helpers.h"
 
-extern classes_stack *top;
+classes_stack *top;
 
 static void
 pop_tear_down(void *fixture) {
@@ -11,8 +11,12 @@ pop_tear_down(void *fixture) {
 
 static void* 
 pop_setup(const MunitParameter params[], void* user_data) {
+  class_use *class_use = malloc(sizeof(class_use));
   top = malloc(sizeof(classes_stack)); 
+  top->class_use = class_use;
   top->prev = NULL;
+
+  return class_use;
 }
 
 static void* 
@@ -21,12 +25,12 @@ pop_null_setup(const MunitParameter params[], void* user_data) {
 }
 
 MunitResult 
-pop_test(const MunitParameter params[], void* user_data_or_fixture) {
-  classes_stack *popped, *original_top = top;
+pop_test(const MunitParameter params[], void* class_use_setup) {
+  class_use *popped_class_use;
 
-  popped = pop(&top);
+  popped_class_use = pop(&top);
 
-  munit_assert_ptr_equal(popped, original_top);
+  munit_assert_ptr_equal(popped_class_use, (class_use*)class_use_setup);
   munit_assert_ptr_equal(top, NULL);
 
   return MUNIT_OK;
@@ -34,12 +38,12 @@ pop_test(const MunitParameter params[], void* user_data_or_fixture) {
 
 MunitResult
 pop_null_test(const MunitParameter params[], void* user_data_or_fixture) {
-  classes_stack *popped, *original_top = top;
+  class_use *popped_class_use;
 
-  popped = pop(&top);
+  popped_class_use = pop(&top);
 
   munit_assert_ptr_equal(top, NULL);
-  munit_assert_ptr_equal(popped, NULL);
+  munit_assert_ptr_equal(popped_class_use, NULL);
 
   return MUNIT_OK;
 }
@@ -65,7 +69,7 @@ MunitTest pop_tests[] = {
 };
 
 const MunitSuite pop_suite = {
-  "pop_stack ",
+  "pop ",
   pop_tests,
   NULL, 
   1,

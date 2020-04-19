@@ -16,15 +16,15 @@ insert_null_head_setup(const MunitParameter params[], void* user_data) {
   list_head = NULL;
   list_tail = NULL;
 
-  return malloc(sizeof(classes_stack));
+  return malloc(sizeof(class_use));
 }
 
 MunitResult
-insert_null_head_test(const MunitParameter params[], void* user_data_or_fixture) {
+insert_null_head_test(const MunitParameter params[], void* class_use_fixture) {
 
-  insert(&list_head, &list_tail, (classes_stack*)user_data_or_fixture);
+  insert(&list_head, &list_tail, (class_use*)class_use_fixture);
 
-  munit_assert_ptr_equal(list_head->curr, user_data_or_fixture);
+  munit_assert_ptr_equal(list_head->class_use, (class_use*)class_use_fixture);
   munit_assert_ptr_equal(list_tail, NULL);
 
   return MUNIT_OK;
@@ -33,19 +33,19 @@ insert_null_head_test(const MunitParameter params[], void* user_data_or_fixture)
 static void*
 insert_null_tail_setup(const MunitParameter params[], void* user_data) {
   list_head = malloc(sizeof(classes_list));
-  list_head->curr = malloc(sizeof(classes_stack));
+  list_head->class_use = malloc(sizeof(class_use));
   list_tail = NULL;
 
-  return malloc(sizeof(classes_stack));
+  return malloc(sizeof(class_use));
 }
 
 MunitResult
-insert_null_tail_test(const MunitParameter params[], void* user_data_or_fixture) {
+insert_null_tail_test(const MunitParameter params[], void* class_use_fixture) {
 
-  insert(&list_head, &list_tail, (classes_stack*)user_data_or_fixture);
+  insert(&list_head, &list_tail, (class_use*)class_use_fixture);
 
   munit_assert_ptr_equal(list_head->next, list_tail);
-  munit_assert_ptr_equal(list_tail->curr, user_data_or_fixture);
+  munit_assert_ptr_equal(list_tail->class_use, class_use_fixture);
   munit_assert_ptr_equal(list_tail->next, NULL);
 
   return MUNIT_OK;
@@ -54,25 +54,25 @@ insert_null_tail_test(const MunitParameter params[], void* user_data_or_fixture)
 static void*
 insert_setup(const MunitParameter params[], void* user_data) {
   list_head = malloc(sizeof(classes_list));
-  list_head->curr = malloc(sizeof(classes_stack));
+  list_head->class_use = malloc(sizeof(class_use));
 
   list_tail = malloc(sizeof(classes_list));
-  list_tail->curr = malloc(sizeof(classes_stack));
+  list_tail->class_use = malloc(sizeof(class_use));
 
   list_head->next = list_tail;
 
-  return malloc(sizeof(classes_stack));
+  return malloc(sizeof(class_use));
 }
 
 MunitResult
-insert_test(const MunitParameter params[], void* user_data_or_fixture) {
+insert_test(const MunitParameter params[], void* class_use_fixture) {
 
-  insert(&list_head, &list_tail, (classes_stack*)user_data_or_fixture);
+  insert(&list_head, &list_tail, (class_use*)class_use_fixture);
 
   munit_assert_ptr_not_equal(list_head->next, list_tail);
-  munit_assert_ptr_not_equal(list_head->next->curr, list_tail->curr);
+  munit_assert_ptr_not_equal(list_head->next->class_use, list_tail->class_use);
   munit_assert_ptr_equal(list_head->next->next, list_tail);
-  munit_assert_ptr_equal(list_tail->curr, user_data_or_fixture);
+  munit_assert_ptr_equal(list_tail->class_use, class_use_fixture);
   munit_assert_ptr_equal(list_tail->next, NULL);
 
   return MUNIT_OK;

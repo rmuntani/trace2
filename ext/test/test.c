@@ -1,7 +1,6 @@
 #define MUNIT_ENABLE_ASSERT_ALIASES
 #include "munit/munit.h"
 #include "event_processor.h"
-#include "event_processor/pop_stack_to_list_test.h"
 #include "event_processor/pop_test.h"
 #include "event_processor/insert_test.h"
 
@@ -10,7 +9,7 @@ extern const MunitSuite pop_suite;
 
 void main(int argc, const char* argv[]) {
   MunitSuite suites[] = {
-    pop_suite, pop_stack_to_list_suite, insert_suite, NULL
+    pop_suite, insert_suite, NULL
   };
 
   MunitSuite suite = {
