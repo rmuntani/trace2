@@ -14,7 +14,7 @@ typedef struct class_use {
   int lineno;
   const char* path;
   struct class_use* caller;
-  struct classes_list* callee;
+  struct classes_list* head_callee;
   struct classes_list* tail_callee;
 } class_use;
 
@@ -59,6 +59,11 @@ void *insert(classes_list **head, classes_list **tail, class_use *class_use) {
     (*tail)->next = new_node;
     *tail = (*tail)->next;
   }
+}
+
+void add_callee_to_caller(class_use **callee, class_use **caller) {
+  (*callee)->caller = *caller;
+  insert(&(*caller)->head_callee, &(*caller)->tail_callee, *callee);
 }
 
 //

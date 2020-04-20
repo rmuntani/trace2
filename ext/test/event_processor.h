@@ -8,7 +8,7 @@ typedef struct class_use {
   int lineno;
   const char* path;
   struct class_use* caller;
-  struct classes_list* callee;
+  struct classes_list* head_callee;
   struct classes_list* tail_callee;
 } class_use;
 
@@ -29,9 +29,4 @@ VALUE event_processor;
 
 class_use *pop(classes_stack**);
 void *insert(classes_list **head, classes_list **tail, class_use *top);
-void pop_stack_to_list();
-void insert_callee(struct classes_stack*, struct classes_stack*);
-void push_to_stack(rb_trace_arg_t*);
-void update_classes_stack(VALUE);
-void process_event(VALUE, VALUE) ;
-void aggregate_uses(VALUE);
+void add_callee_to_caller(class_use **callee, class_use **caller);
