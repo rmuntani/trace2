@@ -11,8 +11,8 @@ struct classes_list;
 typedef struct class_use {
   const char* name;
   const char* method;
-  int lineno;
   const char* path;
+  int lineno;
   struct class_use* caller;
   struct classes_list* head_callee;
   struct classes_list* tail_callee;
@@ -28,8 +28,9 @@ typedef struct classes_stack {
   class_use *class_use;
 } classes_stack;
 
-struct classes_list *list_head;
-struct classes_list *list_tail;
+classes_list *list_head;
+classes_list *list_tail;
+classes_stack *top;
 
 VALUE event_processor;
 
@@ -46,10 +47,11 @@ class_use *pop(classes_stack **top) {
   }
 }
 
-void *insert(classes_list **head, classes_list **tail, class_use *class_use) {
+void insert(classes_list **head, classes_list **tail, class_use *class_use) {
   classes_list *new_node = malloc(sizeof(classes_list));
   new_node->class_use = class_use;
   new_node->next = NULL;
+
   if (*head == NULL) {
     *head = new_node;
   } else if (*tail == NULL) {
@@ -61,46 +63,56 @@ void *insert(classes_list **head, classes_list **tail, class_use *class_use) {
   }
 }
 
+void push(classes_stack **top, class_use *new_use) {
+  classes_stack *new_top = malloc(sizeof(classes_stack));
+
+  new_top->prev = *top;
+  new_top->class_use = new_use;
+
+  *top = new_top;
+}
+
 void add_callee_to_caller(class_use **callee, class_use **caller) {
   (*callee)->caller = *caller;
   insert(&(*caller)->head_callee, &(*caller)->tail_callee, *callee);
 }
 
-//
-//void insert_callee(struct classes_stack *top, struct classes_stack *new_top) {
-//  struct classes_list *new_callee = malloc(sizeof(struct classes_list));
-//  if (top == NULL) {
-//    new_callee->next = NULL;
-//  } else {
-//    new_callee->next = top->callees;
-//    top->callees = new_callee;
-//  }
-//  new_callee->class_use = new_top;
-//}
-//
-//void push_to_stack(rb_trace_arg_t *tracearg) {
-//  class_ *new_top = malloc(sizeof(struct classes_stack));
-//  VALUE path;
-//  new_top->name = class_name(rb_tracearg_self(tracearg));
-//  path = rb_tracearg_path(tracearg);
-//  new_top->path = rb_string_value_ptr(&path);
-//  new_top->method = rb_id2name(rb_tracearg_callee_id(tracearg));
-//  new_top->lineno = FIX2INT(rb_tracearg_lineno(tracearg));
-//  new_top->prev = top;
-//  insert_callee(top, new_top);
-//  top = new_top;
-//}
-//
-//void update_classes_stack(VALUE trace_point) {
-//  rb_trace_arg_t *tracearg = rb_tracearg_from_tracepoint(trace_point);
-//  rb_event_flag_t event = rb_tracearg_event_flag(tracearg);
-//
-//  if (event == RUBY_EVENT_CALL || event == RUBY_EVENT_B_CALL) {
-//    push_to_stack(tracearg);
-//  } else if (event == RUBY_EVENT_RETURN || event == RUBY_EVENT_B_RETURN) {
-//    // pop_stack_to_list();
-//  }
-//}
+class_use *build_class_use(rb_trace_arg_t *tracearg, class_use **caller) {
+  class_use *new_use = malloc(sizeof(class_use));
+  VALUE path = rb_tracearg_path(tracearg);
+
+  new_use->caller = NULL;
+  new_use->head_callee = NULL;
+  new_use->tail_callee = NULL;
+
+  new_use->name = class_name(rb_tracearg_self(tracearg));
+  new_use->path = rb_string_value_ptr(&path);
+  new_use->method = rb_id2name(rb_tracearg_callee_id(tracearg));
+  new_use->lineno = FIX2INT(rb_tracearg_lineno(tracearg));
+
+  add_callee_to_caller(&new_use, caller);
+
+  return new_use;
+}
+
+void build_classes_stack(rb_trace_arg_t *tracearg) {
+  class_use *new_use;
+
+  new_use = build_class_use(tracearg, &top->class_use);
+  push(&top, new_use);
+}
+
+void process_event(VALUE self, VALUE trace_point) {
+  rb_trace_arg_t *tracearg = rb_tracearg_from_tracepoint(trace_point);
+  rb_event_flag_t event = rb_tracearg_event_flag(tracearg);
+
+  if (event == RUBY_EVENT_CALL || event == RUBY_EVENT_B_CALL) {
+    // push_to_stack(tracearg);
+  } else if (event == RUBY_EVENT_RETURN || event == RUBY_EVENT_B_RETURN) {
+    // pop_stack_to_list();
+  }
+}
+// TOP must be initialized
 //
 //
 ///* void print(struct classes_stack *top) {
@@ -109,9 +121,6 @@ void add_callee_to_caller(class_use **callee, class_use **caller) {
 //  rb_io_puts(1, puts, rb_stdout);
 //} */
 //
-//void process_event(VALUE self, VALUE trace_point) {
-//  update_classes_stack(trace_point);
-//}
 //
 //void aggregate_uses(VALUE self) {
 //  // while (top != NULL) pop_stack_to_list();

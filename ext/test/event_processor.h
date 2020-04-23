@@ -22,11 +22,13 @@ typedef struct classes_stack {
   class_use *class_use;
 } classes_stack;
 
-struct classes_list *list_head;
-struct classes_list *list_tail;
+classes_list *list_head;
+classes_list *list_tail;
+classes_stack *top;
 
 VALUE event_processor;
 
 class_use *pop(classes_stack**);
-void *insert(classes_list **head, classes_list **tail, class_use *top);
+void insert(classes_list **head, classes_list **tail, class_use *top);
 void add_callee_to_caller(class_use **callee, class_use **caller);
+void push(classes_stack **top, class_use *new_use);

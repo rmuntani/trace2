@@ -4,13 +4,16 @@
 #include "event_processor/pop_test.h"
 #include "event_processor/insert_test.h"
 #include "event_processor/add_callee_to_caller_test.h"
+#include "event_processor/push_test.h"
 
 extern const MunitSuite pop_stack_to_list_suite;
 extern const MunitSuite pop_suite;
 
 void main(int argc, const char* argv[]) {
   MunitSuite suites[] = {
-    pop_suite, insert_suite, add_callee_to_caller_suite, NULL
+    pop_suite, insert_suite,
+    add_callee_to_caller_suite, push_suite,
+    NULL
   };
 
   MunitSuite suite = {
