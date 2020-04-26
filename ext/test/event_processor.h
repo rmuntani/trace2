@@ -29,6 +29,8 @@ classes_stack *top;
 VALUE event_processor;
 
 class_use *pop(classes_stack**);
-void insert(classes_list **head, classes_list **tail, class_use *top);
-void add_callee_to_caller(class_use **callee, class_use **caller);
-void push(classes_stack **top, class_use *new_use);
+void insert(classes_list**, classes_list**, class_use*);
+void add_callee_to_caller(class_use**, class_use**);
+void push(classes_stack**, class_use*);
+void pop_stack_to_list(classes_stack**, classes_list**, classes_list**);
+void push_new_class_use(rb_trace_arg_t*, classes_stack**);

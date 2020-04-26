@@ -1,0 +1,1 @@
+const MunitSuite push_new_class_use_suite;

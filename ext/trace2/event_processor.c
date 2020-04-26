@@ -3,7 +3,7 @@
 #include "ruby/ruby.h"
 #include "ruby/debug.h"
 #include "name_finder.h"
-// TODO: remove this eventually
+// TODO: eventually remove this header
 #include "munit/munit.h"
 
 struct classes_list;
@@ -77,7 +77,7 @@ void add_callee_to_caller(class_use **callee, class_use **caller) {
   insert(&(*caller)->head_callee, &(*caller)->tail_callee, *callee);
 }
 
-class_use *build_class_use(rb_trace_arg_t *tracearg, class_use **caller) {
+__attribute__((weak)) class_use *build_class_use(rb_trace_arg_t *tracearg, class_use **caller) {
   class_use *new_use = malloc(sizeof(class_use));
   VALUE path = rb_tracearg_path(tracearg);
 
@@ -95,11 +95,18 @@ class_use *build_class_use(rb_trace_arg_t *tracearg, class_use **caller) {
   return new_use;
 }
 
-void build_classes_stack(rb_trace_arg_t *tracearg) {
-  class_use *new_use;
+void push_new_class_use(rb_trace_arg_t *tracearg, classes_stack **top) {
+  class_use *new_use, *last_use;
 
-  new_use = build_class_use(tracearg, &top->class_use);
-  push(&top, new_use);
+  last_use = (*top == NULL) ? NULL : &(*top)->class_use;
+  new_use = build_class_use(tracearg, last_use);
+
+  push(top, new_use);
+}
+
+void pop_stack_to_list(classes_stack **top, classes_list **list_head, classes_list **list_tail) {
+  class_use *last_use = pop(top);
+  insert(list_head, list_tail, last_use);
 }
 
 void process_event(VALUE self, VALUE trace_point) {
@@ -107,20 +114,12 @@ void process_event(VALUE self, VALUE trace_point) {
   rb_event_flag_t event = rb_tracearg_event_flag(tracearg);
 
   if (event == RUBY_EVENT_CALL || event == RUBY_EVENT_B_CALL) {
-    // push_to_stack(tracearg);
+    push_new_class_use(tracearg, &top);
   } else if (event == RUBY_EVENT_RETURN || event == RUBY_EVENT_B_RETURN) {
-    // pop_stack_to_list();
+    pop_stack_to_list(&top, &list_head, &list_tail);
   }
 }
-// TOP must be initialized
-//
-//
-///* void print(struct classes_stack *top) {
-//  VALUE* puts = malloc(sizeof(VALUE)*10);
-//  puts[0] = rb_sprintf("%"PRIsVALUE"", rb_str_new_cstr(top->name));
-//  rb_io_puts(1, puts, rb_stdout);
-//} */
-//
+
 //
 //void aggregate_uses(VALUE self) {
 //  // while (top != NULL) pop_stack_to_list();

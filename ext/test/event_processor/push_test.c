@@ -10,11 +10,6 @@ push_tear_down(void *fixture) {
 }
 
 static void*
-empty_push_setup(const MunitParameter params[], void* user_data) {
-  return malloc(sizeof(class_use));
-}
-
-static void*
 push_setup(const MunitParameter params[], void* user_data) {
   top = malloc(sizeof(classes_stack));
   top->prev = NULL;
@@ -33,6 +28,12 @@ push_test(const MunitParameter params[], void* class_use_setup) {
   munit_assert_ptr_equal(top->prev, original_stack);
 
   return MUNIT_OK;
+}
+
+static void*
+empty_push_setup(const MunitParameter params[], void* user_data) {
+  top = NULL;
+  return malloc(sizeof(class_use));
 }
 
 MunitResult
