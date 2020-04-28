@@ -4,7 +4,7 @@
 #include "ruby/debug.h"
 #include "name_finder.h"
 // TODO: eventually remove this header
-#include "munit/munit.h"
+// #include "munit/munit.h"
 
 struct classes_list;
 
@@ -73,8 +73,12 @@ void push(classes_stack **top, class_use *new_use) {
 }
 
 void add_callee_to_caller(class_use **callee, class_use **caller) {
-  (*callee)->caller = *caller;
-  insert(&(*caller)->head_callee, &(*caller)->tail_callee, *callee);
+  if (*callee && caller && *caller) {
+    (*callee)->caller = *caller;
+    insert(&(*caller)->head_callee, &(*caller)->tail_callee, *callee);
+  } else if (*callee) {
+    (*callee)->caller = NULL;
+  }
 }
 
 __attribute__((weak)) class_use *build_class_use(rb_trace_arg_t *tracearg, class_use **caller) {
@@ -84,6 +88,7 @@ __attribute__((weak)) class_use *build_class_use(rb_trace_arg_t *tracearg, class
   new_use->caller = NULL;
   new_use->head_callee = NULL;
   new_use->tail_callee = NULL;
+
 
   new_use->name = class_name(rb_tracearg_self(tracearg));
   new_use->path = rb_string_value_ptr(&path);
@@ -118,31 +123,39 @@ void process_event(VALUE self, VALUE trace_point) {
   } else if (event == RUBY_EVENT_RETURN || event == RUBY_EVENT_B_RETURN) {
     pop_stack_to_list(&top, &list_head, &list_tail);
   }
+
 }
 
-//
-//void aggregate_uses(VALUE self) {
-//  // while (top != NULL) pop_stack_to_list();
-//}
-//
-///* VALUE *has_name(VALUE self, VALUE name_str) {
-//  struct classes_list *curr = list_head;
-//  char* str = StringValueCStr(name_str);
-//  while (curr != NULL) {
-//    if (strcmp(curr->curr->name, str) == 0) {
-//      return rb_cTrueClass;
-//    }
-//    curr = curr->next;
-//  }
-//  return rb_cFalseClass;
-//} */
-//
-//void init_event_processor(VALUE trace2) {
-//  top = NULL;
-//  list_head = NULL;
-//  list_tail = NULL;
-//  event_processor = rb_define_class_under(trace2, "EventProcessorC", rb_cObject);
-//  rb_define_method(event_processor, "process_event", process_event, 1);
-//  rb_define_method(event_processor, "aggregate_uses", aggregate_uses, 0);
-//  /* rb_define_method(event_processor, "has_name", has_name, 1); */
-//}
+void aggregate_uses(VALUE self) {
+  while (top != NULL) pop_stack_to_list(&top, &list_head, &list_tail);
+}
+
+void list_classes_uses(VALUE self) {
+
+}
+
+/* VALUE *has_name(VALUE self, VALUE name_str) {
+  struct classes_list *curr = list_head;
+  char* str = StringValueCStr(name_str);
+  while (curr != NULL) {
+    if (strcmp(curr->curr->name, str) == 0) {
+      return rb_cTrueClass;
+    }
+    curr = curr->next;
+  }
+  return rb_cFalseClass;
+} */
+
+void initialize(VALUE self, VALUE filters) {}
+
+void init_event_processor(VALUE trace2) {
+  top = NULL;
+  list_head = NULL;
+  list_tail = NULL;
+
+  event_processor = rb_define_class_under(trace2, "EventProcessorC", rb_cObject);
+  rb_define_method(event_processor, "initialize", initialize, 1);
+  rb_define_method(event_processor, "process_event", process_event, 1);
+  rb_define_method(event_processor, "aggregate_uses", aggregate_uses, 0);
+  rb_define_method(event_processor, "classes_use", list_classes_uses, 0);
+}

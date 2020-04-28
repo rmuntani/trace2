@@ -9,9 +9,10 @@ class_use *build_class_use(rb_trace_arg_t *tracearg, class_use **caller) {
 
   if (caller != NULL) {
     new_use->caller = *caller;
+  } else {
+    new_use->caller = NULL;
   }
 
-  munit_log(MUNIT_LOG_WARNING, "OK");
   return new_use;
 }
 
@@ -21,7 +22,7 @@ push_new_class_use_tear_down(void *fixture) {
   clear_list();
 }
 
-static void* 
+static void*
 push_new_class_use_setup(const MunitParameter params[], void* user_data) {
   top = malloc(sizeof(classes_stack));
   top->class_use = malloc(sizeof(class_use));
@@ -33,7 +34,7 @@ push_new_class_use_empty_stack_setup(const MunitParameter params[], void* user_d
   top = NULL;
 }
 
-MunitResult 
+MunitResult
 push_new_class_use_test(const MunitParameter params[], void* class_use_setup) {
   class_use *original_class_use = top->class_use;
   classes_stack *original_top = top;
@@ -48,7 +49,7 @@ push_new_class_use_test(const MunitParameter params[], void* class_use_setup) {
   return MUNIT_OK;
 }
 
-MunitResult 
+MunitResult
 push_new_class_use_empty_stack_test(const MunitParameter params[], void* class_use_setup) {
   push_new_class_use(NULL, &top);
 
@@ -82,7 +83,7 @@ MunitTest push_new_class_use_tests[] = {
 const MunitSuite push_new_class_use_suite = {
   "push_new_class_use ",
   push_new_class_use_tests,
-  NULL, 
+  NULL,
   1,
   MUNIT_SUITE_OPTION_NONE
 };
