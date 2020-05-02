@@ -1,6 +1,5 @@
 #include "../munit/munit.h"
 #include "event_processor.h"
-#include "test_helpers.h"
 
 extern classes_stack *top;
 
@@ -18,8 +17,7 @@ class_use *build_class_use(rb_trace_arg_t *tracearg, class_use **caller) {
 
 static void
 push_new_class_use_tear_down(void *fixture) {
-  clear_stack();
-  clear_list();
+  clear_stack(&top);
 }
 
 static void*

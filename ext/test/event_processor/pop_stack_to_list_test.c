@@ -1,6 +1,5 @@
 #include "../munit/munit.h"
 #include "event_processor.h"
-#include "test_helpers.h"
 
 extern classes_stack *top;
 extern classes_list *list_head;
@@ -8,11 +7,11 @@ extern classes_list *list_tail;
 
 static void
 pop_stack_to_list_tear_down(void *fixture) {
-  clear_stack();
-  clear_list();
+  clear_stack(&top);
+  clear_list(&list_head, &list_tail);
 }
 
-static void* 
+static void*
 pop_stack_to_list_setup(const MunitParameter params[], void* user_data) {
   list_head = malloc(sizeof(classes_stack));
   list_head->next = NULL;
@@ -24,10 +23,10 @@ pop_stack_to_list_setup(const MunitParameter params[], void* user_data) {
   top->prev = NULL;
 }
 
-MunitResult 
+MunitResult
 pop_stack_to_list_test(const MunitParameter params[], void* class_use_setup) {
   class_use *original_class_use = top->class_use;
-  
+
   pop_stack_to_list(&top, &list_head, &list_tail);
 
   munit_assert_ptr_equal(top, NULL);
@@ -52,7 +51,7 @@ MunitTest pop_stack_to_list_tests[] = {
 const MunitSuite pop_stack_to_list_suite = {
   "pop_stack_to_list ",
   pop_stack_to_list_tests,
-  NULL, 
+  NULL,
   1,
   MUNIT_SUITE_OPTION_NONE
 };

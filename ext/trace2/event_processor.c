@@ -134,6 +134,29 @@ void list_classes_uses(VALUE self) {
 
 }
 
+void clear_stack(classes_stack **top) {
+  classes_stack *curr_top = (*top);
+  while(curr_top != NULL) {
+    (*top) = (*top)->prev;
+    free(curr_top);
+    curr_top = *top;
+  }
+  *top = NULL;
+}
+
+void clear_list(classes_list **head, classes_list **tail) {
+  classes_list *curr_node = (*head);
+  while(curr_node != *tail) {
+    (*head) = (*head)->next;
+    free(curr_node);
+    curr_node = *head;
+  }
+  if (*tail != NULL) {
+    free(*tail);
+  }
+  *head = NULL;
+  *tail = NULL;
+}
 /* VALUE *has_name(VALUE self, VALUE name_str) {
   struct classes_list *curr = list_head;
   char* str = StringValueCStr(name_str);

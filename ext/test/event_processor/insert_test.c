@@ -1,6 +1,5 @@
 #include "../munit/munit.h"
 #include "event_processor.h"
-#include "test_helpers.h"
 
 extern classes_stack *top;
 extern classes_list *list_head;
@@ -8,7 +7,8 @@ extern classes_list *list_tail;
 
 static void
 insert_tear_down(void *fixture) {
-  clear_list();
+  clear_list(&list_head, &list_tail);
+  clear_stack(&top);
 }
 
 static void*

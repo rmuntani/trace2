@@ -3,7 +3,6 @@
  * event_processor's insert. */
 #include "../munit/munit.h"
 #include "event_processor.h"
-#include "test_helpers.h"
 
 class_use *caller;
 class_use *callee;

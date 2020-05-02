@@ -34,3 +34,5 @@ void add_callee_to_caller(class_use**, class_use**);
 void push(classes_stack**, class_use*);
 void pop_stack_to_list(classes_stack**, classes_list**, classes_list**);
 void push_new_class_use(rb_trace_arg_t*, classes_stack**);
+void clear_stack(classes_stack **top);
+void clear_list(classes_list **head, classes_list **tail);

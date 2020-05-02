@@ -1,12 +1,11 @@
 #include "../munit/munit.h"
 #include "event_processor.h"
-#include "test_helpers.h"
 
 classes_stack *top;
 
 static void
 push_tear_down(void *fixture) {
-  clear_stack();
+  clear_stack(&top);
 }
 
 static void*

@@ -1,30 +1,29 @@
 #include "../munit/munit.h"
 #include "event_processor.h"
-#include "test_helpers.h"
 
 classes_stack *top;
 
 static void
 pop_tear_down(void *fixture) {
-  clear_stack();
+  clear_stack(&top);
 }
 
-static void* 
+static void*
 pop_setup(const MunitParameter params[], void* user_data) {
   class_use *class_use = malloc(sizeof(class_use));
-  top = malloc(sizeof(classes_stack)); 
+  top = malloc(sizeof(classes_stack));
   top->class_use = class_use;
   top->prev = NULL;
 
   return class_use;
 }
 
-static void* 
+static void*
 pop_null_setup(const MunitParameter params[], void* user_data) {
-  top = NULL; 
+  top = NULL;
 }
 
-MunitResult 
+MunitResult
 pop_test(const MunitParameter params[], void* class_use_setup) {
   class_use *popped_class_use;
 
@@ -71,7 +70,7 @@ MunitTest pop_tests[] = {
 const MunitSuite pop_suite = {
   "pop ",
   pop_tests,
-  NULL, 
+  NULL,
   1,
   MUNIT_SUITE_OPTION_NONE
 };
