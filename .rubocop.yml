@@ -5,3 +5,5 @@ Metrics/BlockLength:
 AllCops:
   Exclude:
     - 'spec/spec_helper.rb'
+    - 'Rakefile'
+    - 'ext/trace2/extconf.rb'

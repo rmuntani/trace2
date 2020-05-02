@@ -7,6 +7,7 @@
 #include "event_processor/push_test.h"
 #include "event_processor/pop_stack_to_list_test.h"
 #include "event_processor/push_new_class_use_test.h"
+#include "event_processor/clear_test.h"
 
 extern const MunitSuite pop_stack_to_list_suite;
 extern const MunitSuite pop_suite;
@@ -17,6 +18,7 @@ void main(int argc, const char* argv[]) {
     add_callee_to_caller_suite, push_suite,
     pop_stack_to_list_suite,
     push_new_class_use_suite,
+    clear_suite,
     NULL
   };
 

@@ -2,9 +2,9 @@
 #define RUBY_EVENT_B_CALL 1
 #define RUBY_EVENT_RETURN 2
 #define RUBY_EVENT_B_RETURN 3
-
 #define T_MODULE 0
 #define T_CLASS 1
+#define T_NIL 2
 
 typedef struct {
 
@@ -49,3 +49,13 @@ char *rb_obj_classname(VALUE);
 VALUE rb_str_new_cstr(const char*);
 
 VALUE rb_define_module_under(VALUE, const char*);
+
+VALUE Qnil;
+
+VALUE rb_sprintf(char*, ...);
+
+VALUE rb_ary_new();
+
+VALUE rb_ary_push(VALUE, VALUE);
+
+VALUE SYM2ID(VALUE);

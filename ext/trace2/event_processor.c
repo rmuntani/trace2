@@ -6,12 +6,10 @@
 // TODO: eventually remove this header
 // #include "munit/munit.h"
 
-struct classes_list;
-
 typedef struct class_use {
-  const char* name;
-  const char* method;
-  const char* path;
+  char* name;
+  char* method;
+  char* path;
   int lineno;
   struct class_use* caller;
   struct classes_list* head_callee;
@@ -84,6 +82,7 @@ void add_callee_to_caller(class_use **callee, class_use **caller) {
 __attribute__((weak)) class_use *build_class_use(rb_trace_arg_t *tracearg, class_use **caller) {
   class_use *new_use = malloc(sizeof(class_use));
   VALUE path = rb_tracearg_path(tracearg);
+  VALUE method = rb_tracearg_callee_id(tracearg);
 
   new_use->caller = NULL;
   new_use->head_callee = NULL;
@@ -92,46 +91,18 @@ __attribute__((weak)) class_use *build_class_use(rb_trace_arg_t *tracearg, class
 
   new_use->name = class_name(rb_tracearg_self(tracearg));
   new_use->path = rb_string_value_ptr(&path);
-  new_use->method = rb_id2name(rb_tracearg_callee_id(tracearg));
   new_use->lineno = FIX2INT(rb_tracearg_lineno(tracearg));
+
+  if (TYPE(method) != T_NIL) {
+    new_use->method = rb_id2name(SYM2ID(method));
+  } else {
+    new_use->method = malloc(sizeof(char)*4);
+    strcpy(new_use->method, "nil");
+  }
 
   add_callee_to_caller(&new_use, caller);
 
   return new_use;
-}
-
-void push_new_class_use(rb_trace_arg_t *tracearg, classes_stack **top) {
-  class_use *new_use, *last_use;
-
-  last_use = (*top == NULL) ? NULL : &(*top)->class_use;
-  new_use = build_class_use(tracearg, last_use);
-
-  push(top, new_use);
-}
-
-void pop_stack_to_list(classes_stack **top, classes_list **list_head, classes_list **list_tail) {
-  class_use *last_use = pop(top);
-  insert(list_head, list_tail, last_use);
-}
-
-void process_event(VALUE self, VALUE trace_point) {
-  rb_trace_arg_t *tracearg = rb_tracearg_from_tracepoint(trace_point);
-  rb_event_flag_t event = rb_tracearg_event_flag(tracearg);
-
-  if (event == RUBY_EVENT_CALL || event == RUBY_EVENT_B_CALL) {
-    push_new_class_use(tracearg, &top);
-  } else if (event == RUBY_EVENT_RETURN || event == RUBY_EVENT_B_RETURN) {
-    pop_stack_to_list(&top, &list_head, &list_tail);
-  }
-
-}
-
-void aggregate_uses(VALUE self) {
-  while (top != NULL) pop_stack_to_list(&top, &list_head, &list_tail);
-}
-
-void list_classes_uses(VALUE self) {
-
 }
 
 void clear_stack(classes_stack **top) {
@@ -157,19 +128,72 @@ void clear_list(classes_list **head, classes_list **tail) {
   *head = NULL;
   *tail = NULL;
 }
-/* VALUE *has_name(VALUE self, VALUE name_str) {
-  struct classes_list *curr = list_head;
-  char* str = StringValueCStr(name_str);
+
+void push_new_class_use(rb_trace_arg_t *tracearg, classes_stack **top) {
+  class_use *new_use;
+
+  if (*top == NULL) {
+    new_use = build_class_use(tracearg, NULL);
+  } else {
+    new_use = build_class_use(tracearg, &(*top)->class_use);
+  }
+
+  push(top, new_use);
+}
+
+// Scrapped function
+void pop_stack_to_list(classes_stack **top, classes_list **list_head, classes_list **list_tail) {
+  class_use *last_use = pop(top);
+  insert(list_head, list_tail, last_use);
+}
+
+void process_event(VALUE self, VALUE trace_point) {
+  rb_trace_arg_t *tracearg = rb_tracearg_from_tracepoint(trace_point);
+  rb_event_flag_t event = rb_tracearg_event_flag(tracearg);
+
+  if (event == RUBY_EVENT_CALL || event == RUBY_EVENT_B_CALL) {
+    push_new_class_use(tracearg, &top);
+    insert(&list_head, &list_tail, top->class_use);
+  } else if (event == RUBY_EVENT_RETURN || event == RUBY_EVENT_B_RETURN) {
+    pop(&top);
+  }
+
+}
+
+void aggregate_uses(VALUE self) { };
+
+VALUE list_classes_uses(VALUE self) {
+  classes_list *curr = list_head;
+  VALUE classes_uses;
+
+  classes_uses = rb_ary_new();
+
   while (curr != NULL) {
-    if (strcmp(curr->curr->name, str) == 0) {
-      return rb_cTrueClass;
+    class_use *curr_use;
+    VALUE string;
+
+    curr_use = curr->class_use;
+
+    if (curr_use->caller) {
+      string = rb_sprintf("class: %s, lineno: %d, path: %s, caller: %s, method: %s", \
+        curr_use->name, curr_use->lineno, curr_use->path, curr_use->caller->name, \
+        curr_use->method);
+    } else {
+    string = rb_sprintf("class: %s, lineno: %d, path: %s, caller: nil, method: %s", \
+        curr_use->name, curr_use->lineno, curr_use->path, curr_use->method);
     }
+
+    rb_ary_push(classes_uses, string);
     curr = curr->next;
   }
-  return rb_cFalseClass;
-} */
 
-void initialize(VALUE self, VALUE filters) {}
+  return classes_uses;
+}
+
+void initialize(VALUE self, VALUE filters) {
+  clear_stack(&top);
+  clear_list(&list_head, &list_tail);
+}
 
 void init_event_processor(VALUE trace2) {
   top = NULL;
@@ -180,5 +204,5 @@ void init_event_processor(VALUE trace2) {
   rb_define_method(event_processor, "initialize", initialize, 1);
   rb_define_method(event_processor, "process_event", process_event, 1);
   rb_define_method(event_processor, "aggregate_uses", aggregate_uses, 0);
-  rb_define_method(event_processor, "classes_use", list_classes_uses, 0);
+  rb_define_method(event_processor, "classes_uses", list_classes_uses, 0);
 }

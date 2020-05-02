@@ -59,6 +59,15 @@ describe Trace2::NameFinder do
       ).to eq 'MyClass'
     end
 
+    it 'parses a class name that is inside a module' do
+      class MyModule::MyClass; end
+      class_instance = MyModule::MyClass.new
+
+      expect(
+        Trace2::NameFinder.class_name(class_instance)
+      ).to eq 'MyModule::MyClass'
+    end
+
     it 'parses <main> class' do
       main = TOPLEVEL_BINDING.eval('self')
 
