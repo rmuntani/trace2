@@ -13,6 +13,7 @@ gcc -g -I ext/test \
        ext/test/event_processor/pop_stack_to_list_test.c \
        ext/test/event_processor/push_new_class_use_test.c \
        ext/test/event_processor/push_test.c \
+       ext/test/event_processor/suite.c \
        ext/test/test.c -o test.o
 
 echo 'Running tests...'
