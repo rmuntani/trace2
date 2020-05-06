@@ -1,9 +1,13 @@
 #define MUNIT_ENABLE_ASSERT_ALIASES
 #include "munit/munit.h"
 #include "event_processor/suite.h"
+#include "query_use/suite.h"
+
+#define NUMBER_OF_SUITES 2
 
 void main(int argc, const char* argv[]) {
-  MunitSuite *suites = malloc(sizeof(MunitSuite));
+  MunitSuite *suites = malloc(sizeof(MunitSuite)*NUMBER_OF_SUITES);
+  MunitSuite *suite_head = suites;
 
   MunitSuite suite = {
     "extension suite ",
@@ -14,7 +18,10 @@ void main(int argc, const char* argv[]) {
   };
 
   *suites = *(event_processor_suite());
-  suite.suites = suites;
+  suites++;
+  *suites = *(query_use_suite());
+
+  suite.suites = suite_head;
 
   munit_suite_main(&suite, NULL, argc, argv);
 }

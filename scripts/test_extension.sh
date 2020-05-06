@@ -3,6 +3,7 @@
 echo 'Compiling tests...'
 gcc -g -I ext/test \
        ext/trace2/event_processor.c \
+       ext/trace2/query_use.c \
        ext/trace2/name_finder.c \
        ext/test/munit/munit.c \
        ext/test/ruby.c \
@@ -13,6 +14,8 @@ gcc -g -I ext/test \
        ext/test/event_processor/pop_stack_to_list_test.c \
        ext/test/event_processor/push_new_class_use_test.c \
        ext/test/event_processor/push_test.c \
+       ext/test/query_use/validations_test.c \
+       ext/test/query_use/suite.c \
        ext/test/event_processor/suite.c \
        ext/test/test.c -o test.o
 

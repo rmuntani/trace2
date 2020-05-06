@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include "ruby.h"
 #include "ruby/ruby.h"
 #include "ruby/debug.h"
