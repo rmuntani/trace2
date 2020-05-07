@@ -3,10 +3,10 @@
 struct classes_list;
 
 typedef struct class_use {
-  const char* name;
-  const char* method;
+  char* name;
+  char* method;
+  char* path;
   int lineno;
-  const char* path;
   struct class_use* caller;
   struct classes_list* head_callee;
   struct classes_list* tail_callee;
