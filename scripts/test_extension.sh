@@ -15,6 +15,7 @@ gcc -g -I ext/test \
        ext/test/event_processor/push_new_class_use_test.c \
        ext/test/event_processor/push_test.c \
        ext/test/query_use/validations_test.c \
+       ext/test/query_use/run_validations_test.c \
        ext/test/query_use/suite.c \
        ext/test/event_processor/suite.c \
        ext/test/test.c -o test.o
