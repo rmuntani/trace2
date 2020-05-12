@@ -5,11 +5,11 @@
 validation *validations;
 class_use* use;
 
-int stub_true_validation(class_use *use, void *x) {
+static int stub_true_validation(class_use *use, void *x) {
   return 1;
 }
 
-int stub_false_validation(class_use *use, void *x) {
+static int stub_false_validation(class_use *use, void *x) {
   return 0;
 }
 
@@ -149,7 +149,7 @@ MunitTest run_validations_tests[] = {
     NULL
   },
   {
-    "when the validations are run through run validations",
+    "when the validations are run with real validations",
     integration_run_validations_test,
     integration_run_validations_setup,
     run_validations_tear_down,

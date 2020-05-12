@@ -10,6 +10,7 @@
 #define LINENO 3
 #define CALLER 4
 
+#define NONE (-1)
 #define ALLOW 0
 #define REJECT 1
 
@@ -17,6 +18,12 @@ typedef struct validation {
   int (*function)(class_use*, void*);
   void* values;
 } validation;
+
+typedef struct action {
+  short type;
+  short num_validations;
+  validation **validations;
+} action;
 
 int valid_name(class_use *use, void* names_ptr) {
   char** names = names_ptr;
@@ -60,5 +67,23 @@ int run_validations(validation *validations, class_use *use) {
     valid &= (validations->function)(use, validations->values);
     validations++;
   }
+  return valid;
+}
+
+int run_actions(action *actions, class_use *use) {
+  int valid = 1;
+  while(valid == 1 && actions != NULL && actions->type != NONE) {
+    int i, curr_valid = 0;
+    validation *curr_validations = *(actions->validations);
+
+    for(i = 0; i < actions->num_validations && !curr_valid; i++) {
+      curr_valid |= run_validations(curr_validations, use);
+      curr_validations++;
+    }
+
+    valid &= (curr_valid ^ actions->type) & 1;
+    actions++;
+  }
+
   return valid;
 }
