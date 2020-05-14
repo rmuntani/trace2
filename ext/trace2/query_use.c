@@ -69,7 +69,6 @@ int run_validations(validation *validations, class_use *use) {
   }
   return valid;
 }
-
 int run_actions(action *actions, class_use *use) {
   int valid = 1;
   while(valid == 1 && actions != NULL && actions->type != NONE) {
@@ -86,4 +85,14 @@ int run_actions(action *actions, class_use *use) {
   }
 
   return valid;
+}
+
+int count_occurrences(char* word, char** words_array, int start, int end) {
+  int count = 0, curr = start;
+  while((end < 0 || curr < end) && words_array[curr] != NULL) {
+    if (strcmp(words_array[curr], word) == 0) count++;
+    curr++;
+  }
+
+  return count;
 }
