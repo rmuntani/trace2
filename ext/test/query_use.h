@@ -25,3 +25,7 @@ int valid_lineno(class_use*, void*);
 
 int run_validations(validation*, class_use*);
 int run_actions(action*, class_use*);
+
+filter* build_filters(char**);
+int count_occurrences(char*, char**, int, int);
+int find_position(char*, char**, int);

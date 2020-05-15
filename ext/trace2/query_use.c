@@ -96,3 +96,16 @@ int count_occurrences(char* word, char** words_array, int start, int end) {
 
   return count;
 }
+
+int find_position(char* word, char** word_array, int start) {
+  int pos = -1, i;
+
+  for(i = start; word_array[i] != NULL; i++) {
+    if (strcmp(word, word_array[i]) == 0) {
+      pos = i;
+      break;
+    }
+  }
+
+  return pos;
+}
