@@ -4,7 +4,7 @@
 
 /* The tests on this file rely on build_filter, due to the
  * difficulty of building a filter */
-static const class_use use = {
+static class_use use = {
   "MyClass",
   "yes",
   "/my/path",

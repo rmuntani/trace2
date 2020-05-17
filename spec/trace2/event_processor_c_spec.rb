@@ -87,5 +87,45 @@ describe Trace2::EventProcessorC do
         'Nested', 'Nested', 'Simple', 'Trace2::ClassLister', 'TracePoint'
       ]
     end
+
+    it 'returns a filtered array' do
+      class_lister_args = {
+        filter: [
+          {
+            reject: [{ name: ['Simple'] }]
+          },
+          {
+            reject: [{ name: ['Nested'], method: ['nested_call'] }]
+          }
+        ],
+        event_processor: Trace2::EventProcessorC,
+        filter_parser: Trace2::FilterParser
+      }
+      class_lister = Trace2::ClassLister.new(class_lister_args)
+
+      class_lister.enable
+      nested = Nested.new
+      nested.nested_call
+      nested.nested_simple_call
+      class_lister.disable
+
+      classes_uses = class_lister.classes_uses
+      parsed_classes = classes_uses.map do |class_use|
+        {
+          name: class_use.match(/class: ([\w|:]+)/)[1],
+          method: class_use.match(/method: ([\w|:]+)/)[1]
+        }
+      end
+
+      expect(parsed_classes).not_to include(
+        name: 'Simple', method: 'simple_call'
+      )
+      expect(parsed_classes).not_to include(
+        name: 'Nested', method: 'nested_call'
+      )
+      expect(parsed_classes).to include(
+        name: 'Nested', method: 'nested_simple_call'
+      )
+    end
   end
 end

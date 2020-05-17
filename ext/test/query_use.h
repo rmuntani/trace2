@@ -2,6 +2,9 @@
 #define ALLOW 0
 #define REJECT 1
 
+struct class_use;
+typedef class_use class_use;
+
 typedef struct validation {
   int (*function)(class_use*, void*);
   void* values;

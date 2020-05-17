@@ -2,6 +2,18 @@
 
 trace2 is a gem to improve tracing of an application.
 
+## Usage
+
+```ruby
+filter = []
+class_lister = Trace2::ClassLister.new(filter: filter)
+class_lister.enable
+# code that should generate a list of classes' uses
+class_lister.disable
+
+class_lister.classes_uses # an array of Trace2::ClassUse
+```
+
 ## Filter formats
 
 ruby's `QueryUse` is a class that checks if a class matches filters. The filter
@@ -43,7 +55,7 @@ To execute an AND statement:
 ## Running ruby tests
 
 ```
-rake compile && rspec
+script/test_ruby.sh
 ```
 
 ## Running extension tests
@@ -62,3 +74,7 @@ After that:
 scripts/test_extension.sh
 ```
 
+## Build and install the gem
+```
+scripts/build_gem.sh
+```

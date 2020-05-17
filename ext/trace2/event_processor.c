@@ -4,23 +4,14 @@
 #include "ruby/ruby.h"
 #include "ruby/debug.h"
 #include "name_finder.h"
+#include "event_processor.h"
 // TODO: eventually remove this header
 // #include "munit/munit.h"
 
-typedef struct class_use {
-  char* name;
-  char* method;
-  char* path;
-  int lineno;
-  struct class_use* caller;
-  struct classes_list* head_callee;
-  struct classes_list* tail_callee;
-} class_use;
-
-typedef struct classes_list {
-  struct classes_list *next;
-  class_use *class_use;
-} classes_list;
+struct filter;
+typedef struct filter filter;
+filter* build_filters(char**);
+class_use *run_filters(filter*, class_use*);
 
 typedef struct classes_stack {
   struct classes_stack *prev;
@@ -30,6 +21,7 @@ typedef struct classes_stack {
 classes_list *list_head;
 classes_list *list_tail;
 classes_stack *top;
+filter *curr_filter;
 
 VALUE event_processor;
 
@@ -41,7 +33,6 @@ class_use *pop(classes_stack **top) {
     class_use *popped_value = (*top)->class_use;
 
     *top = (*top)->prev;
-
     return popped_value;
   }
 }
@@ -177,14 +168,18 @@ VALUE list_classes_uses(VALUE self) {
 
     if (curr_use->caller) {
       string = rb_sprintf("class: %s, lineno: %d, path: %s, caller: %s, method: %s", \
-        curr_use->name, curr_use->lineno, curr_use->path, curr_use->caller->name, \
-        curr_use->method);
+          curr_use->name, curr_use->lineno, curr_use->path, curr_use->caller->name, \
+          curr_use->method);
     } else {
-    string = rb_sprintf("class: %s, lineno: %d, path: %s, caller: nil, method: %s", \
-        curr_use->name, curr_use->lineno, curr_use->path, curr_use->method);
+      string = rb_sprintf("class: %s, lineno: %d, path: %s, caller: nil, method: %s", \
+          curr_use->name, curr_use->lineno, curr_use->path, curr_use->method);
     }
 
-    rb_ary_push(classes_uses, string);
+    if(curr_filter == NULL ||
+        (curr_filter != NULL && run_filters(curr_filter, curr_use) != NULL)) {
+      rb_ary_push(classes_uses, string);
+    }
+
     curr = curr->next;
   }
 
@@ -192,6 +187,18 @@ VALUE list_classes_uses(VALUE self) {
 }
 
 void initialize(VALUE self, VALUE filters) {
+  long length = RARRAY_LEN(filters), i;
+  char **filters_array = malloc(sizeof(char*)*(length + 1));
+
+  for(i = 0; i < length; i++) {
+    VALUE curr_value = rb_ary_entry(filters, i);
+    filters_array[i] = StringValueCStr(curr_value);
+  }
+  filters_array[length] = NULL;
+
+  if(curr_filter != NULL) free(curr_filter);
+
+  curr_filter = (length > 0) ? build_filters(filters_array) : NULL;
   clear_stack(&top);
   clear_list(&list_head, &list_tail);
 }
@@ -200,6 +207,7 @@ void init_event_processor(VALUE trace2) {
   top = NULL;
   list_head = NULL;
   list_tail = NULL;
+  curr_filter = NULL;
 
   event_processor = rb_define_class_under(trace2, "EventProcessorC", rb_cObject);
   rb_define_method(event_processor, "initialize", initialize, 1);

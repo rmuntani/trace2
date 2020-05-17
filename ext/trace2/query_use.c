@@ -2,7 +2,8 @@
 #include <string.h>
 #include "ruby.h"
 #include "event_processor.h"
-#include "munit/munit.h"
+// TODO: eventually remove this header
+// #include "munit/munit.h"
 
 #define NAME 0
 #define METHOD 1

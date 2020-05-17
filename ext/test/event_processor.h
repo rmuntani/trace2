@@ -1,7 +1,5 @@
 #include "ruby.h"
 
-struct classes_list;
-
 typedef struct class_use {
   char* name;
   char* method;

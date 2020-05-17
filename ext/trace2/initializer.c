@@ -1,6 +1,7 @@
 #include "ruby.h"
 #include "name_finder.h"
 #include "event_processor.h"
+#include "query_use.h"
 
 VALUE trace2;
 

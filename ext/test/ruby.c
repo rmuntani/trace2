@@ -89,3 +89,9 @@ VALUE SYM2ID(VALUE symbol) {}
 VALUE rb_ary_new() {}
 
 VALUE rb_ary_push(VALUE array, VALUE value) {}
+
+VALUE rb_ary_entry(VALUE array, long position) {}
+
+long RARRAY_LEN(VALUE array) {}
+
+char* StringValueCStr(VALUE str) {}

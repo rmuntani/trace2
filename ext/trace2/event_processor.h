@@ -8,4 +8,9 @@ typedef struct class_use {
   struct classes_list* tail_callee;
 } class_use;
 
-VALUE init_event_processor(VALUE);
+typedef struct classes_list {
+  struct classes_list *next;
+  class_use *class_use;
+} classes_list;
+
+void init_event_processor(VALUE);

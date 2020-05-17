@@ -13,7 +13,7 @@ const char* class_name(VALUE object) {
 
     if (class_name == pend || class_name[0] == '#') {
       const char *anonymous_name = rb_obj_classname(object);
-      char *final_name = malloc((9+strlen(anonymous_name))*sizeof(char));
+      char *final_name = malloc((9 + strlen(anonymous_name))*sizeof(char));
 
       strcpy(final_name, "Anonymous");
       strcat(final_name, anonymous_name);

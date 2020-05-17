@@ -59,3 +59,9 @@ VALUE rb_ary_new();
 VALUE rb_ary_push(VALUE, VALUE);
 
 VALUE SYM2ID(VALUE);
+
+VALUE rb_ary_entry(VALUE, long);
+
+long RARRAY_LEN(VALUE);
+
+char* StringValueCStr(VALUE);
