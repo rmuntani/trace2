@@ -7,9 +7,9 @@ describe Trace2::FilterParser do
     context 'when filter is empty' do
       it 'parses the filter' do
         filter = []
-        parsed_filter = Trace2::FilterParser.parse(filter)
+        parsed_filter = Trace2::FilterParser.new(filter).parse
 
-        expect(parsed_filter).to eq []
+        expect(parsed_filter).to eq ['0']
       end
     end
 
@@ -18,14 +18,18 @@ describe Trace2::FilterParser do
         context 'when the validation has one value' do
           it 'parses the filter' do
             filter = [{ allow: [{ name: ['MyClass'] }] }]
-            parsed_filter = Trace2::FilterParser.parse(filter)
+            parsed_filter = Trace2::FilterParser.new(filter).parse
 
             expect(parsed_filter).to eq %w[
-              filter
+              1
+              1
+              1
+              1
+              validate_name
+              1
+              MyClass
               allow
-              validations name MyClass end_name end_validations
-              end_allow
-              end_filter
+              filter
             ]
           end
         end
@@ -33,16 +37,19 @@ describe Trace2::FilterParser do
         context 'when the validation has multiple values' do
           it 'parses the filter' do
             filter = [{ allow: [{ name: %w[MyClass YourClass] }] }]
-            parsed_filter = Trace2::FilterParser.parse(filter)
+            parsed_filter = Trace2::FilterParser.new(filter).parse
 
             expect(parsed_filter).to eq %w[
-              filter
+              1
+              1
+              1
+              1
+              validate_name
+              2
+              MyClass
+              YourClass
               allow
-              validations
-              name MyClass YourClass end_name
-              end_validations
-              end_allow
-              end_filter
+              filter
             ]
           end
         end
@@ -52,17 +59,21 @@ describe Trace2::FilterParser do
         context 'when the validations are applied in sequence' do
           it 'parses the filter' do
             filter = [{ allow: [{ name: ['MyClass'], method: ['yes'] }] }]
-            parsed_filter = Trace2::FilterParser.parse(filter)
+            parsed_filter = Trace2::FilterParser.new(filter).parse
 
             expect(parsed_filter).to eq %w[
-              filter
+              1
+              1
+              1
+              2
+              validate_name
+              1
+              MyClass
+              validate_method
+              1
+              yes
               allow
-              validations
-              name MyClass end_name
-              method yes end_method
-              end_validations
-              end_allow
-              end_filter
+              filter
             ]
           end
         end
@@ -70,19 +81,22 @@ describe Trace2::FilterParser do
         context 'when the validations are applied in parallel' do
           it 'parses the filter' do
             filter = [{ allow: [{ name: ['MyClass'] }, { method: ['yes'] }] }]
-            parsed_filter = Trace2::FilterParser.parse(filter)
+            parsed_filter = Trace2::FilterParser.new(filter).parse
 
             expect(parsed_filter).to eq %w[
-              filter
+              1
+              1
+              2
+              1
+              validate_name
+              1
+              MyClass
+              1
+              validate_method
+              1
+              yes
               allow
-              validations
-              name MyClass end_name
-              end_validations
-              validations
-              method yes end_method
-              end_validations
-              end_allow
-              end_filter
+              filter
             ]
           end
         end
@@ -96,21 +110,24 @@ describe Trace2::FilterParser do
         allow: [{ name: ['MyClass'] }],
         reject: [{ method: ['no'] }]
       }]
-      parsed_filter = Trace2::FilterParser.parse(filter)
+      parsed_filter = Trace2::FilterParser.new(filter).parse
 
       expect(parsed_filter).to eq %w[
-        filter
+        1
+        2
+        1
+        1
+        validate_name
+        1
+        MyClass
         allow
-        validations
-        name MyClass end_name
-        end_validations
-        end_allow
+        1
+        1
+        validate_method
+        1
+        no
         reject
-        validations
-        method no end_method
-        end_validations
-        end_reject
-        end_filter
+        filter
       ]
     end
   end
@@ -121,23 +138,26 @@ describe Trace2::FilterParser do
         { allow: [{ name: ['MyClass'] }] },
         { reject: [{ method: ['no'] }] }
       ]
-      parsed_filter = Trace2::FilterParser.parse(filter)
+      parsed_filter = Trace2::FilterParser.new(filter).parse
 
       expect(parsed_filter).to eq %w[
-        filter
+        2
+        1
+        1
+        1
+        validate_name
+        1
+        MyClass
         allow
-        validations
-        name MyClass end_name
-        end_validations
-        end_allow
-        end_filter
         filter
+        1
+        1
+        1
+        validate_method
+        1
+        no
         reject
-        validations
-        method no end_method
-        end_validations
-        end_reject
-        end_filter
+        filter
       ]
     end
   end
