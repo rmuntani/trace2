@@ -1,3 +1,3 @@
 #!/bin/bash
 
-rake compile && bundle exec rspec
+rake compile && bundle exec rspec $1

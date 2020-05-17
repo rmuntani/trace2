@@ -60,7 +60,7 @@ describe Trace2::NameFinder do
     end
 
     it 'parses a class name that is inside a module' do
-      class MyModule::MyClass; end
+      module MyModule; class MyClass; end; end
       class_instance = MyModule::MyClass.new
 
       expect(

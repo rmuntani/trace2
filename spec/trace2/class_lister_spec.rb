@@ -181,9 +181,9 @@ describe Trace2::ClassLister do
 
   describe 'integration with Trace2::QueryUse' do
     it 'lists acessed classes that pass the filter' do
-      class_lister = Trace2::ClassLister.new(
-        [{ allow: [{ name: ['Zaratustra'] }] }]
-      )
+      filter = [{ allow: [{ name: ['Zaratustra'] }] }]
+      class_lister = Trace2::ClassLister.new(filter: filter)
+
       simple_class = Simple.new
 
       class_lister.enable
@@ -196,9 +196,9 @@ describe Trace2::ClassLister do
     end
 
     it 'does not list callers that dont pass the filter' do
-      class_lister = Trace2::ClassLister.new(
-        [{ reject: [{ name: [/Nested/] }] }]
-      )
+      filter = [{ reject: [{ name: [/Nested/] }] }]
+      class_lister = Trace2::ClassLister.new(filter: filter)
+
       complex_class = ComplexNesting.new
 
       class_lister.enable
@@ -219,9 +219,9 @@ describe Trace2::ClassLister do
     end
 
     it 'does not list callees that dont pass the filter' do
-      class_lister = Trace2::ClassLister.new(
-        [{ reject: [{ name: [/Nested/] }] }]
-      )
+      filter = [{ reject: [{ name: [/Nested/] }] }]
+      class_lister = Trace2::ClassLister.new(filter: filter)
+
       complex_class = ComplexNesting.new
 
       class_lister.enable

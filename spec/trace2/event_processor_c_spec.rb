@@ -1,11 +1,19 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-
 describe Trace2::EventProcessorC do
   describe '#new' do
-    it 'does not raise an error' do
-      expect { Trace2::EventProcessorC.new([]) }.not_to raise_error
+    context 'when filter is empty' do
+      it 'does not raise an error' do
+        expect { Trace2::EventProcessorC.new([]) }.not_to raise_error
+      end
+    end
+
+    context 'when filter is not empty' do
+      it 'does not raise an error' do
+        filter = %w[1 1 1 1 validate_name 1 MyClass allow filter]
+        expect { Trace2::EventProcessorC.new(filter) }.not_to raise_error
+      end
     end
   end
 
@@ -35,8 +43,12 @@ describe Trace2::EventProcessorC do
   end
 
   describe 'test all functions' do
-    it 'for a simple class use' do
-      class_lister = Trace2::ClassLister.new([], Trace2::EventProcessorC)
+    it 'returns a string with details of the class use' do
+      class_lister_args = {
+        filter: [],
+        event_processor: Trace2::EventProcessorC
+      }
+      class_lister = Trace2::ClassLister.new(class_lister_args)
 
       class_lister.enable
       Simple.new.simple_call
@@ -55,7 +67,11 @@ describe Trace2::EventProcessorC do
     end
 
     it 'returns an array ordered by call order' do
-      class_lister = Trace2::ClassLister.new([], Trace2::EventProcessorC)
+      class_lister_args = {
+        filter: [],
+        event_processor: Trace2::EventProcessorC
+      }
+      class_lister = Trace2::ClassLister.new(class_lister_args)
 
       class_lister.enable
       nested = Nested.new
