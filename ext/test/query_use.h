@@ -18,6 +18,13 @@ typedef struct action {
   validation **validations;
 } action;
 
+/* A filter can have up to two actions, and they must have
+ * different types */
+typedef struct filter {
+  short num_actions;
+  action *actions;
+} filter;
+
 int valid_name(class_use*, void*);
 int valid_method(class_use*, void*);
 int valid_path(class_use*, void*);
