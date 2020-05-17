@@ -26,6 +26,7 @@ typedef struct validation {
   int (*function)(class_use*, void*);
   void* values;
 } validation;
+
 typedef struct action {
   short type;
   short num_validations;
@@ -102,29 +103,6 @@ int run_actions(action *actions, class_use *use) {
   }
 
   return valid;
-}
-
-int count_occurrences(char* word, char** words_array, int start, int end) {
-  int count = 0, curr = start;
-  while((end < 0 || curr < end) && words_array[curr] != NULL) {
-    if (strcmp(words_array[curr], word) == 0) count++;
-    curr++;
-  }
-
-  return count;
-}
-
-int find_position(char* word, char** word_array, int start) {
-  int pos = -1, i;
-
-  for(i = start; word_array[i] != NULL; i++) {
-    if (strcmp(word, word_array[i]) == 0) {
-      pos = i;
-      break;
-    }
-  }
-
-  return pos;
 }
 
 static char **duplicate_words_array(char** array, int start, int end) {
@@ -211,6 +189,7 @@ static validation **initialize_validations(int num_validations) {
   validation** validations = malloc(sizeof(validation*)*(num_validations + 1));
 
   for(i = 0; i < num_validations; i++) {
+    // (void*) 1 is used to make (vaidation[i] != NULL) false
     validations[i] = (void*) 1;
   }
   validations[num_validations] = NULL;
