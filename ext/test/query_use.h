@@ -34,3 +34,4 @@ int run_validations(validation*, class_use*);
 int run_actions(action*, class_use*);
 
 filter* build_filters(char**);
+class_use *run_filters(filter*, class_use*);

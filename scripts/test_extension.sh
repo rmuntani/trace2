@@ -18,6 +18,7 @@ gcc -g -I ext/test \
        ext/test/query_use/run_validations_test.c \
        ext/test/query_use/run_actions_test.c \
        ext/test/query_use/build_filter_test.c \
+       ext/test/query_use/run_filters_test.c \
        ext/test/query_use/suite.c \
        ext/test/event_processor/suite.c \
        ext/test/test.c -o test.o

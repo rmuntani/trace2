@@ -259,3 +259,16 @@ filter* build_filters(char** filter_array) {
   }
   return filters;
 }
+
+class_use *run_filters(filter* filters, class_use *use) {
+  filter *curr_filter = filters;
+  class_use *filtered_use = use;
+
+  while(filtered_use != NULL && curr_filter->num_actions != 0) {
+    int valid = run_actions(curr_filter->actions, filtered_use);
+    filtered_use = valid ? filtered_use : NULL;
+    curr_filter++;
+  }
+
+  return filtered_use;
+}
