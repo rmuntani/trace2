@@ -74,6 +74,15 @@ After that:
 scripts/test_extension.sh
 ```
 
+## Running Valgrind
+
+Valgrind is a tool used to detect memory leaks and improper use of memory. To run
+it, first install Valgrind. After installing it:
+
+```
+scripts/run_valgrind.sh
+```
+
 ## Build and install the gem
 ```
 scripts/build_gem.sh

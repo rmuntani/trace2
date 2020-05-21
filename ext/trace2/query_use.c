@@ -200,14 +200,14 @@ static validation **initialize_validations(int num_validations) {
 
 static validation *initialize_validation(int num_validation) {
   int i;
-  validation* validation = malloc(sizeof(validation)*(num_validation + 1));
+  validation* curr_validation = malloc(sizeof(validation)*(num_validation + 1));
 
   for(i = 0; i < num_validation; i++) {
-    (validation[i]).function = valid_not_implemented;
+    (curr_validation[i]).function = valid_not_implemented;
   }
-  (validation[num_validation]).function = NULL;
+  (curr_validation[num_validation]).function = NULL;
 
-  return validation;
+  return curr_validation;
 }
 
 filter* build_filters(char** filter_array) {
@@ -229,7 +229,8 @@ filter* build_filters(char** filter_array) {
     curr_filter->num_actions = num_actions;
 
     for(curr_action = actions; curr_action->type != NONE; curr_action++) {
-      num_parallel_validations = atoi(filter_array[++i]);
+      i++;
+      num_parallel_validations = atoi(filter_array[i]);
       validations = initialize_validations(num_parallel_validations);
 
       curr_action->num_validations = num_parallel_validations;
@@ -238,7 +239,8 @@ filter* build_filters(char** filter_array) {
       for(curr_validations = validations;
           *curr_validations != NULL;
           curr_validations++) {
-        num_validations = atoi(filter_array[++i]);
+        i++;
+        num_validations = atoi(filter_array[i]);
 
         *curr_validations = initialize_validation(num_validations);
 
@@ -250,13 +252,15 @@ filter* build_filters(char** filter_array) {
           setup_validation(filter_array, &i, curr_validation);
         }
       }
-      if(strcmp(filter_array[++i], "allow") == 0) {
+      i++;
+      if(strcmp(filter_array[i], "allow") == 0) {
         curr_action->type = ALLOW;
       } else {
         curr_action->type = REJECT;
       }
     }
-    if(strcmp(filter_array[++i], "filter") == 0) i++;
+    i++;
+    if(strcmp(filter_array[i], "filter") == 0) i++;
   }
   return filters;
 }
