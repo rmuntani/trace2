@@ -10,6 +10,9 @@ valid_setup(const MunitParameter params[], void* user_data) {
   use->method = "yes";
   use->path = "/var";
   use->lineno = 8;
+  use->caller = NULL;
+  use->head_callee = NULL;
+  use->tail_callee = NULL;
 
   return use;
 }
@@ -191,6 +194,68 @@ multiple_invalid_linenos_test(const MunitParameter params[], void* class_use) {
   return MUNIT_OK;
 }
 
+MunitResult
+valid_top_of_stack_test(const MunitParameter params[], void* class_use) {
+  int valid, is_top = 1;
+
+  valid = valid_top_of_stack(class_use, (void*)(&is_top));
+
+  munit_assert_int(valid, ==, 1);
+
+  return MUNIT_OK;
+}
+
+static void*
+invalid_top_of_stack_setup(const MunitParameter params[], void* user_data) {
+  class_use* use = malloc(sizeof(class_use));
+
+  use->head_callee = malloc(sizeof(class_use));
+
+  return use;
+}
+
+MunitResult
+invalid_top_of_stack_test(const MunitParameter params[], void* class_use) {
+  int valid, is_top = 1;
+
+  valid = valid_top_of_stack(class_use, (void*)(&is_top));
+
+  munit_assert_int(valid, ==, 0);
+
+  return MUNIT_OK;
+}
+
+MunitResult
+valid_bottom_of_stack_test(const MunitParameter params[], void* class_use) {
+  int valid, is_bottom = 0;
+
+  valid = valid_bottom_of_stack(class_use, (void*)(&is_bottom));
+
+  munit_assert_int(valid, ==, 0);
+
+  return MUNIT_OK;
+}
+
+static void*
+invalid_bottom_of_stack_setup(const MunitParameter params[], void* user_data) {
+  class_use* use = malloc(sizeof(class_use));
+
+  use->caller = malloc(sizeof(class_use));
+
+  return use;
+}
+
+MunitResult
+invalid_bottom_of_stack_test(const MunitParameter params[], void* class_use) {
+  int valid, is_bottom = 0;
+
+  valid = valid_bottom_of_stack(class_use, (void*)&is_bottom);
+
+  munit_assert_int(valid, ==, 1);
+
+  return MUNIT_OK;
+}
+
 MunitTest validations_tests[] = {
   {
     "when method is valid",
@@ -284,6 +349,38 @@ MunitTest validations_tests[] = {
     "when none of many linenos is valid",
     multiple_invalid_linenos_test,
     valid_setup,
+    NULL,
+    MUNIT_TEST_OPTION_NONE,
+    NULL
+  },
+  {
+    "when class is top of stack (has no callees)",
+    valid_top_of_stack_test,
+    valid_setup,
+    NULL,
+    MUNIT_TEST_OPTION_NONE,
+    NULL
+  },
+  {
+    "when class is not top of stack (has callees)",
+    invalid_top_of_stack_test,
+    invalid_top_of_stack_setup,
+    NULL,
+    MUNIT_TEST_OPTION_NONE,
+    NULL
+  },
+  {
+    "when class is bottom of stack (has no caller)",
+    valid_bottom_of_stack_test,
+    valid_setup,
+    NULL,
+    MUNIT_TEST_OPTION_NONE,
+    NULL
+  },
+  {
+    "when class is not bottom of stack (has caller)",
+    invalid_bottom_of_stack_test,
+    invalid_bottom_of_stack_setup,
     NULL,
     MUNIT_TEST_OPTION_NONE,
     NULL

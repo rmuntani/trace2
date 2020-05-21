@@ -33,9 +33,18 @@ module Trace2
         @parsed_filter.push(validation.length)
         validation.each do |attribute, values|
           @parsed_filter.push("validate_#{attribute}")
-          @parsed_filter.push(values.length)
-          @parsed_filter.concat(values)
+          parse_values(values)
         end
+      end
+    end
+
+    def parse_values(values)
+      if values.is_a? Array
+        @parsed_filter.push(values.length)
+        @parsed_filter.concat(values)
+      else
+        @parsed_filter.push(1)
+        @parsed_filter.push(values)
       end
     end
   end

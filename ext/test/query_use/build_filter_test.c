@@ -118,7 +118,7 @@ single_filter_multi_value_validation_build_test(const MunitParameter params[], v
 
 static void*
 single_filter_multiple_validations_build_setup(const MunitParameter params[], void* user_data) {
-  char **simple_filter = malloc(sizeof(char*)*11);
+  char **simple_filter = malloc(sizeof(char*)*13);
 
   simple_filter[0] =  "1";
   simple_filter[1] =  "1";
@@ -130,9 +130,9 @@ single_filter_multiple_validations_build_setup(const MunitParameter params[], vo
   simple_filter[7] =  "validate_method";
   simple_filter[8] =  "1";
   simple_filter[9] =  "yes";
-  simple_filter[10] =  "allow";
-  simple_filter[11] =  "filter";
-  simple_filter[12] =  "filter";
+  simple_filter[10] = "allow";
+  simple_filter[11] = "filter";
+  simple_filter[12] = NULL;
 
   return (void*)simple_filter;
 }
@@ -150,17 +150,64 @@ single_filter_multiple_validations_build_test(const MunitParameter params[], voi
   munit_assert_int(filters->num_actions, ==, 1);
   munit_assert_int(actions->num_validations, ==, 1);
   munit_assert_int(actions->type, ==, ALLOW);
+
   munit_assert_string_equal("MyClass", *((char**)(*validations)->values));
   munit_assert_string_equal("yes", *((char**)(*validations + 1)->values));
+
   munit_assert_ptr_equal((*validations)->function, valid_name);
-  munit_assert_ptr_equal((*validations+1)->function, valid_method);
+  munit_assert_ptr_equal((*validations + 1)->function, valid_method);
+
+  return MUNIT_OK;
+}
+
+static void*
+position_of_stack_validations_build_setup(const MunitParameter params[], void* user_data) {
+  char **simple_filter = malloc(sizeof(char*)*13);
+
+  simple_filter[0] =  "1";
+  simple_filter[1] =  "1";
+  simple_filter[2] =  "1";
+  simple_filter[3] =  "2";
+  simple_filter[4] =  "validate_top_of_stack";
+  simple_filter[5] =  "1";
+  simple_filter[6] =  "true";
+  simple_filter[7] =  "validate_bottom_of_stack";
+  simple_filter[8] =  "1";
+  simple_filter[9] =  "false";
+  simple_filter[10] = "allow";
+  simple_filter[11] = "filter";
+  simple_filter[12] = NULL;
+
+  return (void*)simple_filter;
+}
+
+MunitResult
+position_of_stack_validations_build_test(const MunitParameter params[], void* filter_fixture) {
+  filter *filters;
+  action *actions;
+  validation **validations;
+
+  filters = build_filters((char**)filter_fixture);
+  actions = filters->actions;
+  validations = actions->validations;
+
+  munit_assert_int(filters->num_actions, ==, 1);
+
+  munit_assert_int(actions->num_validations, ==, 1);
+  munit_assert_int(actions->type, ==, ALLOW);
+
+  munit_assert_int(1, == , *((int*)(*validations)->values));
+  munit_assert_int(0, == , *((int*)(*validations + 1)->values));
+
+  munit_assert_ptr_equal((*validations)->function, valid_top_of_stack);
+  munit_assert_ptr_equal((*validations + 1)->function, valid_bottom_of_stack);
 
   return MUNIT_OK;
 }
 
 static void*
 single_filter_parallel_validations_build_setup(const MunitParameter params[], void* user_data) {
-  char **simple_filter = malloc(sizeof(char*)*11);
+  char **simple_filter = malloc(sizeof(char*)*14);
 
   simple_filter[0] = "1";
   simple_filter[1] = "1";
@@ -342,9 +389,17 @@ MunitTest build_filter_tests[] = {
     NULL
   },
   {
-    "when filter has one validation with multiple values",
+    "when filter has multiple validations",
     single_filter_multiple_validations_build_test,
     single_filter_multiple_validations_build_setup,
+    NULL,
+    MUNIT_TEST_OPTION_NONE,
+    NULL
+  },
+  {
+    "when filter has validates top and bottom of stack",
+    position_of_stack_validations_build_test,
+    position_of_stack_validations_build_setup,
     NULL,
     MUNIT_TEST_OPTION_NONE,
     NULL

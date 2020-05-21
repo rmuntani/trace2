@@ -22,6 +22,8 @@
 #define METHOD 1
 #define PATH 2
 #define LINENO 3
+#define TOP_OF_STACK 4
+#define BOTTOM_OF_STACK 5
 
 typedef struct validation {
   int (*function)(class_use*, void*);
@@ -73,6 +75,16 @@ int valid_lineno(class_use *use, void* linenos_ptr) {
     linenos++;
   }
   return 0;
+}
+
+int valid_top_of_stack(class_use *use, void* is_top) {
+  int valid = ((use->head_callee == NULL) == *((int*)is_top));
+  return valid;
+}
+
+int valid_bottom_of_stack(class_use *use, void* is_bottom) {
+  int valid = ((use->caller == NULL) == *((int*)is_bottom));
+  return valid;
 }
 
 static int valid_not_implemented(class_use *use, void* nothing) {
@@ -135,6 +147,8 @@ static int validation_type(char *type) {
   else if (strcmp(type, "validate_name") == 0) return NAME;
   else if (strcmp(type, "validate_path") == 0) return PATH;
   else if (strcmp(type, "validate_method") == 0) return METHOD;
+  else if (strcmp(type, "validate_top_of_stack") == 0) return TOP_OF_STACK;
+  else if (strcmp(type, "validate_bottom_of_stack") == 0) return BOTTOM_OF_STACK;
   else return NOT_IMPLEMENTED;
 }
 
@@ -154,6 +168,14 @@ static void setup_validation(char **filter, int *pos, validation *curr_validatio
     else curr_validation->function = valid_method;
 
     curr_validation->values = (void*)duplicate_words_array(filter, *pos, *pos + num_values);
+  } else if (type == TOP_OF_STACK || type == BOTTOM_OF_STACK) {
+    int *value = malloc(sizeof(int));
+    if(type == TOP_OF_STACK) curr_validation->function = valid_top_of_stack;
+    else if(type == BOTTOM_OF_STACK) curr_validation->function = valid_bottom_of_stack;
+
+    *value = (strcmp(filter[*pos], "true") == 0) ? 1 : 0;
+
+    curr_validation->values= (int*)value;
   } else {
     curr_validation->values = NULL;
     curr_validation->function = valid_not_implemented;

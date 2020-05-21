@@ -50,7 +50,19 @@ To execute an AND statement:
 ]
 ```
 
-`query_use_spec` has more examples of how to write a filter.
+## Possible filters
+
+The filters described bellow work both for Ruby and the extension. Bear in mind
+that Ruby currently has more validations than the extension.
+
+|validation name   | effect                                                                     | possible values  |
+|------------------|----------------------------------------------------------------------------|------------------|
+| name             | check if class name is equal to any of the possible values                 | array of Strings |
+| method           | check if class method is equal to any of the possible values               | array of Strings |
+| path             | check if class path is equal to any of the possible values                 | array of Strings |
+| lineno           | check if the line number is equal to any of the possible values            | array of Integers|
+| top_of_stack     | check if class has callees and if the result is equal to the possible value| true or false    |
+| bottom_of_stack  | check if class has callers and if the result is equal to the possible value| true or false    |
 
 ## Running ruby tests
 

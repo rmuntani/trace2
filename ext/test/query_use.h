@@ -32,6 +32,8 @@ int valid_name(class_use*, void*);
 int valid_method(class_use*, void*);
 int valid_path(class_use*, void*);
 int valid_lineno(class_use*, void*);
+int valid_top_of_stack(class_use*, void*);
+int valid_bottom_of_stack(class_use*, void*);
 
 int run_validations(validation*, class_use*);
 int run_actions(action*, class_use*);

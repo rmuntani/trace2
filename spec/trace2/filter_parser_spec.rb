@@ -53,6 +53,30 @@ describe Trace2::FilterParser do
             ]
           end
         end
+
+        context 'when the validation has a non-array value' do
+          it 'parses the filter' do
+            filter = [{
+              reject: [{ top_of_stack: true, bottom_of_stack: false }]
+            }]
+            parsed_filter = Trace2::FilterParser.new(filter).parse
+
+            expect(parsed_filter).to eq %w[
+              1
+              1
+              1
+              2
+              validate_top_of_stack
+              1
+              true
+              validate_bottom_of_stack
+              1
+              false
+              reject
+              filter
+            ]
+          end
+        end
       end
 
       context 'when there is more than one validation' do
