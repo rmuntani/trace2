@@ -24,6 +24,7 @@
 #define LINENO 3
 #define TOP_OF_STACK 4
 #define BOTTOM_OF_STACK 5
+#define CALLER_CLASS 6
 
 typedef struct validation {
   int (*function)(class_use*, void*);
@@ -100,6 +101,19 @@ int run_validations(validation *validations, class_use *use) {
   return valid;
 }
 
+int valid_caller_class(class_use *use, void *validations_ptr) {
+  validation *validations = (validation*)validations_ptr;
+  class_use *curr_use = use->caller;
+  int valid = 0;
+
+  while(valid == 0 && curr_use != NULL) {
+    valid |= run_validations(validations, curr_use);
+    curr_use = curr_use->caller;
+  }
+
+  return valid;
+}
+
 int run_actions(action *actions, class_use *use) {
   int valid = 1;
   while(valid == 1 && actions != NULL && actions->type != NONE) {
@@ -140,48 +154,6 @@ static int *duplicate_int_array(char** array, int start, int end) {
   dup_array[i] = 0;
 
   return dup_array;
-}
-
-static int validation_type(char *type) {
-  if (strcmp(type, "validate_lineno") == 0) return LINENO;
-  else if (strcmp(type, "validate_name") == 0) return NAME;
-  else if (strcmp(type, "validate_path") == 0) return PATH;
-  else if (strcmp(type, "validate_method") == 0) return METHOD;
-  else if (strcmp(type, "validate_top_of_stack") == 0) return TOP_OF_STACK;
-  else if (strcmp(type, "validate_bottom_of_stack") == 0) return BOTTOM_OF_STACK;
-  else return NOT_IMPLEMENTED;
-}
-
-static void setup_validation(char **filter, int *pos, validation *curr_validation) {
-  int num_values = atoi(filter[*pos + 1]), type;
-
-  type = validation_type(filter[*pos]);
-  curr_validation->values = malloc(sizeof(void*)*(num_values + 1));
-  (*pos) += 2;
-
-  if(type == LINENO) {
-    curr_validation->function = valid_lineno;
-    curr_validation->values = (void*)duplicate_int_array(filter, *pos, *pos + num_values);
-  } else if(type == NAME || type == PATH || type == METHOD) {
-    if(type == NAME) curr_validation->function = valid_name;
-    else if(type == PATH) curr_validation->function = valid_path;
-    else curr_validation->function = valid_method;
-
-    curr_validation->values = (void*)duplicate_words_array(filter, *pos, *pos + num_values);
-  } else if (type == TOP_OF_STACK || type == BOTTOM_OF_STACK) {
-    int *value = malloc(sizeof(int));
-    if(type == TOP_OF_STACK) curr_validation->function = valid_top_of_stack;
-    else if(type == BOTTOM_OF_STACK) curr_validation->function = valid_bottom_of_stack;
-
-    *value = (strcmp(filter[*pos], "true") == 0) ? 1 : 0;
-
-    curr_validation->values= (int*)value;
-  } else {
-    curr_validation->values = NULL;
-    curr_validation->function = valid_not_implemented;
-  }
-
-  (*pos) += num_values - 1;
 }
 
 static filter *initialize_filters(int num_filters) {
@@ -230,6 +202,62 @@ static validation *initialize_validation(int num_validation) {
   (curr_validation[num_validation]).function = NULL;
 
   return curr_validation;
+}
+
+static int validation_type(char *type) {
+  if (strcmp(type, "validate_lineno") == 0) return LINENO;
+  else if (strcmp(type, "validate_name") == 0) return NAME;
+  else if (strcmp(type, "validate_path") == 0) return PATH;
+  else if (strcmp(type, "validate_method") == 0) return METHOD;
+  else if (strcmp(type, "validate_top_of_stack") == 0) return TOP_OF_STACK;
+  else if (strcmp(type, "validate_bottom_of_stack") == 0) return BOTTOM_OF_STACK;
+  else if (strcmp(type, "validate_caller_class") == 0) return CALLER_CLASS;
+  else return NOT_IMPLEMENTED;
+}
+
+static void setup_validation(char **filter, int *pos, validation *curr_validation) {
+  int num_values = atoi(filter[*pos + 1]), type;
+
+  type = validation_type(filter[*pos]);
+  (*pos) += 2;
+
+  if(type == LINENO) {
+    curr_validation->function = valid_lineno;
+    curr_validation->values = (void*)duplicate_int_array(filter, *pos, *pos + num_values);
+  } else if(type == NAME || type == PATH || type == METHOD) {
+    if(type == NAME) curr_validation->function = valid_name;
+    else if(type == PATH) curr_validation->function = valid_path;
+    else curr_validation->function = valid_method;
+
+    curr_validation->values = (void*)duplicate_words_array(filter, *pos, *pos + num_values);
+  } else if (type == TOP_OF_STACK || type == BOTTOM_OF_STACK) {
+    int *value = malloc(sizeof(int));
+    if(type == TOP_OF_STACK) curr_validation->function = valid_top_of_stack;
+    else if(type == BOTTOM_OF_STACK) curr_validation->function = valid_bottom_of_stack;
+
+    *value = (strcmp(filter[*pos], "true") == 0) ? 1 : 0;
+
+    curr_validation->values= (int*)value;
+  } else if (type == CALLER_CLASS) {
+    validation *caller_class_validations; 
+
+    caller_class_validations = initialize_validation(num_values);
+    curr_validation->values = (void*)caller_class_validations;
+    curr_validation->function = valid_caller_class;
+
+    while(caller_class_validations->function != NULL) {
+      setup_validation(filter, pos, caller_class_validations);
+      caller_class_validations++; 
+      (*pos) += 1;
+    }
+    
+    (*pos) -= num_values;
+  } else {
+    curr_validation->values = NULL;
+    curr_validation->function = valid_not_implemented;
+  }
+
+  (*pos) += num_values - 1;
 }
 
 filter* build_filters(char** filter_array) {

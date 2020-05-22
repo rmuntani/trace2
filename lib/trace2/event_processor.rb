@@ -4,6 +4,7 @@ module Trace2
   # Processes a TracePoint event
   class EventProcessor
     attr_accessor :classes_uses
+    EVENTS = %i[call b_call].freeze
 
     def initialize(filter_by)
       @selector = QueryUse.where(filter_by)
@@ -24,6 +25,10 @@ module Trace2
       @classes_uses << caller_to_classes_uses if @stack_level > caller.length
       @stack_level = caller.length
       update_callers_stack(trace_point)
+    end
+
+    def events
+      EVENTS
     end
 
     private

@@ -15,7 +15,7 @@ module Trace2
     def initialize(args = {})
       @event_processor = initialize_event_processor(args)
       @classes_uses = []
-      @trace_point = TracePoint.new(:call, :b_call) do |tp|
+      @trace_point = TracePoint.new(*@event_processor.events) do |tp|
         @event_processor.process_event(tp)
       end
     end

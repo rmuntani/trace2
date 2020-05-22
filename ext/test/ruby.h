@@ -14,6 +14,10 @@ typedef struct {
 
 } rb_trace_arg_t;
 
+typedef struct {
+
+} ID;
+
 VALUE rb_cObject;
 
 typedef unsigned long rb_event_flag_t;
@@ -40,6 +44,8 @@ VALUE rb_define_class_under(VALUE, char*, VALUE);
 
 void rb_define_method(VALUE, const char*, void (*)(), int);
 
+void rb_define_const(VALUE, const char*, VALUE);
+
 int TYPE(VALUE);
 
 char* rb_class2name(VALUE);
@@ -65,3 +71,9 @@ VALUE rb_ary_entry(VALUE, long);
 long RARRAY_LEN(VALUE);
 
 char* StringValueCStr(VALUE);
+
+VALUE ID2SYM(ID);
+
+ID rb_intern(char*);
+
+void rb_define_const(VALUE, const char*, VALUE);

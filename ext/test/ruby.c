@@ -15,6 +15,10 @@ typedef struct {
   rb_event_flag_t event_flag;
 } rb_trace_arg_t;
 
+typedef struct {
+
+} ID;
+
 rb_trace_arg_t *tracearg_mock;
 VALUE rb_cObject;
 
@@ -86,6 +90,8 @@ VALUE rb_sprintf(char* str, ...) {}
 
 VALUE SYM2ID(VALUE symbol) {}
 
+VALUE ID2SYM(ID id) {}
+
 VALUE rb_ary_new() {}
 
 VALUE rb_ary_push(VALUE array, VALUE value) {}
@@ -95,3 +101,7 @@ VALUE rb_ary_entry(VALUE array, long position) {}
 long RARRAY_LEN(VALUE array) {}
 
 char* StringValueCStr(VALUE str) {}
+
+ID rb_intern(char* id) {}
+
+void rb_define_const(VALUE class, const char* str, VALUE content) {}

@@ -40,6 +40,18 @@ describe Trace2::EventProcessorC do
     it '#classes_uses' do
       expect { processor.classes_uses }.not_to raise_error
     end
+
+    it '#events' do
+      expect { processor.events }.not_to raise_error
+    end
+  end
+
+  describe '#events' do
+    it 'returns the needed events for the extension' do
+      processor = Trace2::EventProcessorC.new([])
+
+      expect(processor.events).to eq %i[call b_call return b_return]
+    end
   end
 
   describe 'test all functions' do
@@ -125,6 +137,47 @@ describe Trace2::EventProcessorC do
       )
       expect(parsed_classes).to include(
         name: 'Nested', method: 'nested_simple_call'
+      )
+    end
+
+    it 'returns filtered array for a caller class filter' do
+      class_lister_args = {
+        filter: [
+          {
+            allow: [{
+              name: ['Simple'],
+              caller_class: { name: ['ComplexNesting'] }
+            }]
+          },
+          {
+            reject: [{ caller_class: { name: ['Nested'] } }]
+          }
+        ],
+        event_processor: Trace2::EventProcessorC,
+        filter_parser: Trace2::FilterParser
+      }
+      class_lister = Trace2::ClassLister.new(class_lister_args)
+
+      class_lister.enable
+      complex_nesting = ComplexNesting.new
+      complex_nesting.complex_call
+      class_lister.disable
+
+      classes_uses = class_lister.classes_uses
+      parsed_classes = classes_uses.map do |class_use|
+        {
+          name: class_use.match(/class: ([\w|:]+)/)[1],
+          method: class_use.match(/method: ([\w|:]+)/)[1],
+          caller_class: class_use.match(/caller: ([\w|:]+)/)[1]
+        }
+      end
+
+      expect(parsed_classes).to eq(
+        [{
+          name: 'Simple',
+          method: 'simple_call',
+          caller_class: 'ComplexNesting'
+        }]
       )
     end
   end

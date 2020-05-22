@@ -363,6 +363,137 @@ multiple_filters_build_test(const MunitParameter params[], void* filter_fixture)
   return MUNIT_OK;
 }
 
+static void*
+build_caller_class_filter_setup(const MunitParameter params[], void* user_data) {
+  char **caller_class_filter = malloc(sizeof(char*)*16);
+
+  caller_class_filter[0] = "1";
+  caller_class_filter[1] = "1";
+  caller_class_filter[2] = "1";
+  caller_class_filter[3] = "1";
+  caller_class_filter[4] = "validate_caller_class";
+  caller_class_filter[5] = "2";
+  caller_class_filter[6] = "validate_name";
+  caller_class_filter[7] = "2";
+  caller_class_filter[8] = "MyClass";
+  caller_class_filter[9] = "OurClass";
+  caller_class_filter[10] = "validate_method";
+  caller_class_filter[11] = "1";
+  caller_class_filter[12] = "yes";
+  caller_class_filter[13] = "reject";
+  caller_class_filter[14] = "filter";
+  caller_class_filter[15] = NULL;
+
+  return (void*)caller_class_filter;
+}
+
+MunitResult
+build_caller_class_filter_test(const MunitParameter params[], void* filter_fixture) {
+  filter *filters;
+  action *actions;
+  validation **validations, *caller_class_validations;
+
+  filters = build_filters((char**)filter_fixture);
+
+  actions = filters->actions;
+
+  validations = actions->validations;
+  caller_class_validations = (validation*)(*validations)->values;
+
+  munit_assert_int(filters->num_actions, ==, 1);
+
+  munit_assert_int(actions->num_validations, ==, 1);
+  munit_assert_int(actions->type, ==, REJECT);
+
+  munit_assert_ptr_equal((*validations)->function, valid_caller_class);
+
+  munit_assert_string_equal("MyClass", *((char**)(*caller_class_validations).values));
+  munit_assert_string_equal("OurClass", *((char**)(*caller_class_validations).values + 1));
+  munit_assert_ptr_equal((*caller_class_validations).function, valid_name);
+
+  munit_assert_string_equal("yes", *((char**)(caller_class_validations + 1)->values));
+  munit_assert_ptr_equal((*(caller_class_validations + 1)).function, valid_method);
+
+  return MUNIT_OK;
+}
+
+static void*
+multiple_filters_caller_class_validation_build_setup(const MunitParameter params[], void* user_data) {
+  char **caller_class_filter = malloc(sizeof(char*)*27);
+
+  caller_class_filter[0] = "2";
+  caller_class_filter[1] = "1";
+  caller_class_filter[2] = "1";
+  caller_class_filter[3] = "2";
+  caller_class_filter[4] = "validate_caller_class";
+  caller_class_filter[5] = "2";
+  caller_class_filter[6] = "validate_name";
+  caller_class_filter[7] = "2";
+  caller_class_filter[8] = "MyClass";
+  caller_class_filter[9] = "OurClass";
+  caller_class_filter[10] = "validate_method";
+  caller_class_filter[11] = "1";
+  caller_class_filter[12] = "yes";
+  caller_class_filter[13] = "validate_method";
+  caller_class_filter[14] = "1";
+  caller_class_filter[15] = "yes";
+  caller_class_filter[16] = "reject";
+  caller_class_filter[17] = "filter";
+  caller_class_filter[18] = "1";
+  caller_class_filter[19] = "1";
+  caller_class_filter[20] = "1";
+  caller_class_filter[21] = "validate_bottom_of_stack";
+  caller_class_filter[22] = "1";
+  caller_class_filter[23] = "false";
+  caller_class_filter[24] = "allow";
+  caller_class_filter[25] = "filter";
+  caller_class_filter[26] = NULL;
+
+  return (void*)caller_class_filter;
+}
+
+MunitResult
+multiple_filters_caller_class_validation_build_test(const MunitParameter params[], void* filter_fixture) {
+  filter *filters;
+  action *first_actions, *second_actions;
+  validation **first_validations, **second_validations,
+             *caller_class_validations;
+
+  filters = build_filters((char**)filter_fixture);
+
+  first_actions = filters->actions;
+  second_actions = (filters + 1)->actions;
+
+  first_validations = first_actions->validations;
+  second_validations = second_actions->validations;
+  caller_class_validations = (validation*)(*first_validations)->values;
+
+  munit_assert_int(filters->num_actions, ==, 1);
+  munit_assert_int((filters + 1)->num_actions, ==, 1);
+
+  munit_assert_int(first_actions->num_validations, ==, 1);
+  munit_assert_int(first_actions->type, ==, REJECT);
+
+  munit_assert_int(second_actions->num_validations, ==, 1);
+  munit_assert_int(second_actions->type, ==, ALLOW);
+
+  munit_assert_ptr_equal((*first_validations)->function, valid_caller_class);
+  munit_assert_ptr_equal((*first_validations + 1)->function, valid_method);
+  munit_assert_string_equal("yes", *((char**)((*first_validations + 1)->values)));
+
+  munit_assert_ptr_equal((*second_validations)->function, valid_bottom_of_stack);
+  munit_assert_ptr_equal(*((int*)((*second_validations)->values)), 0);
+
+  munit_assert_string_equal("MyClass", *((char**)(*caller_class_validations).values));
+  munit_assert_string_equal("OurClass", *((char**)(*caller_class_validations).values + 1));
+  munit_assert_ptr_equal((*caller_class_validations).function, valid_name);
+
+  munit_assert_string_equal("yes", *((char**)(caller_class_validations + 1)->values));
+  munit_assert_ptr_equal((*(caller_class_validations + 1)).function, valid_method);
+
+  return MUNIT_OK;
+}
+
 MunitTest build_filter_tests[] = {
   {
     "when filter is simple",
@@ -432,6 +563,22 @@ MunitTest build_filter_tests[] = {
     "when there are multiple filters",
     multiple_filters_build_test,
     multiple_filters_build_setup,
+    NULL,
+    MUNIT_TEST_OPTION_NONE,
+    NULL
+  },
+  {
+    "when filter has a caller class validation",
+    build_caller_class_filter_test,
+    build_caller_class_filter_setup,
+    NULL,
+    MUNIT_TEST_OPTION_NONE,
+    NULL
+  },
+  {
+    "when there are multiple filters with a caller class validation",
+    multiple_filters_caller_class_validation_build_test,
+    multiple_filters_caller_class_validation_build_setup,
     NULL,
     MUNIT_TEST_OPTION_NONE,
     NULL

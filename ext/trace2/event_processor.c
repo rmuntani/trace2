@@ -24,6 +24,7 @@ classes_stack *top;
 filter *curr_filter;
 
 VALUE event_processor;
+VALUE event_symbols;
 
 class_use *pop(classes_stack **top) {
   if (*top == NULL) {
@@ -203,15 +204,34 @@ void initialize(VALUE self, VALUE filters) {
   clear_list(&list_head, &list_tail);
 }
 
+void initialize_event_symbols() {
+  int num_events = 4, i;
+  char *symbols[] = { "call", "b_call", "return", "b_return", NULL };
+  event_symbols = rb_ary_new();
+
+  for(i = 0; i < num_events; i++) {
+    rb_ary_push(event_symbols, ID2SYM(rb_intern(symbols[i])));
+  }
+}
+
+VALUE return_event_symbols(VALUE self) {
+  return event_symbols;
+}
+
 void init_event_processor(VALUE trace2) {
   top = NULL;
   list_head = NULL;
   list_tail = NULL;
   curr_filter = NULL;
 
+  initialize_event_symbols();
+
   event_processor = rb_define_class_under(trace2, "EventProcessorC", rb_cObject);
   rb_define_method(event_processor, "initialize", initialize, 1);
   rb_define_method(event_processor, "process_event", process_event, 1);
   rb_define_method(event_processor, "aggregate_uses", aggregate_uses, 0);
   rb_define_method(event_processor, "classes_uses", list_classes_uses, 0);
+
+  rb_define_const(event_processor, "EVENT", event_symbols);
+  rb_define_method(event_processor, "events", return_event_symbols, 0);
 }

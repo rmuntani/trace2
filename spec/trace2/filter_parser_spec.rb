@@ -77,6 +77,34 @@ describe Trace2::FilterParser do
             ]
           end
         end
+
+        context 'when the validation validates a caller class' do
+          it 'parses the filter' do
+            filter = [{
+              reject: [{
+                caller_class: { name: ['Yes'], bottom_of_stack: false }
+              }]
+            }]
+            parsed_filter = Trace2::FilterParser.new(filter).parse
+
+            expect(parsed_filter).to eq %w[
+              1
+              1
+              1
+              1
+              validate_caller_class
+              2
+              validate_name
+              1
+              Yes
+              validate_bottom_of_stack
+              1
+              false
+              reject
+              filter
+            ]
+          end
+        end
       end
 
       context 'when there is more than one validation' do
