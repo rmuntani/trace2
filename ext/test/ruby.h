@@ -5,6 +5,12 @@
 #define T_MODULE 0
 #define T_CLASS 1
 #define T_NIL 2
+#define T_REGEXP 3
+
+// PRIsVALUE is used on event_processor.c
+#define RUBY_PRI_VALUE_MARK "\v"
+#define PRIsVALUE PRI_VALUE_PREFIX"i" RUBY_PRI_VALUE_MARK
+#define PRI_VALUE_PREFIX ""
 
 typedef struct {
 

@@ -6,6 +6,7 @@ gcc -g -I ext/test \
        ext/trace2/query_use.c \
        ext/trace2/name_finder.c \
        ext/test/munit/munit.c \
+       ext/test/regex.c \
        ext/test/ruby.c \
        ext/test/event_processor/add_callee_to_caller_test.c \
        ext/test/event_processor/clear_test.c \

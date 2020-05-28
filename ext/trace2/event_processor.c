@@ -150,7 +150,6 @@ void process_event(VALUE self, VALUE trace_point) {
   } else if (event == RUBY_EVENT_RETURN || event == RUBY_EVENT_B_RETURN) {
     pop(&top);
   }
-
 }
 
 void aggregate_uses(VALUE self) { };
@@ -193,7 +192,13 @@ void initialize(VALUE self, VALUE filters) {
 
   for(i = 0; i < length; i++) {
     VALUE curr_value = rb_ary_entry(filters, i);
-    filters_array[i] = StringValueCStr(curr_value);
+    if(TYPE(curr_value) == T_REGEXP) {
+      // indirectly use Regex.to_s method
+      VALUE curr_regex = rb_sprintf("%"PRIsVALUE"", curr_value);
+      filters_array[i] = StringValueCStr(curr_regex);
+    } else {
+      filters_array[i] = StringValueCStr(curr_value);
+    }
   }
   filters_array[length] = NULL;
 

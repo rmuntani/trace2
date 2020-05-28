@@ -180,5 +180,49 @@ describe Trace2::EventProcessorC do
         }]
       )
     end
+
+    it 'uses regex on filters' do
+      class_lister_args = {
+        filter: [{ allow: [{ method: [/simple/] }] }],
+        event_processor: Trace2::EventProcessorC,
+        filter_parser: Trace2::FilterParser
+      }
+      class_lister = Trace2::ClassLister.new(class_lister_args)
+
+      class_lister.enable
+      complex_nesting = ComplexNesting.new
+      complex_nesting.complex_call
+      class_lister.disable
+
+      classes_uses = class_lister.classes_uses
+      parsed_classes = classes_uses.map do |class_use|
+        {
+          name: class_use.match(/class: ([\w|:]+)/)[1],
+          method: class_use.match(/method: ([\w|:]+)/)[1],
+          caller_class: class_use.match(/caller: ([\w|:]+)/)[1]
+        }
+      end
+
+      expect(parsed_classes).to eq([{
+                                     name: 'Simple',
+                                     method: 'simple_call',
+                                     caller_class: 'ComplexNesting'
+                                   },
+                                    {
+                                      name: 'Simple',
+                                      method: 'simple_call',
+                                      caller_class: 'Nested'
+                                    },
+                                    {
+                                      name: 'ComplexNesting',
+                                      method: 'complex_simple_call',
+                                      caller_class: 'ComplexNesting'
+                                    },
+                                    {
+                                      name: 'Nested',
+                                      method: 'nested_simple_call',
+                                      caller_class: 'ComplexNesting'
+                                    }])
+    end
   end
 end

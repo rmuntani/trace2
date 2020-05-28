@@ -2,14 +2,9 @@
 #include <string.h>
 #include "ruby.h"
 #include "event_processor.h"
+#include "regex.h"
 // TODO: eventually remove this header
 // #include "munit/munit.h"
-
-#define NAME 0
-#define METHOD 1
-#define PATH 2
-#define LINENO 3
-#define CALLER 4
 
 // possible types of an action
 #define UNDEFINED (-2)
@@ -17,6 +12,7 @@
 #define ALLOW 0
 #define REJECT 1
 
+// possible types of filter
 #define NOT_IMPLEMENTED -1
 #define NAME 0
 #define METHOD 1
@@ -43,27 +39,27 @@ typedef struct filter {
 } filter;
 
 int valid_name(class_use *use, void* names_ptr) {
-  char** names = names_ptr;
+  regex_t** names = names_ptr;
   while(*names != NULL) {
-    if (strcmp(use->name, *names) == 0) return 1;
+    if (run_regex(use->name, *names)) return 1;
     names++;
   }
   return 0;
 }
 
 int valid_method(class_use *use, void* methods_ptr) {
-  char** methods = methods_ptr;
+  regex_t** methods = methods_ptr;
   while(*methods != NULL) {
-    if (strcmp(use->method, *methods) == 0) return 1;
+    if (run_regex(use->method, *methods)) return 1;
     methods++;
   }
   return 0;
 }
 
 int valid_path(class_use *use, void* paths_ptr) {
-  char** paths = paths_ptr;
+  regex_t** paths = paths_ptr;
   while(*paths != NULL) {
-    if (strcmp(use->path, *paths) == 0) return 1;
+    if (run_regex(use->path, *paths)) return 1;
     paths++;
   }
   return 0;
@@ -132,16 +128,16 @@ int run_actions(action *actions, class_use *use) {
   return valid;
 }
 
-static char **duplicate_words_array(char** array, int start, int end) {
+static regex_t **build_regex_array(char** array, int start, int end) {
   int i = 0;
-  char **dup_array = malloc(sizeof(char*)*(end - start + 2));
+  regex_t **regex_array = malloc(sizeof(regex_t*)*(end - start + 2));
 
   for(i = 0; i + start <= end; i++) {
-    dup_array[i] = array[i + start];
+    build_regex(array[i + start], (regex_array + i));
   }
-  dup_array[i] = NULL;
+  regex_array[i] = NULL;
 
-  return dup_array;
+  return regex_array;
 }
 
 static int *duplicate_int_array(char** array, int start, int end) {
@@ -229,7 +225,7 @@ static void setup_validation(char **filter, int *pos, validation *curr_validatio
     else if(type == PATH) curr_validation->function = valid_path;
     else curr_validation->function = valid_method;
 
-    curr_validation->values = (void*)duplicate_words_array(filter, *pos, *pos + num_values);
+    curr_validation->values = (void*)build_regex_array(filter, *pos, *pos + num_values);
   } else if (type == TOP_OF_STACK || type == BOTTOM_OF_STACK) {
     int *value = malloc(sizeof(int));
     if(type == TOP_OF_STACK) curr_validation->function = valid_top_of_stack;
