@@ -5,6 +5,7 @@ gcc -g -I ext/test \
        ext/trace2/event_processor.c \
        ext/trace2/query_use.c \
        ext/trace2/name_finder.c \
+       ext/trace2/summarizer.c \
        ext/test/munit/munit.c \
        ext/test/regex.c \
        ext/test/ruby.c \
@@ -21,8 +22,10 @@ gcc -g -I ext/test \
        ext/test/query_use/build_filter_test.c \
        ext/test/query_use/run_filters_test.c \
        ext/test/query_use/valid_caller_class_test.c \
+       ext/test/summarizer/summarize_test.c \
        ext/test/query_use/suite.c \
        ext/test/event_processor/suite.c \
+       ext/test/summarizer/suite.c \
        ext/test/test.c -o test.o
 
 echo 'Compiled tests output file is test.o'

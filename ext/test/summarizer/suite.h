@@ -1,0 +1,1 @@
+MunitSuite *summarizer_suite();
