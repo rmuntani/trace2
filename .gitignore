@@ -1,9 +1,12 @@
-coverage
 TODO.md
 trace2-*.gem
+
+coverage
 tmp
+
 lib/trace2/trace2_c.so
 learnings.c
 test.o
+
 ext/test/munit/**
 ext/test/munit/**

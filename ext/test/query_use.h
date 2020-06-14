@@ -3,7 +3,7 @@
 #define REJECT 1
 
 struct class_use;
-typedef class_use class_use;
+typedef struct class_use class_use;
 
 typedef struct validation {
   int (*function)(class_use*, void*);
