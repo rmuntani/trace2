@@ -10,10 +10,11 @@ typedef struct methods_list {
 } methods_list;
 
 typedef struct summarized_list {
-  char* name;
+  char* caller;
+  char* callee;
   struct methods_list *methods;
   struct summarized_list *next;
 } summarized_list;
 
 void init_summarizer(VALUE);
-summarized_list *reduce_uses_list(classes_list*);
+summarized_list *reduce_callees_list(classes_list*);

@@ -1,6 +1,6 @@
 #include "munit/munit.h"
 #include "summarize_test.h"
-#include "reduce_uses_list_test.h"
+#include "reduce_callees_list_test.h"
 
 #define NUMBER_OF_SUITES 2
 
@@ -11,7 +11,7 @@ MunitSuite *summarizer_suite() {
 
   *suite = summarize_suite;
   *suite++;
-  *suite = reduce_uses_list_suite;
+  *suite = reduce_callees_list_suite;
 
   summarizer->prefix =  "summarizer ";
   summarizer->tests = NULL;

@@ -7,14 +7,14 @@
 
 VALUE summarizer;
 
-/* find_summary_with_name: given a name, searches a list for a summary that has
- * that name. returns the matching summarized_list item or NULL */
-summarized_list *find_summary_with_name(summarized_list *summary, char* name) {
+/* find_summary_with_name: given a callee name, searches a list for a summary that has
+ * that callee. returns the matching summarized_list item or NULL */
+summarized_list *find_summary_with_name(summarized_list *summary, char* callee_name) {
   summarized_list *curr_summary = summary;
 
   for(curr_summary = summary;
       curr_summary != NULL &&
-      strcmp(curr_summary->name, name) != 0;
+      strcmp(curr_summary->callee, callee_name) != 0;
       curr_summary = curr_summary->next) {}
 
   return curr_summary;
@@ -46,16 +46,16 @@ methods_list *find_method_with_name(methods_list *methods, char* name) {
   return curr_method;
 }
 
-/* reduce_uses_list: reduces a list of classes uses to a format that is
+/* reduce_callees_list: reduces a list of classes uses to a format that is
  * used on the generation on a new class use */
 
 /* That function uses inefficient data structures and algorithms,
  * which may result in bad performance. If that is the case,
  * a better implementation should be used */
-summarized_list *reduce_uses_list(classes_list* list) {
+summarized_list *reduce_callees_list(class_use* caller) {
   summarized_list *summary = NULL, *summary_tail,
                   *curr_summary;
-  classes_list* curr_item = list;
+  classes_list* curr_item = caller->head_callee;
 
   while(curr_item != NULL) {
     curr_summary = find_summary_with_name(summary, curr_item->class_use->name);
@@ -64,7 +64,8 @@ summarized_list *reduce_uses_list(classes_list* list) {
     if(curr_summary == NULL) {
       push_summary_item(&summary, &summary_tail);
 
-      summary_tail->name = curr_item->class_use->name;
+      summary_tail->caller = caller->name;
+      summary_tail->callee = curr_item->class_use->name;
 
       // initialize the methods list with the current value
       summary_tail->methods = malloc(sizeof(methods_list));
