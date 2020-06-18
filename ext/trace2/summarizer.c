@@ -8,9 +8,9 @@
 VALUE summarizer;
 
 /* find_summary_with_name: given a callee name, searches a list for a summary that has
- * that callee. returns the matching summarized_list item or NULL */
-summarized_list *find_summary_with_name(summarized_list *summary, char* callee_name) {
-  summarized_list *curr_summary = summary;
+ * that callee. returns the matching summarized_callees item or NULL */
+summarized_callees *find_summary_with_name(summarized_callees *summary, char* callee_name) {
+  summarized_callees *curr_summary = summary;
 
   for(curr_summary = summary;
       curr_summary != NULL &&
@@ -20,16 +20,16 @@ summarized_list *find_summary_with_name(summarized_list *summary, char* callee_n
   return curr_summary;
 }
 
-/* push_summary_item: push a new summarized_list item into a linked list */
-void push_summary_item(summarized_list **head, summarized_list **tail) {
+/* push_summary_item: push a new summarized_callees item into a linked list */
+void push_summary_item(summarized_callees **head, summarized_callees **tail) {
   if (*head == NULL) {
-    *head = malloc(sizeof(summarized_list));
+    *head = malloc(sizeof(summarized_callees));
     *tail = *head;
   } else if ((*head)->next == NULL) {
-    (*head)->next = malloc(sizeof(summarized_list));
+    (*head)->next = malloc(sizeof(summarized_callees));
     *tail = (*head)->next;
   } else {
-    (*tail)->next = malloc(sizeof(summarized_list));
+    (*tail)->next = malloc(sizeof(summarized_callees));
     *tail = (*tail)->next;
   }
 }
@@ -52,8 +52,8 @@ methods_list *find_method_with_name(methods_list *methods, char* name) {
 /* That function uses inefficient data structures and algorithms,
  * which may result in bad performance. If that is the case,
  * a better implementation should be used */
-summarized_list *reduce_callees_list(class_use* caller) {
-  summarized_list *summary = NULL, *summary_tail,
+summarized_callees *reduce_callees_list(class_use* caller) {
+  summarized_callees *summary = NULL, *summary_tail,
                   *curr_summary;
   classes_list* curr_item = caller->head_callee;
 

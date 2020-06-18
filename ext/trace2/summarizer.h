@@ -3,11 +3,11 @@ typedef struct methods_list {
   struct methods_list *next;
 } methods_list;
 
-typedef struct summarized_list {
+typedef struct summarized_callees {
   char* caller;
   char* callee;
   struct methods_list *methods;
-  struct summarized_list *next;
-} summarized_list;
+  struct summarized_callees *next;
+} summarized_callees;
 
 void init_summarizer(VALUE);

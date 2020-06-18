@@ -26,7 +26,7 @@ single_use_list_reduce_setup(const MunitParameter params[], void* user_data) {
 
 MunitResult
 single_use_list_reduce_test(const MunitParameter params[], void* caller) {
-  summarized_list *summary = reduce_callees_list((class_use*)caller);
+  summarized_callees *summary = reduce_callees_list((class_use*)caller);
 
   munit_assert_ptr_not_equal(summary, NULL);
   munit_assert_ptr_equal(summary->next, NULL);
@@ -70,7 +70,7 @@ two_different_uses_list_reduce_setup(const MunitParameter params[], void* user_d
 
 MunitResult
 two_different_uses_list_reduce_test(const MunitParameter params[], void* caller) {
-  summarized_list *summary = reduce_callees_list((class_use*)caller);
+  summarized_callees *summary = reduce_callees_list((class_use*)caller);
 
   munit_assert_ptr_not_equal(summary, NULL);
   munit_assert_ptr_not_equal(summary->next, NULL);
@@ -121,7 +121,7 @@ same_class_different_methods_list_reduce_setup(const MunitParameter params[], vo
 
 MunitResult
 same_class_different_methods_list_reduce_test(const MunitParameter params[], void* caller) {
-  summarized_list *summary = reduce_callees_list((class_use*)caller);
+  summarized_callees *summary = reduce_callees_list((class_use*)caller);
 
   munit_assert_ptr_not_equal(summary, NULL);
   munit_assert_ptr_equal(summary->next, NULL);
@@ -167,7 +167,7 @@ repeated_uses_list_reduce_setup(const MunitParameter params[], void* user_data) 
 
 MunitResult
 repeated_uses_list_reduce_test(const MunitParameter params[], void* caller) {
-  summarized_list *summary = reduce_callees_list((class_use*)caller);
+  summarized_callees *summary = reduce_callees_list((class_use*)caller);
 
   munit_assert_ptr_not_equal(summary, NULL);
   munit_assert_ptr_equal(summary->next, NULL);
@@ -234,7 +234,7 @@ multiple_uses_list_reduce_setup(const MunitParameter params[], void* user_data) 
 
 MunitResult
 multiple_uses_list_reduce_test(const MunitParameter params[], void* caller) {
-  summarized_list *first_summary = reduce_callees_list((class_use*)caller),
+  summarized_callees *first_summary = reduce_callees_list((class_use*)caller),
                   *second_summary = first_summary->next,
                   *third_summary = second_summary->next;
 
