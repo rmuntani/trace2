@@ -1,1 +1,0 @@
-const MunitSuite reduce_callees_list_suite;

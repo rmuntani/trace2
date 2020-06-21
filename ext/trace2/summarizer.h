@@ -1,13 +1,25 @@
-typedef struct methods_list {
-  char* name;
-  struct methods_list *next;
-} methods_list;
+#define method_name(x) (char*)(x->value)
 
-typedef struct summarized_callees {
-  char* caller;
-  char* callee;
-  struct methods_list *methods;
-  struct summarized_callees *next;
-} summarized_callees;
+struct class_use;
+typedef struct class_use class_use;
+
+struct classes_list;
+typedef struct classes_list classes_list;
+
+typedef struct list {
+  struct list* next;
+  void* value;
+} list;
+
+typedef struct class_methods {
+  char* name;
+  list* methods;
+} class_methods;
+
+typedef struct summarized_use {
+  list* callers;
+  class_methods *use;
+  list* callees;
+} summarized_use;
 
 void init_summarizer(VALUE);

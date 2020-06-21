@@ -1,8 +1,7 @@
 #include "munit/munit.h"
 #include "summarize_test.h"
-#include "reduce_callees_list_test.h"
 
-#define NUMBER_OF_SUITES 2
+#define NUMBER_OF_SUITES 1
 
 MunitSuite *summarizer_suite() {
   MunitSuite *suite = malloc(sizeof(MunitSuite)*NUMBER_OF_SUITES);
@@ -11,7 +10,6 @@ MunitSuite *summarizer_suite() {
 
   *suite = summarize_suite;
   *suite++;
-  *suite = reduce_callees_list_suite;
 
   summarizer->prefix =  "summarizer ";
   summarizer->tests = NULL;
