@@ -23,6 +23,9 @@ gcc -g -I ext/test \
        ext/test/query_use/run_filters_test.c \
        ext/test/query_use/valid_caller_class_test.c \
        ext/test/summarizer/summarize_test.c \
+       ext/test/summarizer/reduce_summarized_uses_test.c \
+       ext/test/summarizer/reduce_class_methods_list_test.c \
+       ext/test/summarizer/helper.c \
        ext/test/query_use/suite.c \
        ext/test/event_processor/suite.c \
        ext/test/summarizer/suite.c \

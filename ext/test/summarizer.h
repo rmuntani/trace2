@@ -23,3 +23,5 @@ typedef struct summarized_use {
 } summarized_use;
 
 summarized_use *summarize(class_use*);
+void* reduce_class_methods_list(list*, list*);
+list *reduce_summarized_uses(list*);

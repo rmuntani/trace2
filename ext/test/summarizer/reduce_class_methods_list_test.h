@@ -1,0 +1,1 @@
+const MunitSuite reduce_class_methods_list_suite;
