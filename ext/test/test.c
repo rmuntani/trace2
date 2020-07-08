@@ -2,8 +2,9 @@
 #include "munit/munit.h"
 #include "event_processor/suite.h"
 #include "query_use/suite.h"
+#include "hash_table/suite.h"
 
-#define NUMBER_OF_SUITES 2
+#define NUMBER_OF_SUITES 3
 
 void main(int argc, const char* argv[]) {
   MunitSuite *suites = malloc(sizeof(MunitSuite)*NUMBER_OF_SUITES);
@@ -20,6 +21,8 @@ void main(int argc, const char* argv[]) {
   *suites = *(event_processor_suite());
   suites++;
   *suites = *(query_use_suite());
+  suites++;
+  *suites = *(hash_table_suite());
 
   suite.suites = suite_head;
 
