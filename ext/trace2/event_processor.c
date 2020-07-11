@@ -23,6 +23,8 @@ classes_list *list_tail;
 classes_stack *top;
 filter *curr_filter;
 
+int accepted_uses;
+
 VALUE event_processor;
 VALUE event_symbols;
 
@@ -146,7 +148,12 @@ void process_event(VALUE self, VALUE trace_point) {
 
   if (event == RUBY_EVENT_CALL || event == RUBY_EVENT_B_CALL) {
     push_new_class_use(tracearg, &top);
-    insert(&list_head, &list_tail, top->class_use);
+
+    if(curr_filter == NULL ||
+        (curr_filter != NULL && run_filters(curr_filter, top->class_use) != NULL)) {
+      insert(&list_head, &list_tail, top->class_use);
+      accepted_uses++;
+    }
   } else if (event == RUBY_EVENT_RETURN || event == RUBY_EVENT_B_RETURN) {
     pop(&top);
   }
@@ -175,10 +182,7 @@ VALUE list_classes_uses(VALUE self) {
           curr_use->name, curr_use->lineno, curr_use->path, curr_use->method);
     }
 
-    if(curr_filter == NULL ||
-        (curr_filter != NULL && run_filters(curr_filter, curr_use) != NULL)) {
-      rb_ary_push(classes_uses, string);
-    }
+    rb_ary_push(classes_uses, string);
 
     curr = curr->next;
   }
@@ -207,6 +211,7 @@ void initialize(VALUE self, VALUE filters) {
   curr_filter = (length > 0) ? build_filters(filters_array) : NULL;
   clear_stack(&top);
   clear_list(&list_head, &list_tail);
+  accepted_uses = 0;
 }
 
 void initialize_event_symbols() {
@@ -224,6 +229,7 @@ VALUE return_event_symbols(VALUE self) {
 }
 
 void init_event_processor(VALUE trace2) {
+  accepted_uses = 0;
   top = NULL;
   list_head = NULL;
   list_tail = NULL;
