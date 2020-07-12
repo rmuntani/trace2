@@ -3,8 +3,9 @@
 #include "event_processor/suite.h"
 #include "query_use/suite.h"
 #include "hash_table/suite.h"
+#include "graph_generator/suite.h"
 
-#define NUMBER_OF_SUITES 3
+#define NUMBER_OF_SUITES 4
 
 void main(int argc, const char* argv[]) {
   MunitSuite *suites = malloc(sizeof(MunitSuite)*NUMBER_OF_SUITES);
@@ -23,6 +24,8 @@ void main(int argc, const char* argv[]) {
   *suites = *(query_use_suite());
   suites++;
   *suites = *(hash_table_suite());
+  suites++;
+  *suites = *(graph_generator_suite());
 
   suite.suites = suite_head;
 
