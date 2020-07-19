@@ -7,3 +7,4 @@ typedef struct classes_list classes_list;
 
 char **graph_strings(class_use*);
 char **build_graphs_array(classes_list*, int);
+void write_graph_file(char*, char**);

@@ -104,6 +104,24 @@ char** build_graphs_array(classes_list *head, int total_uses) {
   return graphs_array;
 }
 
+/* write_graph_file: given a filename and an array of strings,
+ * writes the strings on the file with filename, using the graph
+ * format */
+void write_graph_file(char* filename, char** graphs_array) {
+  FILE *file;
+  char **curr_str;
+
+  file = fopen(filename, "w");
+
+  fprintf(file, "graph {\n");
+  for(curr_str = graphs_array; *curr_str != NULL; curr_str++) {
+    fprintf(file, "%s\n", *curr_str); 
+  }
+  fprintf(file, "}");
+
+  fclose(file);
+}
+
 /* init_graph_generator: initializes the Ruby classes, modules and functions
  * related to Trace2::GraphGenerator */
 void init_graph_generator(VALUE trace2) {
