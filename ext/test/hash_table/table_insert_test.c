@@ -16,13 +16,13 @@ MunitResult
 empty_table_insert_test(const MunitParameter params[], void* fixture_table) {
   hash_table *table = (hash_table*)fixture_table;
   table_item *node;
-
-  table_insert(table, (void*)4, "testing");
+  int successful_insert = table_insert(table, (void*)4, "testing");
 
   node = table->table[1];
 
+  munit_assert_int(1, ==, successful_insert);
   munit_assert_ptr_equal(node->next, NULL);
-  munit_assert_int(4, ==, (int*)node->value);
+  munit_assert_int(4, ==, (int)node->value);
   munit_assert_string_equal(node->key, "testing");
 
   return MUNIT_OK;
@@ -46,17 +46,18 @@ MunitResult
 collision_table_insert_test(const MunitParameter params[], void* fixture_table) {
   hash_table *table = (hash_table*)fixture_table;
   table_item *node;
-
-  table_insert(table, (void*)4, "testing");
+  int successful_insert = table_insert(table, (void*)4, "testing");
 
   node = table->table[1];
+
+  munit_assert_int(1, ==, successful_insert);
 
   munit_assert_ptr_not_equal(node->next, NULL);
   munit_assert_ptr_equal(node->next->next, NULL);
 
-  munit_assert_int(3, ==, (int*)node->value);
+  munit_assert_int(3, ==, (int)node->value);
 
-  munit_assert_int(4, ==, (int*)node->next->value);
+  munit_assert_int(4, ==, (int)node->next->value);
   munit_assert_string_equal(node->next->key, "testing");
 
   return MUNIT_OK;
@@ -80,14 +81,15 @@ MunitResult
 repeated_key_table_insert_test(const MunitParameter params[], void* fixture_table) {
   hash_table *table = (hash_table*)fixture_table;
   table_item *node;
-
-  table_insert(table, (void*)4, "testing");
+  int successful_insert = table_insert(table, (void*)4, "testing");
 
   node = table->table[1];
 
+  munit_assert_int(0, ==, successful_insert);
+
   munit_assert_ptr_equal(node->next, NULL);
 
-  munit_assert_int(3, ==, (int*)node->value);
+  munit_assert_int(3, ==, (int)node->value);
   munit_assert_string_equal(node->key, "testing");
 
   return MUNIT_OK;

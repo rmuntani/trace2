@@ -18,6 +18,7 @@ gcc -g -I ext/test \
        ext/test/event_processor/push_new_class_use_test.c \
        ext/test/event_processor/push_test.c \
        ext/test/graph_generator/graph_strings_test.c \
+       ext/test/graph_generator/build_graphs_array_test.c \
        ext/test/graph_generator/suite.c \
        ext/test/hash_table/create_table_test.c \
        ext/test/hash_table/table_insert_test.c \

@@ -10,4 +10,4 @@ typedef struct hash_table {
 } hash_table;
 
 hash_table *create_table(int);
-void table_insert(hash_table*, void*, char*);
+int table_insert(hash_table*, void*, char*);
