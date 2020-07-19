@@ -7,6 +7,9 @@
 // TODO: eventually remove this header
 #include "munit/munit.h"
 
+extern classes_list *list_head;
+extern int accepted_uses;
+
 VALUE graph_generator;
 
 /* count_relationships: given a class_use as a parameter, this function
@@ -26,9 +29,9 @@ int count_relationships(class_use *use) {
  * returns a null-terminated string with format "CALLER -> CALLEE" */
 char* make_graph_string(char *caller_name, char *callee_name) {
   char *graph_string;
-  int total_length = strlen(callee_name) + strlen(caller_name) + 5;
+  int total_length = strlen(callee_name) + strlen(caller_name) + 7;
 
-  graph_string = malloc(sizeof(total_length));
+  graph_string = malloc(sizeof(char)*total_length);
   sprintf(graph_string, "%s -> %s", callee_name, caller_name);
 
   return graph_string;
@@ -113,17 +116,27 @@ void write_graph_file(char* filename, char** graphs_array) {
 
   file = fopen(filename, "w");
 
-  fprintf(file, "graph {\n");
+  fprintf(file, "digraph {\n");
   for(curr_str = graphs_array; *curr_str != NULL; curr_str++) {
-    fprintf(file, "%s\n", *curr_str); 
+    fprintf(file, "\t%s\n", *curr_str);
   }
   fprintf(file, "}");
 
   fclose(file);
 }
 
+/* generate_graph: ruby function to generate the graph using
+ * classes_list */
+void generate_graph(VALUE self, VALUE filepath) {
+  char **graphs_array = build_graphs_array(list_head, accepted_uses),
+       *filename = StringValueCStr(filepath);
+
+  write_graph_file(filename, graphs_array);
+}
+
 /* init_graph_generator: initializes the Ruby classes, modules and functions
  * related to Trace2::GraphGenerator */
 void init_graph_generator(VALUE trace2) {
-  graph_generator = rb_define_module_under(trace2, "GraphGenerator");
+  graph_generator = rb_define_class_under(trace2, "GraphGenerator", rb_cObject);
+  rb_define_method(graph_generator, "run", generate_graph, 1);
 }

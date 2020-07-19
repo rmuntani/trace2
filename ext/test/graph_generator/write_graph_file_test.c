@@ -27,7 +27,7 @@ empty_string_write_graph_file_test(const MunitParameter params[], void* str) {
   fgets(first_line, 256, file);
   fgets(second_line, 256, file);
 
-  munit_assert_string_equal(first_line, "graph {\n");
+  munit_assert_string_equal(first_line, "digraph {\n");
   munit_assert_string_equal(second_line, "}");
 
   return MUNIT_OK;
@@ -61,10 +61,10 @@ write_graph_file_test(const MunitParameter params[], void* str) {
   fgets(fourth_line, 256, file);
   fgets(fifth_line, 256, file);
 
-  munit_assert_string_equal(first_line, "graph {\n");
-  munit_assert_string_equal(second_line, "FirstUse -> Use\n");
-  munit_assert_string_equal(third_line, "SecondUse -> Use\n");
-  munit_assert_string_equal(fourth_line, "ThirdUse -> Use\n");
+  munit_assert_string_equal(first_line, "digraph {\n");
+  munit_assert_string_equal(second_line, "\tFirstUse -> Use\n");
+  munit_assert_string_equal(third_line, "\tSecondUse -> Use\n");
+  munit_assert_string_equal(fourth_line, "\tThirdUse -> Use\n");
   munit_assert_string_equal(fifth_line, "}");
 
   return MUNIT_OK;
