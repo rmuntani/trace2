@@ -7,3 +7,4 @@ learnings.c
 test.o
 ext/test/munit/**
 ext/test/munit/**
+spec/examples.txt

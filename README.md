@@ -4,12 +4,19 @@ trace2 is a gem to improve tracing of an application.
 
 ## Usage
 
+### Runner
+
+trace2's runner should be used with other Ruby executables:
+
+```bash
+trace2 $executable
+```
+
+### On an application
+
 ```ruby
 filter = []
-class_lister = Trace2::ClassLister.new(filter: filter)
-class_lister.enable
-# code that should generate a list of classes' uses
-class_lister.disable
+class_lister = Trace2::ClassLister.new(filter: filter) class_lister.enable # code that should generate a list of classes' uses class_lister.disable
 
 class_lister.classes_uses # an array of Trace2::ClassUse
 ```
@@ -57,9 +64,9 @@ that Ruby currently has more validations than the extension.
 
 |validation name   | effect                                                                     | possible values  |
 |------------------|----------------------------------------------------------------------------|------------------|
-| name             | check if class name is equal to any of the possible values                 | array of Strings |
-| method           | check if class method is equal to any of the possible values               | array of Strings |
-| path             | check if class path is equal to any of the possible values                 | array of Strings |
+| name             | check if class name is equal to any of the possible values                 | array of Regex   |
+| method           | check if class method is equal to any of the possible values               | array of Regex   |
+| path             | check if class path is equal to any of the possible values                 | array of Regex   |
 | lineno           | check if the line number is equal to any of the possible values            | array of Integers|
 | top_of_stack     | check if class has callees and if the result is equal to the possible value| true or false    |
 | bottom_of_stack  | check if class has callers and if the result is equal to the possible value| true or false    |
@@ -72,8 +79,8 @@ script/test_ruby.sh
 
 ## Running extension tests
 
-Make sure that `munit.c` and `munit.h` are inside the `ext/test/munit` folder. 
-Both files can be found at [µnit](https://github.com/nemequ/munit). The 
+Make sure that `munit.c` and `munit.h` are inside the `ext/test/munit` folder.
+Both files can be found at [µnit](https://github.com/nemequ/munit). The
 following script may also be used:
 
 ```
