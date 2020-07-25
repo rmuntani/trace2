@@ -22,6 +22,8 @@ module Trace2
       set_at_exit_callback { generate_report }
       class_lister.enable
       load(executable_path)
+    rescue SyntaxError
+      raise SyntaxError, "#{executable} is not a valid Ruby script"
     end
 
     private
@@ -37,12 +39,12 @@ module Trace2
     end
 
     def find_executable
-      possible_paths = system_path.split(':').map do |path|
+      possible_paths = system_path.split(':').unshift('.').map do |path|
         "#{path}/#{executable}"
       end
 
       executable_path = possible_paths.find do |path|
-        File.exist?(path) && File.executable?(path)
+        File.exist?(path)
       end
 
       raise ArgumentError, 'executable does not exist' if executable_path.nil?

@@ -3,4 +3,4 @@
 
 require 'trace2'
 
-Trace2::Runner.run(ARGV)
+Trace2::Runner.run

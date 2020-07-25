@@ -36,37 +36,100 @@ describe Trace2::Runner do
     context 'when executable exists' do
       let(:executable) { 'executable' }
 
-      before do
-        allow(runner)
-          .to receive(:load)
-          .with(executable_path)
-          .and_return(true)
-        allow(runner)
-          .to receive(:set_at_exit_callback)
-          .and_yield
-        subject
+      context 'when the executable is a valid Ruby script' do
+        context 'when the executable is on the system_path' do
+          before do
+            allow(runner)
+              .to receive(:load)
+              .with(executable_path)
+              .and_return(true)
+            allow(runner)
+              .to receive(:set_at_exit_callback)
+              .and_yield
+            subject
+          end
+
+          it 'enables class listing' do
+            expect(class_lister).to have_received(:enable)
+          end
+
+          it 'tries to load the executable' do
+            expect(runner).to have_received(:load)
+              .with('spec/fixtures/executable')
+          end
+
+          it 'sets an at_exit callback' do
+            expect(runner).to have_received(:set_at_exit_callback)
+          end
+
+          it 'disables class listing' do
+            expect(class_lister).to have_received(:disable)
+          end
+
+          it 'tries to run a report generator' do
+            expect(report_generator).to have_received(:run)
+              .with(output_path)
+          end
+        end
+
+        context 'when the executable is not on the system_path' do
+          let(:executable) { 'ruby_file' }
+
+          before do
+            allow(File)
+              .to receive(:exist?)
+              .with('./ruby_file')
+              .and_return(true)
+            allow(runner)
+              .to receive(:load)
+              .with('./ruby_file')
+              .and_return(true)
+            allow(runner)
+              .to receive(:set_at_exit_callback)
+              .and_yield
+            subject
+          end
+
+          it 'enables class listing' do
+            expect(class_lister).to have_received(:enable)
+          end
+
+          it 'tries to load the executable' do
+            expect(runner).to have_received(:load)
+              .with('./ruby_file')
+          end
+
+          it 'sets an at_exit callback' do
+            expect(runner).to have_received(:set_at_exit_callback)
+          end
+
+          it 'disables class listing' do
+            expect(class_lister).to have_received(:disable)
+          end
+
+          it 'tries to run a report generator' do
+            expect(report_generator).to have_received(:run)
+              .with(output_path)
+          end
+        end
       end
 
-      it 'enables class listing' do
-        expect(class_lister).to have_received(:enable)
-      end
+      context 'when the executable is not a valid Ruby script' do
+        before do
+          allow(runner)
+            .to receive(:set_at_exit_callback)
+            .and_yield
+          allow(runner)
+            .to receive(:load)
+            .with(executable_path)
+            .and_raise(SyntaxError)
+        end
 
-      it 'tries to load the executable' do
-        expect(runner).to have_received(:load)
-          .with('spec/fixtures/executable')
-      end
-
-      it 'sets an at_exit callback' do
-        expect(runner).to have_received(:set_at_exit_callback)
-      end
-
-      it 'disables class listing' do
-        expect(class_lister).to have_received(:disable)
-      end
-
-      it 'tries to run a report generator' do
-        expect(report_generator).to have_received(:run)
-          .with(output_path)
+        it 'raises an error that specifies what the file should contain' do
+          expect { subject }.to raise_error(
+            SyntaxError, 'executable is not a valid Ruby script'
+          )
+        end
       end
     end
 
