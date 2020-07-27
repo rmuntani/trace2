@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'trace2/version'
 require 'trace2/runner'
 require 'trace2/event_processor'
 require 'trace2/class_lister'
