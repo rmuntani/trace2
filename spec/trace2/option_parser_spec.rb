@@ -2,100 +2,113 @@
 
 require 'spec_helper'
 
-shared_examples 'prints version' do |args|
-  subject { described_class.parse(args) }
-
-  before do
-    stub_const('Trace2::VERSION', '1.0.0')
-    allow_any_instance_of(described_class)
-      .to receive(:puts)
-      .and_return(true)
-    allow_any_instance_of(described_class)
-      .to receive(:exit_runner)
-      .and_return(true)
-  end
-
-  it 'prints the version' do
-    expect_any_instance_of(described_class)
-      .to receive(:puts)
-      .with('1.0.0')
-
-    subject
-  end
-
-  it 'exits' do
-    expect_any_instance_of(described_class)
-      .to receive(:exit_runner)
-      .at_least(1).time
-
-    subject
-  end
-end
-
-shared_examples 'parses output path' do |args, path|
-  subject { described_class.parse(args) }
-
-  it 'returns the output path on the options' do
-    expect(subject).to eq(output_path: path)
-  end
-end
-
-shared_examples 'prints help banner' do |args|
-  subject { described_class.parse(args) }
-  let(:help_banner) do
-    <<~HELP
-      Usage: trace2 [options] RUBY_EXECUTABLE [executable options]
-          -h, --help                       Display help
-          -v, --version                    Show trace2 version
-              --filter FILTER_PATH         Specify a filter file
-          -o, --output OUTPUT_PATH         Output path for the report file
-    HELP
-  end
-
-  before do
-    allow_any_instance_of(described_class)
-      .to receive(:puts)
-      .and_return(true)
-    allow_any_instance_of(described_class)
-      .to receive(:exit_runner)
-      .and_return(true)
-  end
-
-  it 'prints the help banner' do
-    expect_any_instance_of(described_class)
-      .to receive(:puts)
-      .with(help_banner)
-
-    subject
-  end
-
-  it 'exits' do
-    expect_any_instance_of(described_class)
-      .to receive(:exit_runner)
-      .at_least(1).time
-
-    subject
-  end
-end
-
 describe Trace2::OptionParser do
-  describe '.parse' do
-    it_behaves_like 'prints version', %w[-v]
-    it_behaves_like 'prints version', %w[--version]
+  describe '#add_option' do
+    let(:trace2_parser) { described_class.new }
 
-    it_behaves_like 'parses output path', %w[-o /path/to], '/path/to'
-    it_behaves_like 'parses output path', %w[--output /path/to], '/path/to'
+    subject do
+      trace2_parser.add_option(short: short,
+                               long: long,
+                               description: description)
+    end
 
-    it_behaves_like 'prints help banner', %w[-h]
-    it_behaves_like 'prints help banner', %w[--help]
+    context 'when option has no arguments' do
+      let(:short) { '-h' }
+      let(:long) { '--help' }
+      let(:description) { 'great help' }
 
-    subject { described_class.parse(args) }
+      before do
+        allow(trace2_parser).to receive(:on)
+          .and_return(true)
 
-    context 'when --filter is passed' do
-      let(:args) { %w[--filter /path/to/file.yml] }
+        subject
+      end
 
-      it 'returns the file filter file on the options' do
-        expect(subject).to eq(filter_path: '/path/to/file.yml')
+      it 'adds the option key to the options keys' do
+        expect(trace2_parser.options_keys).to eq(
+          '-h': false,
+          '--help': false
+        )
+      end
+
+      it 'calls the option parser\'s on method' do
+        expect(trace2_parser).to have_received(:on)
+          .with('-h', '--help', 'great help')
+      end
+    end
+
+    context 'when option has arguments' do
+      let(:short) { '-f FILE' }
+      let(:long) { '--file FILE' }
+      let(:description) { 'great help' }
+
+      before do
+        allow(trace2_parser).to receive(:on)
+          .and_return(true)
+
+        subject
+      end
+
+      it 'adds the option key to the options keys' do
+        expect(trace2_parser.options_keys).to eq(
+          '-f': true,
+          '--file': true
+        )
+      end
+
+      it 'calls the option parser\'s on method' do
+        expect(trace2_parser).to have_received(:on)
+          .with('-f FILE', '--file FILE', 'great help')
+      end
+    end
+  end
+
+  describe '#split_executables' do
+    let(:trace2_parser) { described_class.new }
+
+    subject do
+      trace2_parser.add_option(short: '-h')
+      trace2_parser.add_option(short: '-f FILE', long: '--file FILE')
+      trace2_parser.split_executables(args)
+    end
+
+    context 'when args have no options' do
+      let(:args) { %w[rspec] }
+
+      it { expect(subject).to eq [[], ['rspec']] }
+    end
+
+    context 'when args have options that take no arguments' do
+      let(:args) { %w[-h rspec -h] }
+
+      it { expect(subject).to eq [['-h'], ['rspec', '-h']] }
+    end
+
+    context 'when args have options that take arguments' do
+      let(:args) { %w[--file /path/there rspec -h] }
+
+      it { expect(subject).to eq [['--file', '/path/there'], ['rspec', '-h']] }
+    end
+
+    context 'when args have both types of options' do
+      let(:args) { %w[--file /path/there -h rspec --fail-fast --tag TAG] }
+
+      it 'splits the executables' do
+        expect(subject).to eq([
+                                ['--file', '/path/there', '-h'],
+                                ['rspec', '--fail-fast', '--tag', 'TAG']
+                              ])
+      end
+    end
+
+    context 'when there is no executable' do
+      let(:args) { %w[-h] }
+
+      it 'raises an error' do
+        expect { subject }.to raise_error(
+          ArgumentError,
+          'an executable or ruby script name must be passed as argument'
+        )
       end
     end
   end
