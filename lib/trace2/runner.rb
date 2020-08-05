@@ -3,33 +3,32 @@
 module Trace2
   # Base class for trace2's executable
   class Runner
-    def self.run(options = {})
-      executable = ARGV.shift
-      new(options.merge(executable: executable, args: ARGV)).run
+    def self.run(args: ARGV, options: Options.new)
+      options_hash = options.parse(args)
+      new(options_hash).run
     end
 
     def initialize(options)
       @class_lister = initialize_class_lister(options)
-      @system_path = options.fetch(:system_path, ENV['PATH'])
       @report_generator = options.fetch(:report_generator, GraphGenerator.new)
       @executable = options[:executable]
-      @output_path = options.fetch(:output_path, 'trace2_report')
       @args = options[:args]
+      @output_path = options.fetch(:output_path, 'trace2_report')
+      @executable_runner = options.fetch(
+        :executable_runner, ExecutableRunner.new
+      )
     end
 
     def run
-      executable_path = find_executable
-      set_at_exit_callback { generate_report }
+      set_at_exit_callback { end_class_listing }
       class_lister.enable
-      load(executable_path)
-    rescue SyntaxError
-      raise SyntaxError, "#{executable} is not a valid Ruby script"
+      executable_runner.run(executable, args)
     end
 
     private
 
-    attr_reader :class_lister, :executable, :output_path,
-                :report_generator, :system_path
+    attr_reader :args, :class_lister, :executable, :executable_runner,
+                :output_path, :report_generator
 
     def initialize_class_lister(options)
       return options[:class_lister] if options[:class_lister]
@@ -38,27 +37,13 @@ module Trace2
       ClassLister.new(event_processor: event_processor)
     end
 
-    def find_executable
-      possible_paths = system_path.split(':').unshift('.').map do |path|
-        "#{path}/#{executable}"
-      end
-
-      executable_path = possible_paths.find do |path|
-        File.exist?(path)
-      end
-
-      raise ArgumentError, 'executable does not exist' if executable_path.nil?
-
-      executable_path
-    end
-
     def set_at_exit_callback
       at_exit do
         yield
       end
     end
 
-    def generate_report
+    def end_class_listing
       class_lister.disable
       report_generator.run(output_path)
     end

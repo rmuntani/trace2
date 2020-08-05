@@ -2,8 +2,8 @@
 
 Gem::Specification.new do |s|
   s.name        = 'trace2'
-  s.version     = '0.6.1'
-  s.date        = '2020-07-24'
+  s.version     = '0.6.2'
+  s.date        = '2020-08-04'
   s.summary     = 'Check the runtime dependencies of your classes'
   s.description = 'Check the runtime dependencies of your classes'
   s.authors     = ['Raphael Montani']

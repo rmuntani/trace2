@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'optparse'
+
 module Trace2
   # Class that parses the options that will be used
   # by trace2
