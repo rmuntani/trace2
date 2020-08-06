@@ -42,7 +42,7 @@ one_caller_graph_strings_test(const MunitParameter params[], void* class_use_set
   class_use *use = (class_use*)class_use_setup;
   char** uses_keys = graph_strings(use);
 
-  munit_assert_string_equal(*uses_keys, "TheirClass -> MyClass");
+  munit_assert_string_equal(*uses_keys, "\"TheirClass\" -> \"MyClass\"");
 
   munit_assert_ptr_equal(*(uses_keys + 1), NULL);
 
@@ -86,9 +86,9 @@ many_callees_graph_strings_test(const MunitParameter params[], void* class_use_s
   class_use *use = (class_use*)class_use_setup;
   char** uses_keys = graph_strings(use);
 
-  munit_assert_string_equal(*uses_keys, "MyClass -> FirstCallee");
-  munit_assert_string_equal(*(uses_keys + 1), "MyClass -> SecondCallee");
-  munit_assert_string_equal(*(uses_keys + 2), "MyClass -> ThirdCallee");
+  munit_assert_string_equal(*uses_keys, "\"MyClass\" -> \"FirstCallee\"");
+  munit_assert_string_equal(*(uses_keys + 1), "\"MyClass\" -> \"SecondCallee\"");
+  munit_assert_string_equal(*(uses_keys + 2), "\"MyClass\" -> \"ThirdCallee\"");
 
   munit_assert_ptr_equal(*(uses_keys + 3), NULL);
 
@@ -134,10 +134,10 @@ use_with_caller_and_callees_graph_strings_test(const MunitParameter params[], vo
   class_use *use = (class_use*)class_use_setup;
   char** uses_keys = graph_strings(use);
 
-  munit_assert_string_equal(*uses_keys, "Caller -> MyClass");
-  munit_assert_string_equal(*(uses_keys + 1), "MyClass -> FirstCallee");
-  munit_assert_string_equal(*(uses_keys + 2), "MyClass -> SecondCallee");
-  munit_assert_string_equal(*(uses_keys + 3), "MyClass -> ThirdCallee");
+  munit_assert_string_equal(*uses_keys, "\"Caller\" -> \"MyClass\"");
+  munit_assert_string_equal(*(uses_keys + 1), "\"MyClass\" -> \"FirstCallee\"");
+  munit_assert_string_equal(*(uses_keys + 2), "\"MyClass\" -> \"SecondCallee\"");
+  munit_assert_string_equal(*(uses_keys + 3), "\"MyClass\" -> \"ThirdCallee\"");
 
   munit_assert_ptr_equal(*(uses_keys + 4), NULL);
 

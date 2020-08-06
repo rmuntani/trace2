@@ -5,7 +5,7 @@
 #include "event_processor.h"
 #include "hash_table.h"
 // TODO: eventually remove this header
-#include "munit/munit.h"
+// #include "munit/munit.h"
 
 extern classes_list *list_head;
 extern int accepted_uses;
@@ -29,10 +29,10 @@ int count_relationships(class_use *use) {
  * returns a null-terminated string with format "CALLER -> CALLEE" */
 char* make_graph_string(char *caller_name, char *callee_name) {
   char *graph_string;
-  int total_length = strlen(callee_name) + strlen(caller_name) + 7;
+  int total_length = strlen(callee_name) + strlen(caller_name) + 10;
 
   graph_string = malloc(sizeof(char)*total_length);
-  sprintf(graph_string, "%s -> %s", callee_name, caller_name);
+  sprintf(graph_string, "\"%s\" -> \"%s\"", callee_name, caller_name);
 
   return graph_string;
 }

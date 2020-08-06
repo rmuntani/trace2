@@ -76,9 +76,9 @@ one_use_with_relationships_build_graphs_array_test(const MunitParameter params[]
   classes_list *head = (classes_list*)classes_list_head;
   char** graphs_array = build_graphs_array(head, 10);
 
-  munit_assert_int(count_ocurrences(graphs_array, "Caller -> Use"), ==, 1);
-  munit_assert_int(count_ocurrences(graphs_array, "Use -> FirstCallee"), ==, 1);
-  munit_assert_int(count_ocurrences(graphs_array, "Use -> SecondCallee"), ==, 1);
+  munit_assert_int(count_ocurrences(graphs_array, "\"Caller\" -> \"Use\""), ==, 1);
+  munit_assert_int(count_ocurrences(graphs_array, "\"Use\" -> \"FirstCallee\""), ==, 1);
+  munit_assert_int(count_ocurrences(graphs_array, "\"Use\" -> \"SecondCallee\""), ==, 1);
 
   munit_assert_ptr_equal(*(graphs_array + 3), NULL);
 
@@ -110,7 +110,7 @@ repeated_relationships_build_graphs_array_test(const MunitParameter params[], vo
   classes_list *head = (classes_list*)classes_list_head;
   char** graphs_array = build_graphs_array(head, 10);
 
-  munit_assert_string_equal(*graphs_array, "Caller -> Use");
+  munit_assert_string_equal(*graphs_array, "\"Caller\" -> \"Use\"");
   munit_assert_ptr_equal(*(graphs_array + 1), NULL);
 
   return MUNIT_OK;
@@ -177,10 +177,10 @@ multiple_uses_build_graphs_array_test(const MunitParameter params[], void* class
   classes_list *head = (classes_list*)classes_list_head;
   char** graphs_array = build_graphs_array(head, 10);
 
-  munit_assert_int(count_ocurrences(graphs_array, "FirstUse -> SecondUse"), ==, 1);
-  munit_assert_int(count_ocurrences(graphs_array, "SecondUse -> ThirdUse"), ==, 1);
-  munit_assert_int(count_ocurrences(graphs_array, "SecondUse -> Extra"), ==, 1);
-  munit_assert_int(count_ocurrences(graphs_array, "SecondUse -> SecondUse"), ==, 1);
+  munit_assert_int(count_ocurrences(graphs_array, "\"FirstUse\" -> \"SecondUse\""), ==, 1);
+  munit_assert_int(count_ocurrences(graphs_array, "\"SecondUse\" -> \"ThirdUse\""), ==, 1);
+  munit_assert_int(count_ocurrences(graphs_array, "\"SecondUse\" -> \"Extra\""), ==, 1);
+  munit_assert_int(count_ocurrences(graphs_array, "\"SecondUse\" -> \"SecondUse\""), ==, 1);
 
   munit_assert_ptr_equal(*(graphs_array + 4), NULL);
 
