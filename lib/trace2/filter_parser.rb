@@ -4,12 +4,13 @@ module Trace2
   # Class that queries ClassUse by parameters
   # passed as a hash
   class FilterParser
-    def initialize(filters)
+    FILTER = 'filter'
+    VALIDATE = 'validate_%s'
+    PARSE = 'parse_%s'
+
+    def parse(filters)
       @filters = filters
       @parsed_filter = [filters.length]
-    end
-
-    def parse
       parse_filters
       @parsed_filter.map(&:to_s)
     end
@@ -23,7 +24,7 @@ module Trace2
           parse_validations(validations)
           @parsed_filter.push(action.to_s)
         end
-        @parsed_filter.push('filter')
+        @parsed_filter.push(FILTER)
       end
     end
 
@@ -37,7 +38,7 @@ module Trace2
 
     def parse_validation(validation)
       validation.each do |attribute, values|
-        @parsed_filter.push("validate_#{attribute}")
+        @parsed_filter.push(format(VALIDATE, attribute))
         current_parser = parse_values_method(values)
         if respond_to?(current_parser, true)
           send(current_parser, values)
@@ -49,7 +50,7 @@ module Trace2
     end
 
     def parse_values_method(values)
-      "parse_#{values.class.to_s.downcase}"
+      format(PARSE, values.class.to_s.downcase)
     end
 
     def parse_array(values)

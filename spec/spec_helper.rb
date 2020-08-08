@@ -7,15 +7,10 @@ end
 
 PROJECT_ROOT = File.expand_path('..', __dir__)
 
-Dir.glob(File.join(PROJECT_ROOT, 'lib', 'trace2', '*.*')).each do |file|
-  require file
-end
+# lib/trace2.rb does all the requires that are necessary
+require File.join(PROJECT_ROOT, 'lib', 'trace2.rb')
 
-Dir.glob(File.join(PROJECT_ROOT, 'lib', 'trace2', 'relationship_parser', '*.rb')).each do |file|
-  require file
-end
-
-Dir.glob(File.join(PROJECT_ROOT, 'spec', 'fixtures', '*.rb')).each do |file|
+Dir.glob(File.join(PROJECT_ROOT, 'spec', 'fixtures', '*.rb')).sort.each do |file|
   require file
 end
 
@@ -29,5 +24,5 @@ RSpec.configure do |config|
   end
 
   config.shared_context_metadata_behavior = :apply_to_host_groups
-  config.example_status_persistence_file_path = "spec/examples.txt"
+  config.example_status_persistence_file_path = 'spec/examples.txt'
 end

@@ -5,20 +5,20 @@ describe Trace2::EventProcessorC do
   describe '#new' do
     context 'when filter is empty' do
       it 'does not raise an error' do
-        expect { Trace2::EventProcessorC.new([]) }.not_to raise_error
+        expect { described_class.new([]) }.not_to raise_error
       end
     end
 
     context 'when filter is not empty' do
       it 'does not raise an error' do
         filter = %w[1 1 1 1 validate_name 1 MyClass allow filter]
-        expect { Trace2::EventProcessorC.new(filter) }.not_to raise_error
+        expect { described_class.new(filter) }.not_to raise_error
       end
     end
   end
 
   describe 'validate if functions raise errors' do
-    let(:processor) { Trace2::EventProcessorC.new([]) }
+    let(:processor) { described_class.new([]) }
 
     it '#process_event' do
       expect do
@@ -48,7 +48,7 @@ describe Trace2::EventProcessorC do
 
   describe '#events' do
     it 'returns the needed events for the extension' do
-      processor = Trace2::EventProcessorC.new([])
+      processor = described_class.new([])
 
       expect(processor.events).to eq %i[call b_call return b_return]
     end
@@ -58,7 +58,7 @@ describe Trace2::EventProcessorC do
     it 'returns a string with details of the class use' do
       class_lister_args = {
         filter: [],
-        event_processor: Trace2::EventProcessorC
+        event_processor: described_class
       }
       class_lister = Trace2::ClassLister.new(class_lister_args)
 
@@ -81,7 +81,7 @@ describe Trace2::EventProcessorC do
     it 'returns an array ordered by call order' do
       class_lister_args = {
         filter: [],
-        event_processor: Trace2::EventProcessorC
+        event_processor: described_class
       }
       class_lister = Trace2::ClassLister.new(class_lister_args)
 
@@ -110,8 +110,8 @@ describe Trace2::EventProcessorC do
             reject: [{ name: ['Nested'], method: ['nested_call'] }]
           }
         ],
-        event_processor: Trace2::EventProcessorC,
-        filter_parser: Trace2::FilterParser
+        event_processor: described_class,
+        filter_parser: Trace2::FilterParser.new
       }
       class_lister = Trace2::ClassLister.new(class_lister_args)
 
@@ -153,8 +153,8 @@ describe Trace2::EventProcessorC do
             reject: [{ caller_class: { name: ['Nested'] } }]
           }
         ],
-        event_processor: Trace2::EventProcessorC,
-        filter_parser: Trace2::FilterParser
+        event_processor: described_class,
+        filter_parser: Trace2::FilterParser.new
       }
       class_lister = Trace2::ClassLister.new(class_lister_args)
 
@@ -184,8 +184,8 @@ describe Trace2::EventProcessorC do
     it 'uses regex on filters' do
       class_lister_args = {
         filter: [{ allow: [{ method: [/simple/] }] }],
-        event_processor: Trace2::EventProcessorC,
-        filter_parser: Trace2::FilterParser
+        event_processor: described_class,
+        filter_parser: Trace2::FilterParser.new
       }
       class_lister = Trace2::ClassLister.new(class_lister_args)
 
