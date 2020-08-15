@@ -4,32 +4,40 @@ require 'spec_helper'
 
 describe Trace2::GraphGenerator do
   describe '#run' do
+    subject(:run_graph_generator) do
+      described_class.new.run('file.txt')
+    end
+
+    let(:filter) do
+      [{ allow: [{ path: [%r{/spec/fixtures/classes.rb}] }] }]
+    end
+
+    let(:expected_file_content) do
+      'digraph {' \
+        "\n\t\"ComplexNesting\" -> \"ComplexNesting\"" \
+        "\n\t\"ComplexNesting\" -> \"Simple\"" \
+        "\n\t\"ComplexNesting\" -> \"Nested\"" \
+        "\n\t\"Nested\" -> \"Simple\"" \
+        "\n}"
+    end
+
     after do
       File.delete('file.txt') if File.exist?('file.txt')
     end
 
-    it 'uses regex on filters' do
-      class_lister_args = {
-        filter: [{ allow: [{ path: [%r{/spec/fixtures/classes.rb}] }] }],
-        event_processor: Trace2::EventProcessorC,
-        filter_parser: Trace2::FilterParser
-      }
-      class_lister = Trace2::ClassLister.new(class_lister_args)
-      expected_file = 'digraph {' \
-                      "\n\tComplexNesting -> ComplexNesting" \
-                      "\n\tComplexNesting -> Simple" \
-                      "\n\tComplexNesting -> Nested" \
-                      "\n\tNested -> Simple" \
-                      "\n}"
+    before do
+      class_lister = Trace2::ClassListerBuilder.new.build(filter, type: :native)
 
       class_lister.enable
       complex_nesting = ComplexNesting.new
       complex_nesting.complex_call
       class_lister.disable
 
-      Trace2::GraphGenerator.new.run('file.txt')
+      run_graph_generator
+    end
 
-      expect(File.read('file.txt')).to eq(expected_file)
+    it 'uses regex on filters' do
+      expect(File.read('file.txt')).to eq(expected_file_content)
     end
   end
 end

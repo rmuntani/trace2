@@ -12,10 +12,10 @@ module Trace2
 
     def_delegators :@trace_point, :enable
 
-    def initialize(args = {})
-      @event_processor = initialize_event_processor(args)
+    def initialize(event_processor, trace_point = TracePoint)
+      @event_processor = event_processor
       @classes_uses = []
-      @trace_point = TracePoint.new(*@event_processor.events) do |tp|
+      @trace_point = trace_point.new(*@event_processor.events) do |tp|
         @event_processor.process_event(tp)
       end
     end
@@ -24,22 +24,6 @@ module Trace2
       @trace_point.disable
       @event_processor.aggregate_uses
       @classes_uses = @event_processor.classes_uses
-    end
-
-    private
-
-    def initialize_event_processor(args)
-      filter = args[:filter] || []
-      filter_parser = args[:filter_parser]
-      event_processor = args[:event_processor] || Trace2::EventProcessor
-
-      used_filter = if filter_parser.nil? || filter.empty?
-                      filter
-                    else
-                      filter_parser.new(filter).parse
-                    end
-
-      event_processor.new(used_filter)
     end
   end
 end

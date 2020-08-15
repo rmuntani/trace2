@@ -10,10 +10,10 @@ module Trace2
       @class_lister = class_lister
     end
 
-    def build(filter_path, type: :native)
+    def build(filter, type: :native)
       @type = type
-      filter = build_filter(filter_path)
-      event_processor = build_event_processor(filter)
+      parsed_filter = build_filter(filter)
+      event_processor = build_event_processor(parsed_filter)
       @class_lister.new(event_processor)
     end
 
@@ -29,8 +29,7 @@ module Trace2
       filter_parser: nil
     }.freeze
 
-    def build_filter(filter_path)
-      unparsed_filter = YAML.load_file(filter_path)
+    def build_filter(unparsed_filter)
       return type_filter.parse(unparsed_filter) if type_filter
 
       unparsed_filter

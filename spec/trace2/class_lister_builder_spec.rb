@@ -11,15 +11,11 @@ describe Trace2::ClassListerBuilder do
     class_double('Trace2::ClassLister', new: class_lister_instance)
   end
   let(:class_lister_instance) { instance_double('Trace2::ClassLister') }
-  let(:filter_path) { '/path/to/file' }
-
-  before do
-    allow(YAML).to receive(:load_file)
-      .and_return(['raw_filter'])
-  end
 
   describe '#build' do
-    subject(:factory_build) { factory.build(filter_path, type: type) }
+    subject(:factory_build) { factory.build(filter, type: type) }
+
+    let(:filter) { ['filter'] }
 
     context 'when type is :native' do
       let(:type) { :native }
@@ -49,7 +45,7 @@ describe Trace2::ClassListerBuilder do
 
       it 'tries to parse the filter with FilterParser' do
         expect(filter_parser).to have_received(:parse)
-          .with(['raw_filter'])
+          .with(['filter'])
       end
 
       it 'initializes event processor with a filter' do
@@ -92,7 +88,7 @@ describe Trace2::ClassListerBuilder do
 
       it 'initializes event processor with a filter' do
         expect(event_processor).to have_received(:new)
-          .with(['raw_filter'])
+          .with(['filter'])
       end
 
       it 'initializes class lister with EventProcessorC' do
