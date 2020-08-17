@@ -8,14 +8,16 @@ module Trace2
       new.parse(args)
     end
 
-    def initialize(option_parser: Trace2::OptionParser.new)
-      @options = {}
+    def initialize(option_parser: Trace2::OptionParser.new, kernel: Kernel)
+      @options = default_options
+      @kernel = kernel
       @option_parser = option_parser
       options_banner
       help_option
       version_option
       filter_option
       output_option
+      type_option
     end
 
     def parse(args)
@@ -27,6 +29,10 @@ module Trace2
     end
 
     private
+
+    def default_options
+      { event_processor_type: :native }
+    end
 
     def options_banner
       @option_parser.banner = 'Usage: trace2 [options] ' \
@@ -66,8 +72,18 @@ module Trace2
       end
     end
 
+    def type_option
+      event_processor_type = 'Type of the EventProcessor that will '\
+       'be used with ClassLister'
+      @option_parser.add_option(short: '-t EVENT_PROCESSOR_TYPE',
+                                description: event_processor_type,
+                                long: '--type EVENT_PROCESSOR_TYPE') do |type|
+        @options[:event_processor_type] = type.to_sym
+      end
+    end
+
     def exit_runner
-      exit
+      @kernel.exit
     end
   end
 end
