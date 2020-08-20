@@ -10,17 +10,21 @@ module Trace2
       new(options_hash).run
     end
 
+    # rubocop:disable Metrics/MethodLength
     def initialize(options)
-      @report_generator = options.fetch(:report_generator, GraphGenerator.new)
-      @executable = options[:executable]
       @args = options[:args]
+      @executable = options[:executable]
       @output_path = options.fetch(:output_path, DEFAULT_OUTPUT_PATH)
+      @report_generator = options.fetch(:report_generator, GraphGenerator.new)
       @executable_runner = options.fetch(
         :executable_runner, ExecutableRunner.new
       )
       filter = load_filter(options)
       @class_lister = build_class_lister(options, filter)
+      @render_graph_automatically = options.fetch(:automatic_render, false)
+      @dot_wrapper = options.fetch(:dot_wrapper, DotWrapper.new)
     end
+    # rubocop:enable Metrics/MethodLength
 
     def run
       set_at_exit_callback { end_class_listing }
@@ -32,6 +36,7 @@ module Trace2
 
     DEFAULT_OUTPUT_PATH = 'trace2_report.dot'
     DEFAULT_FILTER_YML = '.trace2.yml'
+    DEFAULT_GRAPH_FORMAT = 'pdf'
 
     attr_reader :args, :class_lister, :executable, :executable_runner,
                 :output_path, :report_generator
@@ -57,6 +62,14 @@ module Trace2
     def end_class_listing
       class_lister.disable
       report_generator.run(output_path)
+      run_graph_rendering
+    end
+
+    def run_graph_rendering
+      return unless @render_graph_automatically
+
+      final_file = "#{output_path}.#{DEFAULT_GRAPH_FORMAT}"
+      @dot_wrapper.render_graph(output_path, final_file, DEFAULT_GRAPH_FORMAT)
     end
   end
 end

@@ -42,6 +42,7 @@ shared_examples 'help option' do |args|
               --filter FILTER_PATH         Specify a filter file
           -o, --output OUTPUT_PATH         Output path for the report file
           -t, --type EVENT_PROCESSOR_TYPE  Type of the EventProcessor that will be used with ClassLister
+          -m, --manual                     Don't try to render the relationships graph automatically
     HELP
   end
 
@@ -74,6 +75,12 @@ shared_examples 'wrong runner type option' do |args|
   end
 end
 
+shared_examples 'manual graph render' do |args|
+  subject(:manual_render) { described_class.new.parse(args) }
+
+  it { expect(manual_render).to include(automatic_render: false) }
+end
+
 describe Trace2::Options do
   describe '.parse' do
     subject(:parsed_option) do
@@ -93,6 +100,8 @@ describe Trace2::Options do
 
     it_behaves_like 'class lister type option', %w[-t ruby rspec]
     it_behaves_like 'class lister type option', %w[--type ruby rspec]
+
+    it_behaves_like 'manual graph render', %w[--manual rspec]
 
     context 'when --filter is passed' do
       let(:args) { %w[--filter /path/to/file.yml executable] }
@@ -128,7 +137,10 @@ describe Trace2::Options do
       let(:args) { %w[rspec] }
 
       it 'returns default values' do
-        expect(parsed_option).to include(event_processor_type: :native)
+        expect(parsed_option).to include(
+          event_processor_type: :native,
+          automatic_render: true
+        )
       end
     end
   end

@@ -40,7 +40,9 @@ describe Trace2::Runner do
         executable_runner: executable_runner,
         filter_path: filter_path,
         output_path: output_path,
-        report_generator: report_generator
+        report_generator: report_generator,
+        automatic_render: automatic_render,
+        dot_wrapper: dot_wrapper
       }
     end
 
@@ -67,6 +69,12 @@ describe Trace2::Runner do
     let(:report_generator) do
       instance_double(Trace2::GraphGenerator, run: true)
     end
+
+    let(:dot_wrapper) do
+      instance_double(Trace2::DotWrapper, render_graph: true)
+    end
+
+    let(:automatic_render) { true }
 
     before do
       allow(runner).to receive(:set_at_exit_callback)
@@ -100,6 +108,13 @@ describe Trace2::Runner do
     it 'tries to run a report generator' do
       expect(report_generator).to have_received(:run)
         .with(output_path)
+    end
+
+    context 'when automatic render is true' do
+      it 'runs dot wrapper' do
+        expect(dot_wrapper).to have_received(:render_graph)
+          .with('/our/path', '/our/path.pdf', 'pdf')
+      end
     end
   end
 end

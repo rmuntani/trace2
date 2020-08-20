@@ -18,6 +18,7 @@ module Trace2
       filter_option
       output_option
       type_option
+      manual_option
     end
 
     def parse(args)
@@ -31,7 +32,10 @@ module Trace2
     private
 
     def default_options
-      { event_processor_type: :native }
+      {
+        event_processor_type: :native,
+        automatic_render: true
+      }
     end
 
     def options_banner
@@ -79,6 +83,16 @@ module Trace2
                                 description: event_processor_type,
                                 long: '--type EVENT_PROCESSOR_TYPE') do |type|
         @options[:event_processor_type] = type.to_sym
+      end
+    end
+
+    def manual_option
+      run_manually = 'Don\'t try to render the relationships ' \
+       'graph automatically'
+      @option_parser.add_option(short: '-m',
+                                description: run_manually,
+                                long: '--manual') do |_type|
+        @options[:automatic_render] = false
       end
     end
 
