@@ -137,6 +137,6 @@ void generate_graph(VALUE self, VALUE filepath) {
 /* init_graph_generator: initializes the Ruby classes, modules and functions
  * related to Trace2::GraphGenerator */
 void init_graph_generator(VALUE trace2) {
-  graph_generator = rb_define_class_under(trace2, "GraphGenerator", rb_cObject);
+  graph_generator = rb_define_class_under(trace2, "GraphGeneratorC", rb_cObject);
   rb_define_method(graph_generator, "run", generate_graph, 1);
 }

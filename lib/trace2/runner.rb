@@ -15,7 +15,7 @@ module Trace2
       @args = options[:args]
       @executable = options[:executable]
       @output_path = options.fetch(:output_path, DEFAULT_OUTPUT_PATH)
-      @report_generator = options.fetch(:report_generator, GraphGenerator.new)
+      @report_generator = options.fetch(:report_generator, GraphGeneratorC.new)
       @executable_runner = options.fetch(
         :executable_runner, ExecutableRunner.new
       )

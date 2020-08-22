@@ -67,7 +67,7 @@ describe Trace2::Runner do
     let(:output_path) { '/our/path' }
 
     let(:report_generator) do
-      instance_double(Trace2::GraphGenerator, run: true)
+      instance_double(Trace2::GraphGeneratorC, run: true)
     end
 
     let(:dot_wrapper) do
