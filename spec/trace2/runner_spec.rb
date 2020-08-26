@@ -34,13 +34,12 @@ describe Trace2::Runner do
     let(:initialization_params) do
       {
         args: args,
-        class_lister_builder: class_lister_builder,
+        reporting_tools_factory: reporting_tools_factory,
         event_processor: event_processor,
         executable: executable,
         executable_runner: executable_runner,
         filter_path: filter_path,
         output_path: output_path,
-        report_generator: report_generator,
         automatic_render: automatic_render,
         dot_wrapper: dot_wrapper
       }
@@ -48,8 +47,12 @@ describe Trace2::Runner do
 
     let(:args) { %w[--fail-fast --output x] }
 
-    let(:class_lister_builder) do
-      instance_double(Trace2::ClassListerBuilder, build: class_lister)
+    let(:reporting_tools_factory) do
+      instance_double(
+        Trace2::ReportingToolsFactory,
+        build: { class_lister: class_lister,
+                 graph_generator: graph_generator }
+      )
     end
     let(:class_lister) do
       instance_double(Trace2::ClassLister, enable: true, disable: true)
@@ -66,8 +69,8 @@ describe Trace2::Runner do
     let(:filter_path) { 'spec/fixtures/trace2.yml' }
     let(:output_path) { '/our/path' }
 
-    let(:report_generator) do
-      instance_double(Trace2::GraphGeneratorC, run: true)
+    let(:graph_generator) do
+      instance_double(Trace2::GraphGenerator, run: true)
     end
 
     let(:dot_wrapper) do
@@ -77,14 +80,14 @@ describe Trace2::Runner do
     let(:automatic_render) { true }
 
     before do
-      allow(runner).to receive(:set_at_exit_callback)
+      allow(runner).to receive(:at_exit)
         .and_yield
 
       run_runner
     end
 
     it 'builds a class listing class' do
-      expect(class_lister_builder).to have_received(:build)
+      expect(reporting_tools_factory).to have_received(:build)
         .with(['filter'], type: nil)
     end
 
@@ -93,7 +96,7 @@ describe Trace2::Runner do
     end
 
     it 'sets an at_exit callback' do
-      expect(runner).to have_received(:set_at_exit_callback)
+      expect(runner).to have_received(:at_exit)
     end
 
     it 'calls the executable runner' do
@@ -105,8 +108,8 @@ describe Trace2::Runner do
       expect(class_lister).to have_received(:disable)
     end
 
-    it 'tries to run a report generator' do
-      expect(report_generator).to have_received(:run)
+    it 'tries to run the graph generator' do
+      expect(graph_generator).to have_received(:run)
         .with(output_path)
     end
 

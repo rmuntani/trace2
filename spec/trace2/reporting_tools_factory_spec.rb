@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Trace2::ClassListerBuilder do
+describe Trace2::ReportingToolsFactory do
   subject(:factory) do
     described_class.new(class_lister: class_lister)
   end
@@ -22,7 +22,8 @@ describe Trace2::ClassListerBuilder do
       let(:native_args) do
         {
           event_processor: event_processor_c,
-          filter_parser: filter_parser
+          filter_parser: filter_parser,
+          graph_generator: graph_generator_c
         }
       end
       let(:event_processor_c) do
@@ -35,6 +36,9 @@ describe Trace2::ClassListerBuilder do
       end
       let(:filter_parser) do
         instance_double('Trace2::FilterParser', parse: ['parsed_filter'])
+      end
+      let(:graph_generator_c) do
+        instance_double('Trace2::GraphGeneratorC')
       end
 
       before do
@@ -58,8 +62,11 @@ describe Trace2::ClassListerBuilder do
           .with(event_processor_c_instance)
       end
 
-      it 'retuns a class lister' do
-        expect(factory_build).to eq class_lister_instance
+      it 'retuns a class lister and a graph generator' do
+        expect(factory_build).to eq(
+          class_lister: class_lister_instance,
+          graph_generator: graph_generator_c
+        )
       end
     end
 
@@ -68,7 +75,8 @@ describe Trace2::ClassListerBuilder do
       let(:ruby_args) do
         {
           event_processor: event_processor,
-          filter_parser: nil
+          filter_parser: nil,
+          graph_generator: graph_generator
         }
       end
       let(:event_processor) do
@@ -78,6 +86,9 @@ describe Trace2::ClassListerBuilder do
       end
       let(:event_processor_instance) do
         instance_double('Trace2::EventProcessor')
+      end
+      let(:graph_generator) do
+        instance_double('Trace2::GraphGenerator')
       end
 
       before do
@@ -97,7 +108,10 @@ describe Trace2::ClassListerBuilder do
       end
 
       it 'retuns a class lister' do
-        expect(factory_build).to eq class_lister_instance
+        expect(factory_build).to eq(
+          class_lister: class_lister_instance,
+          graph_generator: graph_generator
+        )
       end
     end
   end

@@ -10,24 +10,20 @@ module Trace2
       new(options_hash).run
     end
 
-    # rubocop:disable Metrics/MethodLength
     def initialize(options)
       @args = options[:args]
       @executable = options[:executable]
       @output_path = options.fetch(:output_path, DEFAULT_OUTPUT_PATH)
-      @report_generator = options.fetch(:report_generator, GraphGeneratorC.new)
       @executable_runner = options.fetch(
         :executable_runner, ExecutableRunner.new
       )
-      filter = load_filter(options)
-      @class_lister = build_class_lister(options, filter)
       @render_graph_automatically = options.fetch(:automatic_render, false)
       @dot_wrapper = options.fetch(:dot_wrapper, DotWrapper.new)
+      build_class_lister(options)
     end
-    # rubocop:enable Metrics/MethodLength
 
     def run
-      set_at_exit_callback { end_class_listing }
+      at_exit { end_class_listing }
       class_lister.enable
       executable_runner.run(executable, args)
     end
@@ -39,7 +35,17 @@ module Trace2
     DEFAULT_GRAPH_FORMAT = 'pdf'
 
     attr_reader :args, :class_lister, :executable, :executable_runner,
-                :output_path, :report_generator
+                :output_path, :graph_generator, :render_graph_automatically,
+                :dot_wrapper
+
+    def build_class_lister(options)
+      filter = load_filter(options)
+      tools = options.fetch(:reporting_tools_factory, ReportingToolsFactory.new)
+                     .build(filter, type: options[:event_processor_type])
+
+      @class_lister = tools[:class_lister]
+      @graph_generator = tools[:graph_generator]
+    end
 
     def load_filter(options)
       filter_path = options.fetch(:filter_path, DEFAULT_FILTER_YML)
@@ -48,28 +54,17 @@ module Trace2
       []
     end
 
-    def build_class_lister(options, filter)
-      options.fetch(:class_lister_builder, ClassListerBuilder.new)
-             .build(filter, type: options[:event_processor_type])
-    end
-
-    def set_at_exit_callback
-      at_exit do
-        yield
-      end
-    end
-
     def end_class_listing
       class_lister.disable
-      report_generator.run(output_path)
+      graph_generator.run(output_path)
       run_graph_rendering
     end
 
     def run_graph_rendering
-      return unless @render_graph_automatically
+      return unless render_graph_automatically
 
       final_file = "#{output_path}.#{DEFAULT_GRAPH_FORMAT}"
-      @dot_wrapper.render_graph(output_path, final_file, DEFAULT_GRAPH_FORMAT)
+      dot_wrapper.render_graph(output_path, final_file, DEFAULT_GRAPH_FORMAT)
     end
   end
 end

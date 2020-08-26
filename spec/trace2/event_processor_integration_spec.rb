@@ -4,8 +4,9 @@ require 'spec_helper'
 
 describe Trace2::EventProcessor do
   subject(:class_lister) do
-    Trace2::ClassListerBuilder.new
-                              .build(filter, type: :ruby)
+    Trace2::ReportingToolsFactory
+      .new
+      .build(filter, type: :ruby)[:class_lister]
   end
 
   context 'when a simple class is used' do

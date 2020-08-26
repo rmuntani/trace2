@@ -26,7 +26,11 @@ describe Trace2::GraphGeneratorC do
     end
 
     before do
-      class_lister = Trace2::ClassListerBuilder.new.build(filter, type: :native)
+      tools = Trace2::ReportingToolsFactory
+              .new
+              .build(filter, type: :native)
+
+      class_lister = tools[:class_lister]
 
       class_lister.enable
       complex_nesting = ComplexNesting.new

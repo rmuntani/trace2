@@ -11,9 +11,9 @@ describe Trace2::EventProcessorC, :integration do
   end
 
   let(:class_lister) do
-    Trace2::ClassListerBuilder
+    Trace2::ReportingToolsFactory
       .new
-      .build(filter, type: :native)
+      .build(filter, type: :native)[:class_lister]
   end
 
   context 'when filter is empty' do
