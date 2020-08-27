@@ -4,8 +4,8 @@ module Trace2
   # Generates a graph in .dot format from an array of
   # ClassUse
   class GraphGenerator
-    def run(output_path, classes_uses = [])
-      parsed_classes = parse_classes(classes_uses)
+    def run(output_path, class_lister)
+      parsed_classes = parse_classes(class_lister.classes_uses)
       File.write(output_path, base_graph(parsed_classes))
     end
 

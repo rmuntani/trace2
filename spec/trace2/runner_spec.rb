@@ -110,7 +110,7 @@ describe Trace2::Runner do
 
     it 'tries to run the graph generator' do
       expect(graph_generator).to have_received(:run)
-        .with(output_path)
+        .with(output_path, class_lister)
     end
 
     context 'when automatic render is true' do

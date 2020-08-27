@@ -126,8 +126,11 @@ void write_graph_file(char* filename, char** graphs_array) {
 }
 
 /* generate_graph: ruby function to generate the graph using
- * classes_list */
-void generate_graph(VALUE self, VALUE filepath) {
+ * classes_list. placeholder was added to make this classes' interface
+ * similar to ruby's GraphGenerator. */
+/* TODO: change how the classes_uses are passed to this function.
+ * Using an extern variable limits the design */
+void generate_graph(VALUE self, VALUE filepath, VALUE placeholder) {
   char **graphs_array = build_graphs_array(list_head, accepted_uses),
        *filename = StringValueCStr(filepath);
 
@@ -138,5 +141,5 @@ void generate_graph(VALUE self, VALUE filepath) {
  * related to Trace2::GraphGenerator */
 void init_graph_generator(VALUE trace2) {
   graph_generator = rb_define_class_under(trace2, "GraphGeneratorC", rb_cObject);
-  rb_define_method(graph_generator, "run", generate_graph, 1);
+  rb_define_method(graph_generator, "run", generate_graph, 2);
 }

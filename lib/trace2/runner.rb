@@ -56,7 +56,7 @@ module Trace2
 
     def end_class_listing
       class_lister.disable
-      graph_generator.run(output_path)
+      graph_generator.run(output_path, class_lister)
       run_graph_rendering
     end
 

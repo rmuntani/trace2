@@ -4,10 +4,6 @@ require 'spec_helper'
 
 describe Trace2::GraphGeneratorC do
   describe '#run' do
-    subject(:run_graph_generator) do
-      described_class.new.run('file.txt')
-    end
-
     let(:filter) do
       [{ allow: [{ path: [%r{/spec/fixtures/classes.rb}] }] }]
     end
@@ -31,13 +27,14 @@ describe Trace2::GraphGeneratorC do
               .build(filter, type: :native)
 
       class_lister = tools[:class_lister]
+      graph_generator = tools[:graph_generator]
 
       class_lister.enable
       complex_nesting = ComplexNesting.new
       complex_nesting.complex_call
       class_lister.disable
 
-      run_graph_generator
+      graph_generator.run('file.txt', class_lister)
     end
 
     it 'uses regex on filters' do

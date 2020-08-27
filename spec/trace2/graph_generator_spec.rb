@@ -6,8 +6,11 @@ describe Trace2::GraphGenerator do
   subject(:graph_generator) { described_class.new }
 
   describe '#run' do
-    subject(:run_generator) { graph_generator.run(file, classes_uses) }
+    subject(:run_generator) { graph_generator.run(file, class_lister) }
 
+    let(:class_lister) do
+      instance_double(Trace2::ClassLister, classes_uses: classes_uses)
+    end
     let(:file) { "#{PROJECT_ROOT}/spec/fixtures/graph_sample" }
 
     after do
