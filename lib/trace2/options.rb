@@ -26,6 +26,9 @@ module Trace2
       executable = executable_args.shift
 
       @option_parser.parse(trace2)
+
+      raise_missing_executable if executable.nil?
+
       @options.merge(executable: executable, args: executable_args)
     end
 
@@ -33,7 +36,7 @@ module Trace2
 
     def default_options
       {
-        event_processor_type: :native,
+        tools_type: :native,
         automatic_render: true
       }
     end
@@ -77,12 +80,14 @@ module Trace2
     end
 
     def type_option
-      event_processor_type = 'Type of the EventProcessor that will '\
-       'be used with ClassLister'
-      @option_parser.add_option(short: '-t EVENT_PROCESSOR_TYPE',
-                                description: event_processor_type,
-                                long: '--type EVENT_PROCESSOR_TYPE') do |type|
-        @options[:event_processor_type] = type.to_sym
+      tools_type = ['Type of the tools that will be used to generate the ',
+                    'relationship between classes. Possible values: ',
+                    'ruby or native. Defaults to native.']
+
+      @option_parser.add_option(short: '-t TOOLS_TYPE',
+                                description: tools_type,
+                                long: '--type TOOLS_TYPE') do |type|
+        @options[:tools_type] = type.to_sym
       end
     end
 
@@ -94,6 +99,11 @@ module Trace2
                                 long: '--manual') do |_type|
         @options[:automatic_render] = false
       end
+    end
+
+    def raise_missing_executable
+      raise ArgumentError, 'an executable or ruby script name'\
+       ' must be passed as argument'
     end
 
     def exit_runner

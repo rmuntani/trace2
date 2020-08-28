@@ -3,22 +3,19 @@
 require 'spec_helper'
 
 shared_examples 'version option' do |args|
-  subject(:version_option) { described_class.new(kernel: kernel).parse(args) }
-
-  let(:kernel) { class_double(Kernel, exit: true, puts: true) }
+  subject(:version_option) { described_class.parse(args) }
 
   before do
     stub_const('Trace2::VERSION', '1.0.0')
   end
 
-  # RSpec doesn't work as expected if the expectations bellow are separed
-  # TODO: separate the expectations
-  # rubocop:disable RSpec/MultipleExpectations
-  it 'prints the version and exits the runner' do
-    expect { version_option }.to output("1.0.0\n").to_stdout
-    expect(kernel).to have_received(:exit)
+  it 'prints version and exits' do
+    expect do
+      version_option
+    rescue SystemExit
+      nil  # implicitly verify that system exits
+    end.to output("1.0.0\n").to_stdout
   end
-  # rubocop:enable RSpec/MultipleExpectations
 end
 
 shared_examples 'output option' do |args, path|
@@ -30,9 +27,7 @@ shared_examples 'output option' do |args, path|
 end
 
 shared_examples 'help option' do |args|
-  subject { described_class.new(kernel: kernel) }
-
-  let(:kernel) { class_double(Kernel, exit: true) }
+  subject(:help_option) { described_class.parse(args) }
 
   let(:help_banner) do
     <<~HELP
@@ -41,32 +36,32 @@ shared_examples 'help option' do |args|
           -v, --version                    Show trace2 version
               --filter FILTER_PATH         Specify a filter file
           -o, --output OUTPUT_PATH         Output path for the report file
-          -t, --type EVENT_PROCESSOR_TYPE  Type of the EventProcessor that will be used with ClassLister
+          -t, --type TOOLS_TYPE            Type of the tools that will be used to generate the 
+                                           relationship between classes. Possible values: 
+                                           ruby or native. Defaults to native.
           -m, --manual                     Don't try to render the relationships graph automatically
     HELP
   end
 
-  # RSpec doesn't work as expected if the expectations bellow are separed
-  # TODO: separate the expectations
-  # rubocop:disable RSpec/MultipleExpectations
   it 'prints the help banner and exits' do
-    expect { subject.parse(args) }.to output(help_banner).to_stdout
-
-    expect(kernel).to have_received(:exit)
+    expect do
+      help_option
+    rescue SystemExit
+      nil  # implicitly verify that system exits
+    end.to output(help_banner).to_stdout
   end
-  # rubocop:enable RSpec/MultipleExpectations
 end
 
 shared_examples 'class lister type option' do |args|
   subject(:runner_type) { described_class.new.parse(args) }
 
-  it { expect(runner_type).to include(event_processor_type: :ruby) }
+  it { expect(runner_type).to include(tools_type: :ruby) }
 end
 
 shared_examples 'wrong runner type option' do |args|
   subject(:runner_type) { described_class.new.parse(args) }
 
-  it { expect(runner_type).to include(event_processor_type: :native) }
+  it { expect(runner_type).to include(tools_type: :native) }
 
   it 'warns that the passed type is not implemented' do
     expect { subject.parse(args) }.to output(
@@ -87,21 +82,32 @@ describe Trace2::Options do
       described_class.parse(args)
     end
 
-    it_behaves_like 'version option', %w[-v executable]
-    it_behaves_like 'version option', %w[--version executable]
+    it_behaves_like 'version option', %w[-v]
+    it_behaves_like 'version option', %w[--version]
 
     it_behaves_like 'output option', %w[-o /path/to executable], '/path/to'
     it_behaves_like(
       'output option', %w[--output /path/to executable], '/path/to'
     )
 
-    it_behaves_like 'help option', %w[-h executable]
-    it_behaves_like 'help option', %w[--help executable]
+    it_behaves_like 'help option', %w[-h]
+    it_behaves_like 'help option', %w[--help]
 
     it_behaves_like 'class lister type option', %w[-t ruby rspec]
     it_behaves_like 'class lister type option', %w[--type ruby rspec]
 
     it_behaves_like 'manual graph render', %w[--manual rspec]
+
+    context 'when no executable is passed' do
+      let(:args) { %w[] }
+
+      it 'raises an error' do
+        expect { parsed_option }.to raise_error(
+          ArgumentError,
+          'an executable or ruby script name must be passed as argument'
+        )
+      end
+    end
 
     context 'when --filter is passed' do
       let(:args) { %w[--filter /path/to/file.yml executable] }
@@ -138,7 +144,7 @@ describe Trace2::Options do
 
       it 'returns default values' do
         expect(parsed_option).to include(
-          event_processor_type: :native,
+          tools_type: :native,
           automatic_render: true
         )
       end

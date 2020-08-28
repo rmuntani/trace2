@@ -13,17 +13,16 @@ module Trace2
       super(banner, width, indent)
     end
 
-    def add_option(short: nil, long: nil, description: nil)
+    def add_option(short: nil, long: nil, description: [])
       @options_keys.merge!(option_hash(short), option_hash(long))
       options = [short, long].compact
-      on(*options, description) do |option_value|
+      on(*options, *description) do |option_value|
         yield option_value
       end
     end
 
     def split_executables(args)
       second_executable = second_executable_arguments(args)
-      raise_missing_executable if second_executable.empty?
 
       [args.shift(args.length - second_executable.length), second_executable]
     end
@@ -41,11 +40,6 @@ module Trace2
           true
         end
       end
-    end
-
-    def raise_missing_executable
-      raise ArgumentError, 'an executable or ruby script name'\
-       ' must be passed as argument'
     end
 
     def option_hash(option)

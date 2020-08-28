@@ -41,7 +41,7 @@ module Trace2
     def build_class_lister(options)
       filter = load_filter(options)
       tools = options.fetch(:reporting_tools_factory, ReportingToolsFactory.new)
-                     .build(filter, type: options[:event_processor_type])
+                     .build(filter, type: options[:tools_type])
 
       @class_lister = tools[:class_lister]
       @graph_generator = tools[:graph_generator]
