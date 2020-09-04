@@ -80,8 +80,8 @@ module Trace2
     end
 
     def type_option
-      tools_type = ['Type of the tools that will be used to generate the ',
-                    'relationship between classes. Possible values: ',
+      tools_type = ['Type of the tools that will be used to generate the',
+                    'relationship between classes. Possible values:',
                     'ruby or native. Defaults to native.']
 
       @option_parser.add_option(short: '-t TOOLS_TYPE',

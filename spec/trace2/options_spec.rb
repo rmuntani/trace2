@@ -36,8 +36,8 @@ shared_examples 'help option' do |args|
           -v, --version                    Show trace2 version
               --filter FILTER_PATH         Specify a filter file
           -o, --output OUTPUT_PATH         Output path for the report file
-          -t, --type TOOLS_TYPE            Type of the tools that will be used to generate the 
-                                           relationship between classes. Possible values: 
+          -t, --type TOOLS_TYPE            Type of the tools that will be used to generate the
+                                           relationship between classes. Possible values:
                                            ruby or native. Defaults to native.
           -m, --manual                     Don't try to render the relationships graph automatically
     HELP

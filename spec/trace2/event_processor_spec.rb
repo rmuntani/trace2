@@ -3,10 +3,8 @@
 require 'spec_helper'
 
 describe Trace2::EventProcessor do
-  def setup_processor_with_state(
-    classes_uses = [], stack_level = 1, callers_stack = []
-  )
-    Trace2::EventProcessor.new([]).tap do |event_processor|
+  subject(:processor) do
+    described_class.new([]).tap do |event_processor|
       event_processor.instance_variable_set(:@classes_uses, classes_uses)
       event_processor.instance_variable_set(:@stack_level, stack_level)
       event_processor.instance_variable_set(:@callers_stack, callers_stack)
@@ -14,13 +12,18 @@ describe Trace2::EventProcessor do
   end
 
   describe '#process_event' do
+    let(:classes_uses) { [] }
+    let(:trace_point)  do
+      instance_double(
+        'TracePoint', defined_class: 'Simple', callee_id: 'do_it',
+                      path: '/path/to/simple', lineno: 87,
+                      self: Simple, event: :call
+      )
+    end
+
     context 'when stack level reduces' do
-      it 'successfully' do
-        bottom = instance_double(
-          'ClassUse', not_top_of_stack: false, name: 'Bottom', stack_level: 23,
-                      add_callee: []
-        )
-        callers_stack = [
+      let(:callers_stack) do
+        [
           instance_double(
             'ClassUse', not_top_of_stack: false, name: 'Top', stack_level: 25,
                         add_callee: []
@@ -29,97 +32,109 @@ describe Trace2::EventProcessor do
             'ClassUse', not_top_of_stack: false, name: 'Mid', stack_level: 24,
                         add_callee: []
           ),
-          bottom
+          instance_double(
+            'ClassUse', not_top_of_stack: false, name: 'Bottom',
+                        stack_level: 23,
+                        add_callee: []
+          )
         ]
-        caller_stub = double(length: 24)
-        processor = setup_processor_with_state([], 25, callers_stack)
-        trace_point = instance_double(
-          'TracePoint', defined_class: 'Simple', callee_id: 'do_it',
-                        path: '/path/to/simple', lineno: 87,
-                        self: Simple, event: :call
-        )
+      end
+      let(:stack_level) { 25 }
+
+      before do
+        # TODO: refactor event processor to receive it's dependecies
+        caller_stub = instance_double('Array', length: 24)
         allow(processor).to receive(:caller).and_return(caller_stub)
         processor.process_event(trace_point)
-        classes_names = processor.classes_uses.map(&:name)
-        callers_stack = processor
-                        .instance_variable_get(:@callers_stack)
-                        .map(&:name)
+      end
 
-        expect(classes_names).to eq %w[Top Mid]
+      it('removes from callers stack the classes uses that have stack level '\
+          'smaller greater than current level') do
+        classes_uses_names = processor.classes_uses.map(&:name)
+
+        expect(classes_uses_names).to eq %w[Top Mid]
+      end
+
+      it 'pushes the new use to the callers stack' do
+        callers_stack = processor.instance_variable_get(:@callers_stack)
+                                 .map(&:name)
+
         expect(callers_stack).to eq %w[Simple Bottom]
       end
     end
 
-    context 'when stack level mantains' do
-      it 'successfully' do
-        bottom = instance_double(
+    context 'when stack level maintains' do
+      let(:stack_level) { 24 }
+      let(:callers_stack) do
+        [instance_double(
           'ClassUse', not_top_of_stack: false, name: 'Bottom', stack_level: 24,
                       add_callee: []
-        )
-        callers_stack = [
-          bottom
-        ]
-        caller_stub = double(length: 24)
-        processor = setup_processor_with_state([], 24, callers_stack)
-        trace_point = double(
-          'TracePoint', defined_class: 'Simple', callee_id: 'do_it',
-                        path: '/path/to/simple', lineno: 87,
-                        self: Simple, event: :call
-        )
+        )]
+      end
+
+      before do
+        caller_stub = instance_double('Array', length: 24)
         allow(processor).to receive(:caller).and_return(caller_stub)
-
         processor.process_event(trace_point)
-        classes_names = processor.classes_uses.map(&:name)
-        callers_stack = processor
-                        .instance_variable_get(:@callers_stack)
-                        .map(&:name)
+      end
 
-        expect(classes_names).to eq ['Bottom']
-        expect(callers_stack).to eq ['Simple']
+      it('removes from callers stack the classes uses that have stack level '\
+          'smaller greater than current level') do
+        classes_uses_names = processor.classes_uses.map(&:name)
+
+        expect(classes_uses_names).to eq %w[Bottom]
+      end
+
+      it 'pushes the new use to the callers stack' do
+        callers_stack = processor.instance_variable_get(:@callers_stack)
+                                 .map(&:name)
+
+        expect(callers_stack).to eq %w[Simple]
       end
     end
 
     context 'when stack level increases' do
-      it 'successfully' do
-        bottom = double(
+      let(:stack_level) { 24 }
+      let(:callers_stack) do
+        [instance_double(
           'ClassUse', not_top_of_stack: false, name: 'Bottom', stack_level: 24,
                       add_callee: []
-        )
-        callers_stack = [
-          bottom
-        ]
-        caller_stub = double(length: 26)
-        processor = setup_processor_with_state([], 24, callers_stack)
-        trace_point = double(
-          'TracePoint', defined_class: 'Simple', callee_id: 'do_it',
-                        path: '/path/to/simple', lineno: 87,
-                        self: Simple, event: :call
-        )
+        )]
+      end
+
+      before do
+        caller_stub = instance_double('Array', length: 26)
         allow(processor).to receive(:caller).and_return(caller_stub)
-
         processor.process_event(trace_point)
-        classes_names = processor.classes_uses.map(&:name)
-        callers_stack = processor
-                        .instance_variable_get(:@callers_stack)
-                        .map(&:name)
+      end
 
-        expect(classes_names).to eq []
+      it('removes from callers stack the classes uses that have stack level '\
+          'smaller greater than current level') do
+        classes_uses_names = processor.classes_uses.map(&:name)
+
+        expect(classes_uses_names).to be_empty
+      end
+
+      it 'pushes the new use to the callers stack' do
+        callers_stack = processor.instance_variable_get(:@callers_stack)
+                                 .map(&:name)
+
         expect(callers_stack).to eq %w[Simple Bottom]
       end
     end
   end
 
   describe '#aggregate_uses' do
-    it 'successfully' do
-      class_use = double('ClassUse')
-      callers = double('ClassUse')
-      processor = setup_processor_with_state([class_use], 25, [callers])
+    let(:classes_uses) { [instance_double('ClassUse')] }
+    let(:callers_stack) { [instance_double('ClassUse')] }
+    let(:stack_level) {}
 
+    before do
       processor.aggregate_uses
+    end
 
-      classes_uses = processor.classes_uses
-      expect(classes_uses).to include class_use
-      expect(classes_uses).to include callers
+    it 'concatenates classes uses and callers stack' do
+      expect(processor.classes_uses).to eq(callers_stack + classes_uses)
     end
   end
 end

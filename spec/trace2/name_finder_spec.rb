@@ -4,92 +4,60 @@ require 'spec_helper'
 
 describe Trace2::NameFinder do
   describe '.class_name' do
-    it 'parses an instance name' do
-      simple = Simple.new
+    subject(:class_name) { described_class.class_name(object) }
 
-      expect(Trace2::NameFinder.class_name(simple)).to eq 'Simple'
+    context 'when object is an instance' do
+      let(:object) { NormalClass.new }
+
+      it { is_expected.to eq 'NormalClass' }
     end
 
-    it 'parses a class name' do
-      expect(Trace2::NameFinder.class_name(Simple)).to eq 'Simple'
+    context 'when object is a class' do
+      let(:object) { NormalClass }
+
+      it { is_expected.to eq 'NormalClass' }
     end
 
-    it 'parses a module name correctly' do
-      module MyModule; end
+    context 'when object is a module' do
+      let(:object) { NormalModule }
 
-      expect(
-        Trace2::NameFinder.class_name(MyModule)
-      ).to eq 'MyModule'
+      it { is_expected.to eq 'NormalModule' }
     end
 
-    it 'parses a class name correctly' do
-      class MyClass; end
+    context 'when object raises error on it\'s #to_s' do
+      let(:object) { ToSRaisesError }
 
-      expect(
-        Trace2::NameFinder.class_name(MyClass)
-      ).to eq 'MyClass'
+      it { is_expected.to eq 'ToSRaisesError' }
     end
 
-    it 'parses a class name correctly even when it overrides .to_s' do
-      class MyClass
-        def self.to_s
-          raise 'Name will be parsed anyway'
-        end
-      end
+    context 'when object returns nil as it\'s #to_s' do
+      let(:object) { ToSNil }
 
-      expect(Trace2::NameFinder.class_name(MyClass)).to eq 'MyClass'
+      it { is_expected.to eq 'ToSNil' }
     end
 
-    it 'parses name correctly even if .to_s returns nil' do
-      class MyClass
-        def self.to_s
-          nil
-        end
-      end
+    context 'when object is inside a module' do
+      let(:object) { NormalModule::ClassInside }
 
-      expect(Trace2::NameFinder.class_name(MyClass)).to eq 'MyClass'
+      it { is_expected.to eq 'NormalModule::ClassInside' }
     end
 
-    it 'returns name correctly for a class instance' do
-      class MyClass; end
-      class_instance = MyClass.new
+    context 'when object is <main>' do
+      let(:object) { TOPLEVEL_BINDING.eval('self') }
 
-      expect(
-        Trace2::NameFinder.class_name(class_instance)
-      ).to eq 'MyClass'
+      it { is_expected.to eq('Object') }
     end
 
-    it 'parses a class name that is inside a module' do
-      module MyModule; class MyClass; end; end
-      class_instance = MyModule::MyClass.new
+    context 'when object is an anonymous class' do
+      let(:object) { Class.new }
 
-      expect(
-        Trace2::NameFinder.class_name(class_instance)
-      ).to eq 'MyModule::MyClass'
+      it { is_expected.to eq('AnonymousClass') }
     end
 
-    it 'parses <main> class' do
-      main = TOPLEVEL_BINDING.eval('self')
+    context 'when object is an anonymous module' do
+      let(:object) { Module.new }
 
-      expect(
-        Trace2::NameFinder.class_name(main)
-      ).to eq 'Object'
-    end
-
-    it 'parses anonymous classes' do
-      anonymous_class = Class.new
-
-      expect(
-        Trace2::NameFinder.class_name(anonymous_class)
-      ).to eq 'AnonymousClass'
-    end
-
-    it 'parses anonymous modules' do
-      anonymous_module = Module.new
-
-      expect(
-        Trace2::NameFinder.class_name(anonymous_module)
-      ).to eq 'AnonymousModule'
+      it { is_expected.to eq('AnonymousModule') }
     end
   end
 end

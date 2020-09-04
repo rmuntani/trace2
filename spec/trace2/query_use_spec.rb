@@ -4,193 +4,200 @@ require 'spec_helper'
 
 describe Trace2::QueryUse do
   describe '#select' do
-    it 'successfully for empty query' do
-      class_use = instance_double('Trace2::ClassUse')
-      classes_uses = [class_use]
-      query = Trace2::QueryUse.where([])
-
-      selected_classes = query.select(classes_uses)
-
-      expect(selected_classes).to eq classes_uses
+    subject(:select) do
+      described_class.where(filter)
+                     .select(classes_uses)
     end
 
-    it 'applies query successfully' do
-      class_use = instance_double('Trace2::ClassUse')
-      classes_uses = [class_use]
-      query = Trace2::QueryUse.where(
-        [allow: [{ name: ['RSpec'], path: ['/my/path/to'] }]]
-      )
+    context 'when query is empty' do
+      let(:filter) { [] }
+      let(:classes_uses) { [instance_double('Trace2::ClassUse')] }
 
-      allow(class_use).to receive(:matches_name?)
-        .and_return(true)
-      allow(class_use).to receive(:matches_path?)
-        .and_return(true)
-
-      selected_classes = query.select(classes_uses)
-
-      expect(selected_classes).to eq classes_uses
+      it { is_expected.to eq classes_uses }
     end
 
-    it 'applies AND query successfully' do
-      remove_use = instance_double('Trace2::ClassUse')
-      allow(remove_use).to receive(:matches_name?).and_return(false)
+    context 'when query has one statement and one value' do
+      let(:filter) do
+        [{ allow: [{ name: ['RSpec'] }] }]
+      end
 
-      accept_use = instance_double('Trace2::ClassUse')
-      allow(accept_use).to receive(:matches_name?).and_return(true)
-      allow(accept_use).to receive(:matches_path?).and_return(false)
+      let(:first_use) do
+        instance_double('Trace2::ClassUse', matches_name?: true)
+      end
 
-      pass_first_filter = instance_double('Trace2::ClassUse')
-      allow(pass_first_filter).to receive(:matches_name?).and_return(true)
-      allow(pass_first_filter).to receive(:matches_path?).and_return(true)
+      let(:classes_uses) do
+        second_use = instance_double('Trace2::ClassUse', matches_name?: false)
+        [first_use, second_use]
+      end
 
-      classes_uses = [remove_use, accept_use, pass_first_filter]
-
-      query_parameters = [
-        allow: [{ name: ['RSpec'] }],
-        reject: [{ path: ['/my/path/to'] }]
-      ]
-
-      query = Trace2::QueryUse.where(query_parameters)
-      selected_classes = query.select(classes_uses)
-
-      expect(selected_classes).to eq [accept_use]
+      it { is_expected.to eq([first_use]) }
     end
 
-    it 'applies OR query successfully' do
-      fail_query = instance_double('Trace2::ClassUse')
-      allow(fail_query).to receive(:matches_name?).and_return(false)
-      allow(fail_query).to receive(:matches_path?).and_return(false)
+    context 'when a query has an AND statement' do
+      let(:filter) do
+        [{
+          allow: [{ name: ['RSpec'] }],
+          reject: [{ path: ['/my/path/to'] }]
+        }]
+      end
 
-      pass_name = instance_double('Trace2::ClassUse')
-      allow(pass_name).to receive(:matches_name?).and_return(true)
-      allow(pass_name).to receive(:matches_path?).and_return(false)
+      let(:accepted_use) do
+        instance_double('Trace2::ClassUse', matches_name?: true,
+                                            matches_path?: false)
+      end
 
-      pass_both = instance_double('Trace2::ClassUse')
-      allow(pass_both).to receive(:matches_name?).and_return(true)
-      allow(pass_both).to receive(:matches_path?).and_return(true)
+      let(:classes_uses) do
+        fails_first_validation = instance_double(
+          'Trace2::ClassUse', matches_name?: false, matches_path?: false
+        )
+        fails_snd_validaiton = instance_double(
+          'Trace2::ClassUse', matches_name?: false, matches_path?: true
+        )
+        [accepted_use, fails_first_validation, fails_snd_validaiton]
+      end
 
-      classes_uses = [fail_query, pass_name, pass_both]
-
-      query_parameters = [
-        allow: [{ name: ['RSpec'] }, { path: ['/my/path/to'] }]
-      ]
-
-      query = Trace2::QueryUse.where(query_parameters)
-      selected_classes = query.select(classes_uses)
-
-      expect(selected_classes).to eq [pass_name, pass_both]
+      it { is_expected.to eq [accepted_use] }
     end
 
-    it 'applies both types of query' do
-      fail_both = instance_double('Trace2::ClassUse')
-      allow(fail_both).to receive(:matches_name?).and_return(false)
-      allow(fail_both).to receive(:matches_path?).and_return(false)
-      allow(fail_both).to receive(:matches_top_of_stack?).and_return(false)
+    context 'when a query has an OR statement' do
+      let(:filter) do
+        [{
+          allow: [{ name: ['RSpec'] }, { path: ['/my/path/to'] }]
+        }]
+      end
 
-      fail_stack = instance_double('Trace2::ClassUse')
-      allow(fail_stack).to receive(:matches_name?).and_return(true)
-      allow(fail_stack).to receive(:matches_path?).and_return(true)
-      allow(fail_stack).to receive(:matches_top_of_stack?).and_return(false)
+      let(:accepted_uses) do
+        [
+          instance_double(
+            'Trace2:ClassUse', matches_name?: true, matches_path?: false
+          ),
+          instance_double(
+            'Trace2:ClassUse', matches_name?: false, matches_path?: true
+          )
+        ]
+      end
 
-      pass_name = instance_double('Trace2::ClassUse')
-      allow(pass_name).to receive(:matches_name?).and_return(true)
-      allow(pass_name).to receive(:matches_path?).and_return(false)
-      allow(pass_name).to receive(:matches_top_of_stack?).and_return(true)
+      let(:classes_uses) do
+        accepted_uses +
+          [instance_double(
+            'Trace2::ClassUse', matches_name?: false, matches_path?: false
+          )]
+      end
 
-      pass_path = instance_double('Trace2::ClassUse')
-      allow(pass_path).to receive(:matches_name?).and_return(false)
-      allow(pass_path).to receive(:matches_path?).and_return(true)
-      allow(pass_path).to receive(:matches_top_of_stack?).and_return(true)
+      it { is_expected.to eq(accepted_uses) }
+    end
 
-      classes_uses = [fail_both, fail_stack, pass_name, pass_path]
+    context 'when both AND and OR are used on a single filter' do
+      let(:filter) do
+        [
+          { allow: [{ name: ['RSpec'] }, { path: ['/my/path/to'] }] },
+          { allow: [{ top_of_stack: true }] }
+        ]
+      end
 
-      query_parameters = [
-        { allow: [{ name: ['RSpec'] }, { path: ['/my/path/to'] }] },
-        { allow: [{ top_of_stack: true }] }
-      ]
+      let(:accepted_uses) do
+        [
+          instance_double('Trace2::ClassUse', matches_name?: true,
+                                              matches_path?: false,
+                                              matches_top_of_stack?: true),
+          instance_double('Trace2::ClassUse', matches_name?: false,
+                                              matches_path?: true,
+                                              matches_top_of_stack?: true)
+        ]
+      end
 
-      query = Trace2::QueryUse.where(query_parameters)
-      selected_classes = query.select(classes_uses)
+      let(:rejected_uses) do
+        [
+          instance_double('Trace2::ClassUse', matches_name?: true,
+                                              matches_path?: true,
+                                              matches_top_of_stack?: false),
+          instance_double('Trace2::ClassUse', matches_name?: false,
+                                              matches_path?: false,
+                                              matches_top_of_stack?: false)
+        ]
+      end
 
-      expect(selected_classes).to eq [pass_name, pass_path]
+      let(:classes_uses) do
+        accepted_uses + rejected_uses
+      end
+
+      it { is_expected.to eq accepted_uses }
     end
   end
 
   describe '#filter' do
-    it 'successfully for empty query' do
-      class_use = instance_double('Trace2::ClassUse')
-      query = Trace2::QueryUse.where([])
-
-      selected_classes = query.filter(class_use)
-
-      expect(selected_classes).to eq class_use
+    subject(:filter_uses) do
+      described_class.where(filter)
+                     .filter(class_use)
     end
 
-    it 'applies query successfully' do
-      class_use = instance_double('Trace2::ClassUse')
-      query = Trace2::QueryUse.where(
+    context 'when query is empty' do
+      let(:filter) { [] }
+      let(:class_use) { instance_double('Trace2::ClassUse') }
+
+      it { is_expected.to eq class_use }
+    end
+
+    context 'when query is has one filter with one validation' do
+      let(:filter) do
         [
           allow: [
-            { name: ['RSpec'], path: ['/my/path/to'] }
+            { name: ['RSpec'] }
           ]
         ]
-      )
+      end
+      let(:class_use) do
+        instance_double('Trace2::ClassUse', matches_name?: false)
+      end
 
-      allow(class_use).to receive(:matches_name?)
-        .and_return(false)
-      allow(class_use).to receive(:matches_path?)
-        .and_return(true)
-
-      selected_classes = query.filter(class_use)
-
-      expect(selected_classes).to be_nil
+      it { is_expected.to be_nil }
     end
 
-    it 'applies a complex filter successfully' do
-      filters = [
-        { allow: [
-          { caller_class: { name: [/ForASimpleClass/] } },
-          { name: [/ForASimpleClass/] }
-        ] },
-        {
-          allow: [{ top_of_stack: true }]
-        }
-      ]
+    context 'when multiple filters with validations is used' do
+      let(:filter) do
+        [
+          { allow: [
+            { caller_class: { name: [/ForASimpleClass/] } },
+            { name: [/ForASimpleClass/] }
+          ] },
+          {
+            allow: [{ top_of_stack: true }]
+          }
+        ]
+      end
+      let(:class_use) do
+        instance_double('Trace2::ClassUse', matches_caller_class?: true,
+                                            matches_name?: false,
+                                            matches_top_of_stack?: false)
+      end
 
-      query = Trace2::QueryUse.where(filters)
-
-      pass_path = instance_double('Trace2::ClassUse')
-      allow(pass_path).to receive(:matches_caller_class?).and_return(true)
-      allow(pass_path).to receive(:matches_name?).and_return(false)
-      allow(pass_path).to receive(:matches_top_of_stack?).and_return(false)
-
-      expect(query.filter(pass_path)).to be_nil
+      it { is_expected.to be_nil }
     end
 
-    it 'applies a query to direct and indirect callers of class use' do
-      query_parameters = [
-        { allow: [{ caller_class: { name: ['RSpec'] } }] }
-      ]
+    context 'when query has caller_class validaiton' do
+      let(:filter) do
+        [
+          { allow: [{ caller_class: { name: ['RSpec'] } }] }
+        ]
+      end
 
-      second_caller =  Trace2::ClassUse.new(
-        name: 'RSpec', caller_class: nil
-      )
-      first_caller = Trace2::ClassUse.new(
-        name: 'YourClass', caller_class: second_caller
-      )
-      valid_callee = Trace2::ClassUse.new(
-        name: 'MyClass', caller_class: first_caller
-      )
+      let(:first_caller) do
+        Trace2::ClassUse.new(
+          name: 'YourClass', caller_class: second_caller
+        )
+      end
+      let(:second_caller) do
+        Trace2::ClassUse.new(
+          name: 'RSpec', caller_class: nil
+        )
+      end
+      let(:class_use) do
+        Trace2::ClassUse.new(
+          name: 'MyClass', caller_class: first_caller
+        )
+      end
 
-      allow(first_caller).to receive(:matches_name?).and_return(false)
-      allow(second_caller).to receive(:matches_name?).and_return(true)
-
-      query = Trace2::QueryUse.where(query_parameters)
-      class_use = query.filter(valid_callee)
-
-      expect(class_use).to eq valid_callee
-      expect(first_caller).to have_received(:matches_name?)
-      expect(second_caller).to have_received(:matches_name?)
+      it { is_expected.to eq class_use }
     end
   end
 end
