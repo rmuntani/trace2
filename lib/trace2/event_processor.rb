@@ -1,16 +1,20 @@
 # frozen_string_literal: true
 
 module Trace2
-  # Processes a TracePoint event
+  # Processes a TracePoint event, generating an array
+  # of ClassUse
   class EventProcessor
     attr_accessor :classes_uses
     EVENTS = %i[call b_call].freeze
 
-    def initialize(filter_by)
-      @selector = QueryUse.where(filter_by)
-      @classes_uses = []
+    def initialize(filter_by, kernel: Kernel, query_use: QueryUse,
+                   class_use_factory: ClassUseFactory)
       @callers_stack = []
-      @stack_level = caller.length
+      @classes_uses = []
+      @class_use_factory = class_use_factory
+      @kernel = kernel
+      @selector = query_use.where(filter_by)
+      @stack_level = @kernel.caller.length
     end
 
     def aggregate_uses
@@ -22,9 +26,13 @@ module Trace2
     end
 
     def process_event(trace_point)
-      @classes_uses << caller_to_classes_uses if @stack_level > caller.length
-      @stack_level = caller.length
-      update_callers_stack(trace_point)
+      @stack_level = @kernel.caller.length
+
+      remove_exited_callers_from_stack
+      current_class_use = build_class_use(trace_point, current_caller)
+      update_top_of_stack(current_class_use)
+
+      @callers_stack.unshift(current_class_use)
     end
 
     def events
@@ -33,50 +41,35 @@ module Trace2
 
     private
 
+    def remove_exited_callers_from_stack
+      while class_exited?(@callers_stack.first)
+        @classes_uses << @selector.filter(@callers_stack.shift)
+      end
+    end
+
     def build_class_use(trace_point, caller_class)
-      ClassUseFactory.build(
+      @class_use_factory.build(
         trace_point: trace_point,
         stack_level: @stack_level,
         caller_class: caller_class
       )
     end
 
-    def update_callers_stack(trace_point)
-      remove_exited_callers_from_stack
-      current_class_use = build_class_use(trace_point, allowed_caller)
-      update_top_of_callers(current_class_use)
-      @callers_stack.unshift(current_class_use)
-    end
-
-    def update_top_of_callers(callee)
+    def update_top_of_stack(callee)
       caller_class = callee.caller_class
       return if caller_class.nil?
 
       caller_class.add_callee(callee) unless @selector.filter(callee).nil?
     end
 
-    def remove_exited_callers_from_stack
-      while class_exited(@callers_stack.first)
-        @classes_uses << caller_to_classes_uses
-      end
-    end
-
-    def caller_to_classes_uses
-      @selector.filter(@callers_stack.shift)
-    end
-
-    def class_exited(current_class)
+    def class_exited?(current_class)
       current_class && current_class.stack_level >= @stack_level
     end
 
-    def allowed_caller
-      possible_caller = @callers_stack.first
-      class_caller = @selector.filter(possible_caller)
-      while !possible_caller.nil? && class_caller.nil?
-        possible_caller = possible_caller.caller_class
-        class_caller = @selector.filter(possible_caller)
-      end
-      class_caller
+    def current_caller
+      @callers_stack.drop_while do |possible_caller|
+        possible_caller.nil? || @selector.filter(possible_caller).nil?
+      end.first
     end
   end
 end

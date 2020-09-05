@@ -4,12 +4,14 @@ require 'spec_helper'
 
 describe Trace2::EventProcessor do
   subject(:processor) do
-    described_class.new([]).tap do |event_processor|
+    described_class.new([], kernel: kernel).tap do |event_processor|
       event_processor.instance_variable_set(:@classes_uses, classes_uses)
       event_processor.instance_variable_set(:@stack_level, stack_level)
       event_processor.instance_variable_set(:@callers_stack, callers_stack)
     end
   end
+
+  let(:kernel) { class_double(Kernel, caller: []) }
 
   describe '#process_event' do
     let(:classes_uses) { [] }
@@ -42,9 +44,8 @@ describe Trace2::EventProcessor do
       let(:stack_level) { 25 }
 
       before do
-        # TODO: refactor event processor to receive it's dependecies
         caller_stub = instance_double('Array', length: 24)
-        allow(processor).to receive(:caller).and_return(caller_stub)
+        allow(kernel).to receive(:caller).and_return(caller_stub)
         processor.process_event(trace_point)
       end
 
@@ -74,7 +75,7 @@ describe Trace2::EventProcessor do
 
       before do
         caller_stub = instance_double('Array', length: 24)
-        allow(processor).to receive(:caller).and_return(caller_stub)
+        allow(kernel).to receive(:caller).and_return(caller_stub)
         processor.process_event(trace_point)
       end
 
@@ -104,7 +105,7 @@ describe Trace2::EventProcessor do
 
       before do
         caller_stub = instance_double('Array', length: 26)
-        allow(processor).to receive(:caller).and_return(caller_stub)
+        allow(kernel).to receive(:caller).and_return(caller_stub)
         processor.process_event(trace_point)
       end
 
