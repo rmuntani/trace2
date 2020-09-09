@@ -34,11 +34,15 @@ shared_examples 'help option' do |args|
       Usage: trace2 [options] RUBY_EXECUTABLE [executable options]
           -h, --help                       Display help
           -v, --version                    Show trace2 version
-              --filter FILTER_PATH         Specify a filter file
-          -o, --output OUTPUT_PATH         Output path for the report file
+              --filter FILTER_PATH         Specify a filter file. Defaults to .trace2.yml
+          -o, --output OUTPUT_PATH         Output path for the report file. Defaults to
+                                           ./trace2_report.yml
           -t, --type TOOLS_TYPE            Type of the tools that will be used to generate the
                                            relationship between classes. Possible values:
                                            ruby or native. Defaults to native.
+              --format FORMAT              Format that will be used to render the relationship's
+                                           graph. Has no effect if the manual option is set.
+                                           Defaults to pdf.
           -m, --manual                     Don't try to render the relationships graph automatically
     HELP
   end
@@ -112,8 +116,16 @@ describe Trace2::Options do
     context 'when --filter is passed' do
       let(:args) { %w[--filter /path/to/file.yml executable] }
 
-      it 'returns the file filter file on the options' do
+      it 'returns the file filter path on the options' do
         expect(parsed_option).to include(filter_path: '/path/to/file.yml')
+      end
+    end
+
+    context 'when --format it passed' do
+      let(:args) { %w[--format jpg executable] }
+
+      it 'returns the format that should be used to render the graph' do
+        expect(parsed_option).to include(graph_format: 'jpg')
       end
     end
 
@@ -139,14 +151,20 @@ describe Trace2::Options do
       end
     end
 
-    context 'when no options besides the executable is passed' do
+    context 'when no options besides the executable are passed' do
       let(:args) { %w[rspec] }
+      let(:default_options) do
+        {
+          tools_type: :native,
+          automatic_render: true,
+          graph_format: 'pdf',
+          output_path: 'trace2_report.dot',
+          filter_path: '.trace2.yml'
+        }
+      end
 
       it 'returns default values' do
-        expect(parsed_option).to include(
-          tools_type: :native,
-          automatic_render: true
-        )
+        expect(parsed_option).to include(default_options)
       end
     end
   end

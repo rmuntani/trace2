@@ -3,11 +3,13 @@
 module Trace2
   # Defines and returns options for Trace2's runner,
   # given the arguments that were passed
+  # rubocop:disable Metrics/ClassLength
   class Options
     def self.parse(args)
       new.parse(args)
     end
 
+    # rubocop:disable Metrics/MethodLength
     def initialize(option_parser: Trace2::OptionParser.new, kernel: Kernel)
       @options = default_options
       @kernel = kernel
@@ -16,10 +18,12 @@ module Trace2
       help_option
       version_option
       filter_option
-      output_option
+      output_path_option
       type_option
+      format_option
       manual_option
     end
+    # rubocop:enable Metrics/MethodLength
 
     def parse(args)
       trace2, executable_args = @option_parser.split_executables(args)
@@ -37,7 +41,10 @@ module Trace2
     def default_options
       {
         tools_type: :native,
-        automatic_render: true
+        automatic_render: true,
+        graph_format: 'pdf',
+        output_path: 'trace2_report.dot',
+        filter_path: '.trace2.yml'
       }
     end
 
@@ -65,15 +72,18 @@ module Trace2
     end
 
     def filter_option
-      @option_parser.add_option(description: 'Specify a filter file',
+      filter_description = 'Specify a filter file. Defaults to .trace2.yml'
+      @option_parser.add_option(description: filter_description,
                                 long: '--filter FILTER_PATH') do |filter|
         @options[:filter_path] = filter
       end
     end
 
-    def output_option
+    def output_path_option
+      output_path = ['Output path for the report file. Defaults to',
+                     './trace2_report.yml']
       @option_parser.add_option(short: '-o OUTPUT_PATH',
-                                description: 'Output path for the report file',
+                                description: output_path,
                                 long: '--output OUTPUT_PATH') do |output|
         @options[:output_path] = output
       end
@@ -96,8 +106,18 @@ module Trace2
        'graph automatically'
       @option_parser.add_option(short: '-m',
                                 description: run_manually,
-                                long: '--manual') do |_type|
+                                long: '--manual') do
         @options[:automatic_render] = false
+      end
+    end
+
+    def format_option
+      output_format = ['Format that will be used to render the relationship\'s',
+                       'graph. Has no effect if the manual option is set.',
+                       'Defaults to pdf.']
+      @option_parser.add_option(long: '--format FORMAT',
+                                description: output_format) do |format|
+        @options[:graph_format] = format
       end
     end
 
@@ -110,4 +130,5 @@ module Trace2
       @kernel.exit
     end
   end
+  # rubocop:enable Metrics/ClassLength
 end

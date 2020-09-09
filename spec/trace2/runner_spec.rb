@@ -41,7 +41,8 @@ describe Trace2::Runner do
         filter_path: filter_path,
         output_path: output_path,
         automatic_render: automatic_render,
-        dot_wrapper: dot_wrapper
+        dot_wrapper: dot_wrapper,
+        graph_format: graph_format
       }
     end
 
@@ -78,6 +79,7 @@ describe Trace2::Runner do
     end
 
     let(:automatic_render) { true }
+    let(:graph_format) { 'pdf' }
 
     before do
       allow(runner).to receive(:at_exit)

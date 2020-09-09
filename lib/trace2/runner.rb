@@ -13,11 +13,11 @@ module Trace2
     def initialize(options)
       @args = options[:args]
       @executable = options[:executable]
-      @output_path = options.fetch(:output_path, DEFAULT_OUTPUT_PATH)
-      @executable_runner = options.fetch(
-        :executable_runner, ExecutableRunner.new
-      )
+      @output_path = options.fetch(:output_path)
+      @executable_runner = options[:executable_runner] || ExecutableRunner.new
       @render_graph_automatically = options.fetch(:automatic_render, false)
+      @graph_format = options[:graph_format]
+      @filter_path = options[:filter_path]
       @dot_wrapper = options.fetch(:dot_wrapper, DotWrapper.new)
       build_class_lister(options)
     end
@@ -30,16 +30,12 @@ module Trace2
 
     private
 
-    DEFAULT_OUTPUT_PATH = 'trace2_report.dot'
-    DEFAULT_FILTER_YML = '.trace2.yml'
-    DEFAULT_GRAPH_FORMAT = 'pdf'
-
     attr_reader :args, :class_lister, :executable, :executable_runner,
                 :output_path, :graph_generator, :render_graph_automatically,
                 :dot_wrapper
 
     def build_class_lister(options)
-      filter = load_filter(options)
+      filter = load_filter
       tools = options.fetch(:reporting_tools_factory, ReportingToolsFactory.new)
                      .build(filter, type: options[:tools_type])
 
@@ -47,9 +43,8 @@ module Trace2
       @graph_generator = tools[:graph_generator]
     end
 
-    def load_filter(options)
-      filter_path = options.fetch(:filter_path, DEFAULT_FILTER_YML)
-      return YAML.load_file(filter_path) if File.exist?(filter_path)
+    def load_filter
+      return YAML.load_file(@filter_path) if File.exist?(@filter_path)
 
       []
     end
@@ -63,8 +58,8 @@ module Trace2
     def run_graph_rendering
       return unless render_graph_automatically
 
-      final_file = "#{output_path}.#{DEFAULT_GRAPH_FORMAT}"
-      dot_wrapper.render_graph(output_path, final_file, DEFAULT_GRAPH_FORMAT)
+      final_file = "#{output_path}.#{@graph_format}"
+      dot_wrapper.render_graph(output_path, final_file, @graph_format)
     end
   end
 end
