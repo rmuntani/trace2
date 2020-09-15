@@ -1,5 +1,7 @@
 # trace2
 
+[![Build Status](https://travis-ci.com/rmuntani/trace2.svg?token=gGSbpzs6LoB4NK7r6mp6&branch=master)](https://travis-ci.com/rmuntani/trace2)
+
 trace2 generates a graph of relationships between classes that
 are used during a runtime.
 

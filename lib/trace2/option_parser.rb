@@ -14,7 +14,7 @@ module Trace2
     end
 
     def add_option(short: nil, long: nil, description: [])
-      @options_keys.merge!(option_hash(short), option_hash(long))
+      @options_keys.merge!(**option_hash(short), **option_hash(long))
       options = [short, long].compact
       on(*options, *description) do |option_value|
         yield option_value

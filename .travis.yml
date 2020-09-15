@@ -1,0 +1,22 @@
+language: ruby
+rvm:
+  - 2.7
+  - 2.6
+  - 2.5
+  - 2.4
+  - 2.3
+
+before_install:
+  - bundle install
+script: scripts/test_ruby.sh
+
+jobs:
+  fast_finish: true
+  allow_failures:
+    - rvm: 2.4
+    - rvm: 2.3
+  include:
+    - stage: lint
+      rvm: 2.7
+      before_install: bundle install
+      script: bundle exec rubocop
