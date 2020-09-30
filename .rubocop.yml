@@ -5,8 +5,10 @@ Metrics/BlockLength:
     - 'spec/**/*'
 
 AllCops:
+  TargetRubyVersion: 2.7
   Exclude:
     - 'spec/spec_helper.rb'
     - 'Rakefile'
     - 'ext/trace2/extconf.rb'
     - 'vendor/**/*'
+    - 'tmp/**/*'

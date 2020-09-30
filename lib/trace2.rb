@@ -2,8 +2,8 @@
 
 begin
   RUBY_VERSION =~ /(\d+\.\d+)/
-  require "trace2/#{$1}/trace2"
-rescue
+  require "trace2/#{Regexp.last_match(1)}/trace2"
+rescue LoadError
   require 'trace2/trace2'
 end
 

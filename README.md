@@ -20,7 +20,7 @@ of your graph, install [graphviz](https://graphviz.org/download/).
 trace2's runner should be used with other Ruby executables:
 
 ```bash
-trace2 $executable
+trace2 executable
 ```
 
 ```bash
@@ -32,7 +32,7 @@ trace2 my_script.rb  # ruby scripts are also supported
 #### Options
 
 ```bash
-$ trace2 --help
+trace2 --help
 Usage: trace2 [options] RUBY_EXECUTABLE [executable options]
     -h, --help                       Display help
     -v, --version                    Show trace2 version
@@ -210,3 +210,4 @@ scripts/recompile_extension.sh
 ```bash
 scripts/update_version.sh
 ```
+
