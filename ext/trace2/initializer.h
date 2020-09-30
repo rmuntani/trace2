@@ -1,1 +1,1 @@
-void Init_trace2_c();
+void Init_trace2();

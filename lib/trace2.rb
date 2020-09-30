@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require 'trace2/trace2_c'
+begin
+  RUBY_VERSION =~ /(\d+\.\d+)/
+  require "trace2/#{$1}/trace2"
+rescue
+  require 'trace2/trace2'
+end
 
 require 'trace2/class_lister'
 require 'trace2/class_use'

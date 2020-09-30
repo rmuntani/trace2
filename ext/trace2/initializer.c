@@ -6,7 +6,7 @@
 
 VALUE trace2;
 
-void Init_trace2_c() {
+void Init_trace2() {
   trace2 = rb_define_module("Trace2");
   init_name_finder(trace2);
   init_event_processor(trace2);

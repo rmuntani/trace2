@@ -1,10 +1,13 @@
+.bundle
 coverage
 TODO.md
 trace2-*.gem
 tmp
-lib/trace2/trace2_c.so
+lib/trace2/
+lib/trace2/**/*
 learnings.c
 test.o
 ext/test/munit/**
 ext/test/munit/**
 spec/examples.txt
+vendor
