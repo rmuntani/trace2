@@ -3,7 +3,6 @@
 #include "insert_test.h"
 #include "add_callee_to_caller_test.h"
 #include "push_test.h"
-#include "pop_stack_to_list_test.h"
 #include "push_new_class_use_test.h"
 #include "clear_test.h"
 
@@ -21,8 +20,6 @@ MunitSuite *event_processor_suite() {
   *suite = add_callee_to_caller_suite;
   suite++;
   *suite = push_suite;
-  suite++;
-  *suite = pop_stack_to_list_suite;
   suite++;
   *suite = push_new_class_use_suite;
   suite++;

@@ -136,12 +136,6 @@ void push_new_class_use(rb_trace_arg_t *tracearg, classes_stack **top) {
   push(top, new_use);
 }
 
-// Scrapped function
-void pop_stack_to_list(classes_stack **top, classes_list **list_head, classes_list **list_tail) {
-  class_use *last_use = pop(top);
-  insert(list_head, list_tail, last_use);
-}
-
 void process_event(VALUE self, VALUE trace_point) {
   rb_trace_arg_t *tracearg = rb_tracearg_from_tracepoint(trace_point);
   rb_event_flag_t event = rb_tracearg_event_flag(tracearg);

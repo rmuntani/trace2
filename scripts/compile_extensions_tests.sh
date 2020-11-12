@@ -14,7 +14,6 @@ gcc -g -I ext/test \
        ext/test/event_processor/clear_test.c \
        ext/test/event_processor/insert_test.c \
        ext/test/event_processor/pop_test.c \
-       ext/test/event_processor/pop_stack_to_list_test.c \
        ext/test/event_processor/push_new_class_use_test.c \
        ext/test/event_processor/push_test.c \
        ext/test/graph_generator/build_graphs_array_test.c \
