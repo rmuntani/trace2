@@ -24,10 +24,13 @@ trace2 executable
 ```
 
 ```bash
-trace2 rails s
+trace2 rspec
 trace2 rubocop -a  # executable's options are supported
 trace2 my_script.rb  # ruby scripts are also supported
 ```
+
+Check [trace2-examples](https://github.com/rmuntani/trace2-examples) for detailed
+examples.
 
 #### Options
 
